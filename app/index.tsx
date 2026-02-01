@@ -93,7 +93,7 @@ export default function Index() {
   };
 
   const { backgroundImage } = useApp();
-  
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -260,9 +260,9 @@ export default function Index() {
               <Pressable 
                 onPress={handleLeftArrow} 
                 style={[styles.arrowButton, { left: 20 }]}
-              >
+          >
                 <Text style={styles.arrowIcon}>‹</Text>
-              </Pressable>
+          </Pressable>
             )}
             
             <Pressable onPress={handleStartPress} style={styles.startButton}>
@@ -278,11 +278,11 @@ export default function Index() {
                 <Text style={styles.arrowIcon}>›</Text>
               </Pressable>
             )}
-          </View>
-          
-          {/* Technique Section */}
-          <View style={styles.techniqueContainer}>
-            <Text style={styles.techniqueLabel}>Technique:</Text>
+            </View>
+            
+            {/* Technique Section */}
+            <View style={styles.techniqueContainer}>
+              <Text style={styles.techniqueLabel}>Technique:</Text>
             <Pressable onPress={sheets.handleTechniquePress} style={styles.techniqueSelectable}>
               <View style={styles.techniqueRow}>
                 <Text style={styles.techniqueValue}>{displayExercise.title}</Text>
@@ -298,21 +298,21 @@ export default function Index() {
               </View>
               <Text style={styles.chevronIcon}>⌄</Text>
             </Pressable>
+            </View>
           </View>
-        </View>
 
-        {/* Blurred backdrop (tap to dismiss) */}
+          {/* Blurred backdrop (tap to dismiss) */}
         {(sheets.isSheetOpen || sheets.isSupportSheetOpen || sheets.isSelectionSheetOpen) && (
-          <Pressable 
+            <Pressable 
             onPress={sheets.closeAllSheets} 
-            style={StyleSheet.absoluteFill}
-          >
-            <BlurView intensity={20} style={StyleSheet.absoluteFill} />
-          </Pressable>
-        )}
+              style={StyleSheet.absoluteFill}
+            >
+              <BlurView intensity={20} style={StyleSheet.absoluteFill} />
+            </Pressable>
+          )}
 
-        {/* Bottom Sheet Modals */}
-        <ExerciseDetailSheet 
+          {/* Bottom Sheet Modals */}
+          <ExerciseDetailSheet 
           ref={sheets.sheetRef} 
           exercise={sheets.selectedExerciseForInfo}
           onChange={sheets.handleSheetChange}
@@ -326,13 +326,13 @@ export default function Index() {
           onInfoPress={sheets.handleSelectionInfoPress}
           onChange={sheets.handleSelectionSheetChange}
           onDismiss={sheets.handleSelectionSheetDismiss}
-        />
-        <SupportSheet
+          />
+          <SupportSheet
           ref={sheets.supportSheetRef}
           onChange={sheets.handleSupportSheetChange}
           onDismiss={sheets.handleSupportSheetDismiss}
           customHeader={sheets.supportSheetHeader}
-        />
+          />
         </SafeAreaView>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
