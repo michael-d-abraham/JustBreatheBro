@@ -6,17 +6,19 @@ import SoundPicker from "@/components/SoundPicker";
 import SoundscapePicker from "@/components/SoundscapePicker";
 import { useTheme } from "@/components/Theme";
 import ThemePicker from "@/components/ThemePicker";
+import { useApp } from "@/contexts/themeContext";
 import { router, Stack } from "expo-router";
 import { ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
   const { tokens } = useTheme();
+  const { backgroundImage } = useApp();
   
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: tokens.sceneBackground,
+      backgroundColor: backgroundImage ? 'transparent' : tokens.sceneBackground,
       padding: 12,
     },
     scrollView: {

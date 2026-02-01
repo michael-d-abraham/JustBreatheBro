@@ -12,11 +12,12 @@ import ThemePicker from "../components/ThemePicker";
 
 export default function SettingsScreen() {
   const { tokens } = useTheme();
+  const { backgroundImage } = useApp();
   
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: tokens.sceneBackground,
+      backgroundColor: backgroundImage ? 'transparent' : tokens.sceneBackground,
       padding: 12,
     },
     scrollView: {

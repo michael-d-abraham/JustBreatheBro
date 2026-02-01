@@ -5,16 +5,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../components/BackButton";
 import SettingsSection from "../components/SettingsSection";
 import { useTheme } from "../components/Theme";
+import { useApp } from "../contexts/themeContext";
 
 export default function SupportScreen() {
   const { tokens } = useTheme();
+  const { backgroundImage } = useApp();
 
   const handleYouTubePress = () => {
     Linking.openURL('https://www.youtube.com/watch?v=8WPaO819-_g');
   };
   
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: tokens.sceneBackground, padding: 12 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: backgroundImage ? 'transparent' : tokens.sceneBackground, padding: 12 }}>
       <Stack.Screen options={{ headerShown: false }} />
       <BackButton onPress={() => router.back()} />
       <ScrollView 

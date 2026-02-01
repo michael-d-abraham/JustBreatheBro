@@ -27,7 +27,7 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 export default function BreathingPage() {
   const { tokens } = useTheme();
   const { currentExercise } = useBreathing();
-  const { settings } = useApp();
+  const { settings, backgroundImage } = useApp();
   const { autoStart } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   
@@ -415,7 +415,7 @@ export default function BreathingPage() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
-        <SafeAreaView style={{ flex: 1, backgroundColor: tokens.sceneBackground }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: backgroundImage ? 'transparent' : tokens.sceneBackground }}>
           
           {/* Main Content Area - Tap to toggle UI */}
           <Pressable 

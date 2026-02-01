@@ -60,6 +60,7 @@ export const defaultExercises: Exercise[] = [
 // Storage keys
 const EXERCISES_KEY = 'breathing_exercises';
 const CURRENT_EXERCISE_KEY = 'current_exercise';
+const BACKGROUND_IMAGE_KEY = 'background_image';
 
 // Get all exercises
 export const getExercises = async (): Promise<Exercise[]> => {
@@ -108,4 +109,19 @@ export const resetStorage = async (): Promise<void> => {
 // Force update exercises to current defaults (overwrites stored data)
 export const forceUpdateToDefaults = async (): Promise<void> => {
   await saveExercises(defaultExercises);
+};
+
+// Get background image
+export const getBackgroundImage = async (): Promise<string | null> => {
+  const stored = await AsyncStorage.getItem(BACKGROUND_IMAGE_KEY);
+  return stored;
+};
+
+// Save background image
+export const saveBackgroundImage = async (imagePath: string | null): Promise<void> => {
+  if (imagePath) {
+    await AsyncStorage.setItem(BACKGROUND_IMAGE_KEY, imagePath);
+  } else {
+    await AsyncStorage.removeItem(BACKGROUND_IMAGE_KEY);
+  }
 };

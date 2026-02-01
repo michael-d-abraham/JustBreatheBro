@@ -7,9 +7,11 @@ import CustomSlider from "../components/Slider";
 import StartButton from "../components/startbutton";
 import { useTheme } from "../components/Theme";
 import { useBreathing } from "../contexts/breathingContext";
+import { useApp } from "../contexts/themeContext";
 
 export default function BreathingSetup() {
   const { tokens } = useTheme();
+  const { backgroundImage } = useApp();
   const { updateExercise } = useBreathing();
   
   const [inhale, setInhale] = useState(4);
@@ -43,7 +45,7 @@ export default function BreathingSetup() {
   return (
     <SafeAreaView style={{ 
       flex: 1, 
-      backgroundColor: tokens.sceneBackground,
+      backgroundColor: backgroundImage ? 'transparent' : tokens.sceneBackground,
       padding: 24
     }}>
 

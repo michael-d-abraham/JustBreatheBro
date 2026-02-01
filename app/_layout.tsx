@@ -1,7 +1,7 @@
 import BackgroundSoundscapePlayer from "@/components/BackgroundSoundscapePlayer";
 import { ThemeProvider, useTheme } from "@/components/Theme";
 import { BreathingProvider } from "@/contexts/breathingContext";
-import { AppProvider } from "@/contexts/themeContext";
+import { AppProvider, useApp } from "@/contexts/themeContext";
 import * as Sentry from '@sentry/react-native';
 import * as Application from "expo-application";
 import Constants from "expo-constants";
@@ -77,6 +77,7 @@ initSentryOnce();
 
 function RootContent() {
   const { mode } = useTheme();
+  const { backgroundImage } = useApp();
   
   return (
     <>
@@ -85,17 +86,15 @@ function RootContent() {
         screenOptions={{
           headerShown: false,
           contentStyle: {
-            backgroundColor: 'transparent',
+            backgroundColor: backgroundImage ? 'transparent' : 'transparent',
           },
-          animation: 'fade',
-          animationDuration: 800,
+          animation: 'none',
         }}
       >
         <Stack.Screen 
           name="breathing" 
           options={{
-            animation: 'fade',
-            animationDuration: 800,
+            animation: 'none',
           }}
         />
       </Stack>

@@ -1,6 +1,7 @@
 import ExerciseDetailSheet, { ExerciseDetailSheetHandle } from '@/components/ExerciseDetailSheet';
 import { useTheme } from '@/components/Theme';
 import { useBreathing } from '@/contexts/breathingContext';
+import { useApp } from '@/contexts/themeContext';
 import { defaultExercises } from '@/lib/storage';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { BlurView } from 'expo-blur';
@@ -12,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Index() {
   const { tokens } = useTheme();
+  const { backgroundImage } = useApp();
   const router = useRouter();
   const { updateExercise } = useBreathing();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -45,7 +47,7 @@ export default function Index() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: tokens.sceneBackground,
+      backgroundColor: backgroundImage ? 'transparent' : tokens.sceneBackground,
     },
     title: {
       color: tokens.textOnAccent,

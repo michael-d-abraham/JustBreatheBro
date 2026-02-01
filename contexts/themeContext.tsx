@@ -1,6 +1,7 @@
 import { useTheme as useBaseTheme } from '@/components/Theme';
-import { createContext, ReactNode, useContext, useState } from 'react';
-import { View } from 'react-native';
+import { getBackgroundImage } from '@/lib/storage';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { ImageBackground, View } from 'react-native';
 
 export type SoundType = 'synth' | 'guzheng' | 'sine' | 'off';
 export type SoundscapeType = 'dream' | 'fuzzy' | 'keys' | 'off';
@@ -17,7 +18,9 @@ type AppSettings = {
 type AppContextType = {
   // App-specific settings
   settings: AppSettings;
+  backgroundImage: string | null;
   updateSettings: (settings: Partial<AppSettings>) => void;
+  setBackgroundImage: (imagePath: string | null) => void;
   toggleSound: () => void;
   toggleHaptics: () => void;
   toggleAnimations: () => void;
@@ -36,10 +39,30 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     soundType: 'sine',
     soundscape: 'dream',
   });
+  const [backgroundImage, setBackgroundImageState] = useState<string | null>(null);
 
   const updateSettings = (newSettings: Partial<AppSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
   };
+
+  const setBackgroundImage = async (imagePath: string | null) => {
+    const { saveBackgroundImage } = await import('@/lib/storage');
+    await saveBackgroundImage(imagePath);
+    setBackgroundImageState(imagePath);
+  };
+
+  useEffect(() => {
+    // Load background image on mount, or set default to first Peace Stone
+    getBackgroundImage().then(async (storedImage) => {
+      if (storedImage) {
+        setBackgroundImageState(storedImage);
+      } else {
+        // On first startup, set the first Peace Stones image as default
+        const firstPeaceStone = '8b5ab95f17ebce31ce33d4477b0a2394.jpg';
+        await setBackgroundImage(firstPeaceStone);
+      }
+    });
+  }, []);
 
   const toggleSound = () => setSettings(prev => ({ ...prev, soundEnabled: !prev.soundEnabled }));
   const toggleHaptics = () => setSettings(prev => ({ ...prev, hapticsEnabled: !prev.hapticsEnabled }));
@@ -50,7 +73,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AppContext.Provider value={{ 
       settings, 
+      backgroundImage,
       updateSettings,
+      setBackgroundImage,
       toggleSound,
       toggleHaptics,
       toggleAnimations,
@@ -67,12 +92,40 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 // Separate component that can safely use theme
 const ThemedWrapper = ({ children }: { children: ReactNode }) => {
   const theme = useBaseTheme(); // Safe to call here
+  const appContext = useContext(AppContext);
+  const backgroundImage = appContext?.backgroundImage || null;
+  
+  const backgroundStyle = {
+    flex: 1,
+    backgroundColor: theme.tokens.sceneBackground,
+  };
+
+  if (backgroundImage) {
+    // Map image paths to require statements
+    const imageMap: Record<string, any> = {
+      '8b5ab95f17ebce31ce33d4477b0a2394.jpg': require('../assets/images/BackGrounds/PeaceStones/8b5ab95f17ebce31ce33d4477b0a2394.jpg'),
+      'bda498c860d011ed38fe8877fe894261.jpg': require('../assets/images/BackGrounds/PeaceStones/bda498c860d011ed38fe8877fe894261.jpg'),
+      'ebee70bef4e53a0035348e1d01263c5f.jpg': require('../assets/images/BackGrounds/PeaceStones/ebee70bef4e53a0035348e1d01263c5f.jpg'),
+      'forstjpg.jpg': require('../assets/images/BackGrounds/PeaceStones/forstjpg.jpg'),
+    };
+
+    const imageSource = imageMap[backgroundImage];
+    
+    if (imageSource) {
+      return (
+        <ImageBackground
+          source={imageSource}
+          style={backgroundStyle}
+          resizeMode="cover"
+        >
+          {children}
+        </ImageBackground>
+      );
+    }
+  }
   
   return (
-    <View style={{ 
-      flex: 1, 
-      backgroundColor: theme.tokens.sceneBackground
-    }}>
+    <View style={backgroundStyle}>
       {children}
     </View>
   );

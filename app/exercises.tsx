@@ -10,10 +10,12 @@ import ExerciseContainer from '../components/ExerciseContainer';
 import ExerciseDetailSheet, { ExerciseDetailSheetHandle } from '../components/ExerciseDetailSheet';
 import { useTheme } from '../components/Theme';
 import { useBreathing } from '../contexts/breathingContext';
+import { useApp } from '../contexts/themeContext';
 import { Exercise, forceUpdateToDefaults, getExercises } from '../lib/storage';
 
 export default function ExercisesPage() {
   const { tokens } = useTheme();
+  const { backgroundImage } = useApp();
   const { updateExercise } = useBreathing();
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
@@ -62,7 +64,7 @@ export default function ExercisesPage() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
-        <SafeAreaView style={{ flex: 1, backgroundColor: tokens.sceneBackground }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: backgroundImage ? 'transparent' : tokens.sceneBackground }}>
           <View style={{ flex: 1, padding: 16 }}>
             <BackButton onPress={() => router.back()} />
 
