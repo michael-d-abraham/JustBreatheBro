@@ -44,6 +44,10 @@ export default function Calm() {
     undefined                  // No swipe right from calm
   );
 
+  const handleInfoLibraryPress = () => {
+    router.push('/informationarchive');
+  };
+
   const { backgroundImage } = useApp();
   
   const styles = StyleSheet.create({
@@ -61,6 +65,7 @@ export default function Calm() {
             <BreathingPageHeader
               supportSheetRef={sheets.supportSheetRef}
               onSupportPress={sheets.handleSupportPress}
+              onInfoLibraryPress={handleInfoLibraryPress}
             />
 
             <BreathingPageContent

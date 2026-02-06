@@ -66,6 +66,10 @@ export default function Index() {
     sheets.handleSupportPress();
   };
 
+  const handleInfoLibraryPress = () => {
+    router.push('/informationarchive');
+  };
+
   const scrollToPage = (index: number) => {
     scrollViewRef.current?.scrollTo({
       x: index * SCREEN_WIDTH,
@@ -227,6 +231,7 @@ export default function Index() {
             supportSheetRef={sheets.supportSheetRef}
             onSupportPress={sheets.handleSupportPress}
             onCirclePress={handleCirclePress}
+            onInfoLibraryPress={handleInfoLibraryPress}
           />
         </View>
 

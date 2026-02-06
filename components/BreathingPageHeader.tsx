@@ -8,12 +8,14 @@ interface BreathingPageHeaderProps {
   supportSheetRef: RefObject<SupportSheetHandle | null>;
   onSupportPress: () => void;
   onCirclePress?: () => void;
+  onInfoLibraryPress?: () => void;
 }
 
 export default function BreathingPageHeader({ 
   supportSheetRef,
   onSupportPress,
   onCirclePress,
+  onInfoLibraryPress,
 }: BreathingPageHeaderProps) {
   const { tokens } = useTheme();
   const insets = useSafeAreaInsets();
@@ -56,12 +58,14 @@ export default function BreathingPageHeader({
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleMenuItemPress = (item: 'Love' | 'Peace' | 'Support') => {
+  const handleMenuItemPress = (item: 'Love' | 'Info Library' | 'Support') => {
     setIsDropdownOpen(false);
     if (item === 'Support') {
       onSupportPress();
+    } else if (item === 'Info Library' && onInfoLibraryPress) {
+      onInfoLibraryPress();
     }
-    // Love and Peace can be handled later if needed
+    // Love can be handled later if needed
   };
 
   return (
@@ -119,10 +123,10 @@ export default function BreathingPageHeader({
             <Text style={styles.dropdownItemText}>Love</Text>
           </Pressable>
           <Pressable 
-            onPress={() => handleMenuItemPress('Peace')}
+            onPress={() => handleMenuItemPress('Info Library')}
             style={styles.dropdownItem}
           >
-            <Text style={styles.dropdownItemText}>Peace</Text>
+            <Text style={styles.dropdownItemText}>Info Library</Text>
           </Pressable>
           <Pressable 
             onPress={() => handleMenuItemPress('Support')}
