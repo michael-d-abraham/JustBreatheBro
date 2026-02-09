@@ -1,0 +1,121 @@
+[
+    {
+        "id": "1",
+        "name": "Heart Rate Variability During Mindful Breathing Meditation",
+        "link": "https://www.frontiersin.org/journals/physiology/articles/10.3389/fphys.2022.1017350/full",
+        "type": "article",
+        "vibe": "Academic",
+        "shortDescription": "A peer-reviewed physiology study examining how mindful breathing meditation influences heart rate variability and autonomic nervous system balance.",
+        "AI_description": "This peer-reviewed research article investigates how slow, mindful breathing meditation affects heart rate variability (HRV) as a marker of autonomic nervous system activity. The authors analyze limitations of standard HRV metrics during paced breathing and introduce the Autonomic Balance Index (ABI) as an alternative measure of parasympathetic (vagal) dominance. The paper provides methodological insight into how breathing rate influences HRV signals and offers a physiology-based framework for interpreting autonomic balance during breathing practices.",
+        "tags": [
+          "breathing",
+          "heart-rate-variability",
+          "autonomic-nervous-system",
+          "vagus-nerve",
+          "physiology",
+          "meditation",
+          "peer-reviewed"
+        ]
+    },
+
+    {
+        "id": "2",
+        "name": "Episodic Slow Breathing Effects in Preclinical Study",
+        "link": "https://www.biorxiv.org/content/10.1101/2025.02.11.637771v1",
+        "type": "preprint",
+        "vibe": "Academic",
+        "shortDescription": "This is a fairly technical preprint, but it digs into the physiology of slow breathing and how it influences stress-related systems in the body. It's not light reading, but it helps explain what might be happening under the hood when people practice slow or intentional breathing.",
+        "AI_description": "This preprint from bioRxiv presents research examining the effects of episodic slow breathing on physiological markers. As a preprint, it has not yet undergone formal peer review. The study likely investigates autonomic responses, stress indicators, or behavioral outcomes linked to controlled breathing patterns, and offers experimental data to inform future peer-reviewed work in respiratory physiology and stress regulation.",
+        "tags": [
+          "preprint",
+          "physiology",
+          "breathing",
+          "autonomic-nervous-system",
+          "stress-response",
+          "research"
+        ]
+      },
+      {
+        "id": "3",
+        "name": "Diaphragmatic Breathing and Deep Breathing Guide",
+        "link": "https://www.kumc.edu/documents/_shp/research/SleepWell/Diaphragmatic%20Breathing%20and%20Deep%20Breathing.pdf",
+        "type": "article",
+        "vibe": "Academic",
+        "shortDescription": "A practical guide from a university sleep health resource that explains how to practice diaphragmatic and deep breathing for relaxation and stress management. (its got pictues)",
+        "AI_description": "This instructional guide from the SleepWell toolkit at the University of Kansas Medical Center provides step-by-step guidance on diaphragmatic (deep) breathing techniques. It covers how to position the body, how to breathe using the diaphragm rather than the chest, and how deep breathing can support relaxation and stress relief. The resource is written for a general audience and includes actionable instructions suitable for beginners in breathing practices.",
+        "tags": [
+          "breathing",
+          "diaphragmatic",
+          "deep-breathing",
+          "relaxation",
+          "stress-management",
+          "practice-guide"
+        ]
+      },
+  {
+    "id": "4",
+    "name": "Understanding the Vagus Nerve",
+    "link": "https://example.com/vagus-nerve-article",
+    "type": "article",
+    "vibe": "Academic",
+    "shortDescription": "How breathing exercises activate the vagus nerve to promote relaxation.",
+    "AI_description": "Explains the vagus nerve's role in the parasympathetic nervous system and how specific breathing patterns stimulate it. Covers the polyvagal theory, vagal tone measurement, and breathing techniques that enhance vagal activity. Includes research on heart rate variability, stress reduction, and the connection between breathing and emotional regulation.",
+    "tags": ["science", "vagus-nerve", "parasympathetic", "stress-relief", "research"]
+  },
+  {
+    "id": "5",
+    "name": "Diaphragmatic Breathing to Assist with Self-Management of Pain",
+    "link": "https://www.va.gov/WHOLEHEALTHLIBRARY/docs/Diaphragmatic-Breathing-Assist-Self-Management-Pain.pdf",
+    "type": "article",
+    "vibe": "Academic",
+    "shortDescription": "This is a straightforward, clinician-written guide that explains how diaphragmatic breathing can be used to help manage pain and stress. It’s not research-heavy, but it clearly walks through how and why to use the technique.",
+    "AI_description": "This educational handout from the U.S. Department of Veterans Affairs Whole Health Library explains diaphragmatic breathing as a practical tool for self-managing pain and stress. The document focuses on how slow, deep breathing can influence the nervous system, reduce muscle tension, and support relaxation. It provides simple explanations and step-by-step instructions intended for patients and the general public rather than researchers. While it does not present new experimental data, it reflects clinically informed practice used in pain management and whole-health programs.",
+    "tags": [
+      "breathing",
+      "diaphragmatic-breathing",
+      "pain-management",
+      "stress",
+      "nervous-system",
+      "self-management",
+      "clinical-guide"
+    ]
+  },  
+  {
+    "id": "6",
+    "name": "Breath: The New Science of a Lost Art",
+    "link": "https://www.amazon.com/Breath-New-Science-Lost-Art/dp/0735213615",
+    "vibe": "Academic",
+    "type": "book",
+    "shortDescription": "This is a very readable, narrative-style book that explores how modern breathing habits may affect health. It mixes science, history, and personal experimentation, so it’s engaging but not purely academic.",
+    "AI_description": "Written by science journalist James Nestor, this book investigates the role of breathing in human health by combining scientific studies, historical practices, interviews with researchers, and the author's own self-experiments. The book covers topics such as nasal versus mouth breathing, breathing rate and depth, CO₂ tolerance, and their potential connections to sleep, stress, and performance. While it is not a peer-reviewed scientific text, it serves as an accessible synthesis of existing research and expert perspectives, making complex breathing science understandable to a general audience.",
+    "tags": [
+      "breathing",
+      "popular-science",
+      "respiration",
+      "health",
+      "sleep",
+      "stress",
+      "book"
+    ]
+  },
+  {
+    "id": "7",
+    "name": "Dr. Joe Dispenza — Break the Habit of Being Yourself (Animated/Summary Video)",
+    "link": "https://www.youtube.com/watch?app=desktop&v=2Grski61aHc",
+    "type": "video",
+    "vibe": "chill",
+    "shortDescription": "Super Chill watch. Doodles + Talk: This is a ted talk from Dr Joe Dispenza on 'breaking the habit of being yourself' Seems Strange to add to a breathing app, But it comes full circle I promise on why breathing is sooo cool and powerful.",
+    "AI_description": "This video presents the key ideas popularized by author and speaker Dr. Joe Dispenza, focusing on how habitual thought patterns and nervous system responses shape behavior and identity. The content explores concepts like neuroplasticity, breaking automatic mental/emotional cycles, and how intentional practices like meditation may contribute to personal transformation. It is not a scientific lecture but rather an accessible overview of Dr. Dispenza’s perspective on rewiring the brain and nervous system.",
+    "tags": [
+      "video",
+      "DrJoeDispenza",
+      "neuroplasticity",
+      "habits",
+      "transformation",
+      "meditation",
+      "mindset",
+      "easy watch"
+    ]
+  }
+
+]

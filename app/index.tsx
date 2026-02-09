@@ -58,12 +58,8 @@ export default function Index() {
   };
 
   const handleCirclePress = () => {
-    // Set custom header for circle button
-    sheets.setSupportSheetHeader({
-      title: 'Breath Bot',
-      subtitle: 'Coming Soon',
-    });
-    sheets.handleSupportPress();
+    // Navigate to wallpaper selection page
+    router.push('/wallpaper');
   };
 
   const handleInfoLibraryPress = () => {
@@ -336,7 +332,6 @@ export default function Index() {
           ref={sheets.supportSheetRef}
           onChange={sheets.handleSupportSheetChange}
           onDismiss={sheets.handleSupportSheetDismiss}
-          customHeader={sheets.supportSheetHeader}
           />
         </SafeAreaView>
       </BottomSheetModalProvider>

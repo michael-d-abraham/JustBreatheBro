@@ -58,11 +58,11 @@ export default function BreathingPageHeader({
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleMenuItemPress = (item: 'Love' | 'Info Library' | 'Support') => {
+  const handleMenuItemPress = (item: 'Love' | 'Benefits' | 'Support') => {
     setIsDropdownOpen(false);
     if (item === 'Support') {
       onSupportPress();
-    } else if (item === 'Info Library' && onInfoLibraryPress) {
+    } else if (item === 'Benefits' && onInfoLibraryPress) {
       onInfoLibraryPress();
     }
     // Love can be handled later if needed
@@ -123,10 +123,10 @@ export default function BreathingPageHeader({
             <Text style={styles.dropdownItemText}>Love</Text>
           </Pressable>
           <Pressable 
-            onPress={() => handleMenuItemPress('Info Library')}
+            onPress={() => handleMenuItemPress('Benefits')}
             style={styles.dropdownItem}
           >
-            <Text style={styles.dropdownItemText}>Info Library</Text>
+            <Text style={styles.dropdownItemText}>Benefits</Text>
           </Pressable>
           <Pressable 
             onPress={() => handleMenuItemPress('Support')}

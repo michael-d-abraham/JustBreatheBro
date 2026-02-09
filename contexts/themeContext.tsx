@@ -52,14 +52,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // Load background image on mount, or set default to first Peace Stone
+    // Load background image on mount, or set default to first zenscape
     getBackgroundImage().then(async (storedImage) => {
       if (storedImage) {
         setBackgroundImageState(storedImage);
       } else {
-        // On first startup, set the first Peace Stones image as default
-        const firstPeaceStone = '8b5ab95f17ebce31ce33d4477b0a2394.jpg';
-        await setBackgroundImage(firstPeaceStone);
+        // On first startup, set the first zenscape image as default
+        const firstZenscape = '09a7c46feafa016b657ae2b59cfc89c3.jpg';
+        await setBackgroundImage(firstZenscape);
       }
     });
   }, []);
@@ -101,12 +101,17 @@ const ThemedWrapper = ({ children }: { children: ReactNode }) => {
   };
 
   if (backgroundImage) {
-    // Map image paths to require statements
+    // Map image paths to require statements - all images from zenscapes folder
     const imageMap: Record<string, any> = {
-      '8b5ab95f17ebce31ce33d4477b0a2394.jpg': require('../assets/images/BackGrounds/PeaceStones/8b5ab95f17ebce31ce33d4477b0a2394.jpg'),
-      'bda498c860d011ed38fe8877fe894261.jpg': require('../assets/images/BackGrounds/PeaceStones/bda498c860d011ed38fe8877fe894261.jpg'),
-      'ebee70bef4e53a0035348e1d01263c5f.jpg': require('../assets/images/BackGrounds/PeaceStones/ebee70bef4e53a0035348e1d01263c5f.jpg'),
-      'forstjpg.jpg': require('../assets/images/BackGrounds/PeaceStones/forstjpg.jpg'),
+      '09a7c46feafa016b657ae2b59cfc89c3.jpg': require('../assets/images/BackGrounds/zenscapes/09a7c46feafa016b657ae2b59cfc89c3.jpg'),
+      '25ad8d669f24496f38efeb220a94d7d1.jpg': require('../assets/images/BackGrounds/zenscapes/25ad8d669f24496f38efeb220a94d7d1.jpg'),
+      '53f9385211ee5c576f8fa058326f479b.jpg': require('../assets/images/BackGrounds/zenscapes/53f9385211ee5c576f8fa058326f479b.jpg'),
+      '8b5ab95f17ebce31ce33d4477b0a2394.jpg': require('../assets/images/BackGrounds/zenscapes/8b5ab95f17ebce31ce33d4477b0a2394.jpg'),
+      '9c35536ff418ad74cd2e223e0cdbe3aa.jpg': require('../assets/images/BackGrounds/zenscapes/9c35536ff418ad74cd2e223e0cdbe3aa.jpg'),
+      'a173ab0f7d9a7427676a776831bc8154.jpg': require('../assets/images/BackGrounds/zenscapes/a173ab0f7d9a7427676a776831bc8154.jpg'),
+      'bda498c860d011ed38fe8877fe894261.jpg': require('../assets/images/BackGrounds/zenscapes/bda498c860d011ed38fe8877fe894261.jpg'),
+      'kilimanjaro-studioz-jM-Fp4J2xvk-unsplash.jpg': require('../assets/images/BackGrounds/zenscapes/kilimanjaro-studioz-jM-Fp4J2xvk-unsplash.jpg'),
+      'masaaki-komori-fzHaSRdAi68-unsplash.jpg': require('../assets/images/BackGrounds/zenscapes/masaaki-komori-fzHaSRdAi68-unsplash.jpg'),
     };
 
     const imageSource = imageMap[backgroundImage];

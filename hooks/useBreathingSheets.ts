@@ -12,7 +12,6 @@ export function useBreathingSheets() {
   const [isSelectionSheetOpen, setIsSelectionSheetOpen] = useState(false);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [selectedExerciseForInfo, setSelectedExerciseForInfo] = useState<Exercise | null>(null);
-  const [supportSheetHeader, setSupportSheetHeaderState] = useState<{ title: string; subtitle?: string } | undefined>(undefined);
   
   const sheetRef = useRef<ExerciseDetailSheetHandle>(null);
   const supportSheetRef = useRef<SupportSheetHandle>(null);
@@ -68,18 +67,12 @@ export function useBreathingSheets() {
     supportSheetRef.current?.open();
   }, []);
 
-  const setSupportSheetHeader = useCallback((header: { title: string; subtitle?: string } | undefined) => {
-    setSupportSheetHeaderState(header);
-  }, []);
-
   const handleSupportSheetChange = useCallback((index: number) => {
     setIsSupportSheetOpen(index >= 0);
   }, []);
 
   const handleSupportSheetDismiss = useCallback(() => {
     setIsSupportSheetOpen(false);
-    // Reset header when sheet is dismissed
-    setSupportSheetHeaderState(undefined);
   }, []);
 
   const closeSupportSheet = useCallback(() => {
@@ -112,7 +105,6 @@ export function useBreathingSheets() {
     exercises,
     currentExercise,
     selectedExerciseForInfo,
-    supportSheetHeader,
     
     // Refs
     sheetRef,
@@ -131,7 +123,6 @@ export function useBreathingSheets() {
     handleSupportSheetDismiss,
     handleSelectionSheetChange,
     handleSelectionSheetDismiss,
-    setSupportSheetHeader,
     closeSheet,
     closeSupportSheet,
     closeSelectionSheet,

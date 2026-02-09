@@ -109,7 +109,6 @@ export default function Energize() {
             ref={sheets.supportSheetRef}
             onChange={sheets.handleSupportSheetChange}
             onDismiss={sheets.handleSupportSheetDismiss}
-            customHeader={sheets.supportSheetHeader}
           />
           </SafeAreaView>
         </GestureDetector>
