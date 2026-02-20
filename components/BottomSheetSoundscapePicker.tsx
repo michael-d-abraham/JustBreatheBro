@@ -2,7 +2,7 @@ import React from 'react';
 import Svg, { Path } from 'react-native-svg';
 import { SOUNDSCAPE_COLORS } from '../constants/featureColors';
 import { SoundscapeType, useApp } from '../contexts/themeContext';
-import CircularOptionButton from './CircularOptionButton';
+import BottomSheetCircularButton from './BottomSheetCircularButton';
 import { useTheme } from './Theme';
 
 type SoundscapeOption = {
@@ -19,7 +19,7 @@ const OffIcon = () => {
     <Svg width={28} height={28} viewBox="0 0 28 28">
       <Path
         d="M 4 14 L 24 14"
-        stroke={tokens.textOnAccent}
+        stroke={tokens.bottomSheetText}
         strokeWidth={3}
         strokeLinecap="round"
       />
@@ -34,13 +34,13 @@ const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
   { label: 'OFF', value: 'off', iconComponent: <OffIcon /> },
 ];
 
-export default function SoundscapePicker() {
+export default function BottomSheetSoundscapePicker() {
   const { settings, setSoundscape } = useApp();
 
   return (
     <>
       {SOUNDSCAPE_OPTIONS.map(({ label, value, color, iconComponent }) => (
-        <CircularOptionButton
+        <BottomSheetCircularButton
           key={value}
           label={label}
           iconComponent={iconComponent}
@@ -52,4 +52,3 @@ export default function SoundscapePicker() {
     </>
   );
 }
-

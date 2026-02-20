@@ -101,7 +101,6 @@ export default function Energize() {
             exercises={sheets.exercises}
             currentExercise={sheets.currentExercise}
             onSelectExercise={sheets.handleSelectExercise}
-            onInfoPress={sheets.handleSelectionInfoPress}
             onChange={sheets.handleSelectionSheetChange}
             onDismiss={sheets.handleSelectionSheetDismiss}
           />

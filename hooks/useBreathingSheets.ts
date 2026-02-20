@@ -45,11 +45,6 @@ export function useBreathingSheets() {
     await updateExercise(exercise);
   }, [updateExercise]);
 
-  const handleSelectionInfoPress = useCallback((exercise: Exercise) => {
-    selectionSheetRef.current?.close();
-    handleInfoPress(exercise);
-  }, [handleInfoPress]);
-
   const handleSheetChange = useCallback((index: number) => {
     setIsSheetOpen(index >= 0);
   }, []);
@@ -115,7 +110,6 @@ export function useBreathingSheets() {
     handleInfoPress,
     handleTechniquePress,
     handleSelectExercise,
-    handleSelectionInfoPress,
     handleSheetChange,
     handleSheetDismiss,
     handleSupportPress,

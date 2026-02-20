@@ -5,12 +5,13 @@ import React, {
   useState
 } from "react";
 import { PlatformColor, useColorScheme } from 'react-native';
+import { THEME_PREVIEW_COLORS } from '../constants/featureColors';
 
 type Mode = 'light' | 'dark';
 type ThemeName = 'grounded' | 'calm' | 'uplifting';
 type AppearancePref = 'system' | 'light' | 'dark';
 
-type Tokens = {
+type PaletteTokens = {
     sceneBackground: string; // (main background color)
     surface: string; // (secondary background color)
     accentPrimary: string; // (primary accent color)
@@ -20,7 +21,30 @@ type Tokens = {
     shadow: string; // (shadow color)
 };
 
-const palettes: Record<ThemeName, Record<Mode, Tokens>> = {
+/**
+ * Bottom Sheet Tokens - Strictly typed color tokens for bottom sheets
+ * These tokens are INDEPENDENT from app theme colors and automatically
+ * adapt to system light/dark mode via PlatformColor.
+ * 
+ * @see BaseBottomSheet.tsx for usage contract
+ */
+type BottomSheetTokens = {
+    /** Background color - PlatformColor('systemBackground') */
+    bottomSheetBg: any;
+    /** Primary text color - PlatformColor('label') */
+    bottomSheetText: any;
+    /** Secondary/description text color - PlatformColor('secondaryLabel') */
+    bottomSheetSecondaryText: any;
+    /** Divider and handle indicator color - PlatformColor('separator') */
+    bottomSheetSeparator: any;
+};
+
+type Tokens = PaletteTokens & BottomSheetTokens;
+
+/** Export BottomSheetTokens for strict type checking in bottom sheet components */
+export type { BottomSheetTokens };
+
+const palettes: Record<ThemeName, Record<Mode, PaletteTokens>> = {
     grounded: {
       light: {
         sceneBackground: '#F5F3ED',
@@ -87,17 +111,17 @@ const palettes: Record<ThemeName, Record<Mode, Tokens>> = {
     grounded: {
       name: 'Grounded',
       description: 'Natural, earthy tones',
-      preview: '#5A7A3F'
+      preview: THEME_PREVIEW_COLORS.grounded
     },
     calm: {
       name: 'Calm', 
       description: 'Peaceful blue tones',
-      preview: '#2B8FD9'
+      preview: THEME_PREVIEW_COLORS.calm
     },
     uplifting: {
       name: 'Uplifting',
       description: 'Energetic purple tones', 
-      preview: '#6B5BD0'
+      preview: THEME_PREVIEW_COLORS.uplifting
     }
   } as const;
 
@@ -112,6 +136,11 @@ const palettes: Record<ThemeName, Record<Mode, Tokens>> = {
       separator: any;
       systemBg: any;
       systemGroupedBg: any;
+      // Dynamic colors for bottom sheets (system light/dark, independent of theme):
+      bottomSheetBg: any;
+      bottomSheetText: any;
+      bottomSheetSecondaryText: any;
+      bottomSheetSeparator: any;
     };
     setThemeName: (t: ThemeName) => void;
     setAppearance: (a: AppearancePref) => void;
@@ -137,6 +166,11 @@ const palettes: Record<ThemeName, Record<Mode, Tokens>> = {
       separator: PlatformColor('separator'),
       systemBg: PlatformColor('systemBackground'),
       systemGroupedBg: PlatformColor('systemGroupedBackground'),
+      // Dynamic colors for bottom sheets (system light/dark, independent of theme)
+      bottomSheetBg: PlatformColor('systemBackground'),
+      bottomSheetText: PlatformColor('label'),
+      bottomSheetSecondaryText: PlatformColor('secondaryLabel'),
+      bottomSheetSeparator: PlatformColor('separator'),
     };
   }, [themeName, mode]);
 

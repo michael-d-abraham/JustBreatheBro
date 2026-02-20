@@ -1,0 +1,43 @@
+---
+alwaysApply: false
+description: Bottom sheet component color token rules
+---
+
+# Bottom Sheet Token Rules
+
+Bottom sheet components MUST use ONLY these tokens:
+- tokens.bottomSheetBg
+- tokens.bottomSheetText
+- tokens.bottomSheetSecondaryText
+- tokens.bottomSheetSeparator
+
+NEVER use in bottom sheets:
+- tokens.sceneBackground
+- tokens.surface
+- tokens.accentPrimary
+- tokens.accentMuted
+- tokens.textOnAccent
+- tokens.borderSubtle
+
+These themed tokens are for the main app UI only.
+
+## Bottom Sheet Components
+
+All components in the bottom sheet system:
+- BaseBottomSheet.tsx - Core template component
+- BottomSheetDivider.tsx - Separator line primitive
+- BottomSheetSectionTitle.tsx - Section header primitive
+- BottomSheetRow.tsx - Pressable row primitive
+- SupportSheet.tsx - Support page (migrated)
+- SettingsSheet.tsx - Settings page (to be migrated)
+- ExerciseSelectionSheet.tsx - Exercise selection (to be migrated)
+- ExerciseDetailSheet.tsx - Exercise details (to be migrated)
+
+## Why This Separation Matters
+
+Bottom sheets use system colors (PlatformColor) that adapt to light/dark mode automatically and are completely independent of the app's theme palettes (grounded/calm/uplifting). This ensures:
+
+1. Consistent minimal aesthetic across all bottom sheets
+2. Proper light/dark mode support
+3. No color mixing between main app UI and bottom sheets
+4. Native iOS-style appearance

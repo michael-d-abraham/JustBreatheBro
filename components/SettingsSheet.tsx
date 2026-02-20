@@ -1,18 +1,13 @@
-import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import React, { forwardRef, useImperativeHandle, useRef } from 'react';
-import { Text, View } from 'react-native';
-import AppearancePicker from './AppearancePicker';
-import SettingsSection from './SettingsSection';
-import SoundHapticsPicker from './SoundHapticsPicker';
-import SoundPicker from './SoundPicker';
-import SoundscapePicker from './SoundscapePicker';
-import { useTheme } from './Theme';
-import ThemePicker from './ThemePicker';
+import React, { forwardRef } from 'react';
+import BaseBottomSheet, { BaseBottomSheetHandle } from './BaseBottomSheet';
+import BottomSheetAppearancePicker from './BottomSheetAppearancePicker';
+import BottomSheetSettingsSection from './BottomSheetSettingsSection';
+import BottomSheetSoundHapticsPicker from './BottomSheetSoundHapticsPicker';
+import BottomSheetSoundPicker from './BottomSheetSoundPicker';
+import BottomSheetSoundscapePicker from './BottomSheetSoundscapePicker';
+import BottomSheetThemePicker from './BottomSheetThemePicker';
 
-export type SettingsSheetHandle = {
-  open: () => void;
-  close: () => void;
-};
+export type SettingsSheetHandle = BaseBottomSheetHandle;
 
 interface SettingsSheetProps {
   onChange?: (index: number) => void;
@@ -21,55 +16,33 @@ interface SettingsSheetProps {
 
 const SettingsSheet = forwardRef<SettingsSheetHandle, SettingsSheetProps>(
   ({ onChange, onDismiss }, ref) => {
-    const { tokens } = useTheme();
-    const modalRef = useRef<BottomSheetModal>(null);
-
-    useImperativeHandle(ref, () => ({
-      open: () => modalRef.current?.present(),
-      close: () => modalRef.current?.dismiss(),
-    }));
-
     return (
-      <BottomSheetModal
-        ref={modalRef}
-        snapPoints={['80%']}
-        index={0}
-        enablePanDownToClose
-        enableOverDrag={false}
-        enableDynamicSizing={false}
+      <BaseBottomSheet
+        ref={ref}
+        title="Settings"
         onChange={onChange}
         onDismiss={onDismiss}
-        backgroundStyle={{ backgroundColor: tokens.sceneBackground }}
-        handleIndicatorStyle={{ backgroundColor: tokens.textOnAccent }}
       >
-        <BottomSheetScrollView style={{ flex: 1, paddingHorizontal: 20 }} showsVerticalScrollIndicator={false}>
-          <Text style={{ color: tokens.textOnAccent, fontSize: 28, fontWeight: '700', marginBottom: 24, textAlign: 'center' }}>
-            Settings
-          </Text>
+        <BottomSheetSettingsSection title="Inhale / Exhale Tone">
+          <BottomSheetSoundPicker />
+        </BottomSheetSettingsSection>
 
-          <SettingsSection title="Inhale / Exhale Tone">
-            <SoundPicker />
-          </SettingsSection>
+        <BottomSheetSettingsSection title="Soundscape">
+          <BottomSheetSoundscapePicker />
+        </BottomSheetSettingsSection>
 
-          <SettingsSection title="Soundscape">
-            <SoundscapePicker />
-          </SettingsSection>
+        <BottomSheetSettingsSection title="Pick A Theme">
+          <BottomSheetThemePicker />
+        </BottomSheetSettingsSection>
 
-          <SettingsSection title="Pick A Theme">
-            <ThemePicker />
-          </SettingsSection>
+        <BottomSheetSettingsSection title="Appearance Mode">
+          <BottomSheetAppearancePicker />
+        </BottomSheetSettingsSection>
 
-          <SettingsSection title="Appearance Mode">
-            <AppearancePicker />
-          </SettingsSection>
-
-          <SettingsSection title="Sound & Haptics">
-            <SoundHapticsPicker />
-          </SettingsSection>
-
-          <View style={{ height: 40 }} />
-        </BottomSheetScrollView>
-      </BottomSheetModal>
+        <BottomSheetSettingsSection title="Sound & Haptics">
+          <BottomSheetSoundHapticsPicker />
+        </BottomSheetSettingsSection>
+      </BaseBottomSheet>
     );
   }
 );
@@ -77,4 +50,3 @@ const SettingsSheet = forwardRef<SettingsSheetHandle, SettingsSheetProps>(
 SettingsSheet.displayName = 'SettingsSheet';
 
 export default SettingsSheet;
-

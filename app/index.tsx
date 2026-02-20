@@ -292,7 +292,6 @@ export default function Index() {
           exercises={sheets.exercises}
           currentExercise={sheets.currentExercise}
           onSelectExercise={sheets.handleSelectExercise}
-          onInfoPress={sheets.handleSelectionInfoPress}
           onChange={sheets.handleSelectionSheetChange}
           onDismiss={sheets.handleSelectionSheetDismiss}
           />
