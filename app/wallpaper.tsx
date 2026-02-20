@@ -2,7 +2,7 @@ import { useTheme } from '@/components/Theme';
 import { useApp } from '@/contexts/themeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -10,15 +10,9 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // All wallpaper images from zenscapes folder
 const WALLPAPER_IMAGES = [
-  { source: require('../assets/images/BackGrounds/zenscapes/09a7c46feafa016b657ae2b59cfc89c3.jpg'), filename: '09a7c46feafa016b657ae2b59cfc89c3.jpg' },
-  { source: require('../assets/images/BackGrounds/zenscapes/25ad8d669f24496f38efeb220a94d7d1.jpg'), filename: '25ad8d669f24496f38efeb220a94d7d1.jpg' },
   { source: require('../assets/images/BackGrounds/zenscapes/53f9385211ee5c576f8fa058326f479b.jpg'), filename: '53f9385211ee5c576f8fa058326f479b.jpg' },
-  { source: require('../assets/images/BackGrounds/zenscapes/8b5ab95f17ebce31ce33d4477b0a2394.jpg'), filename: '8b5ab95f17ebce31ce33d4477b0a2394.jpg' },
-  { source: require('../assets/images/BackGrounds/zenscapes/9c35536ff418ad74cd2e223e0cdbe3aa.jpg'), filename: '9c35536ff418ad74cd2e223e0cdbe3aa.jpg' },
   { source: require('../assets/images/BackGrounds/zenscapes/a173ab0f7d9a7427676a776831bc8154.jpg'), filename: 'a173ab0f7d9a7427676a776831bc8154.jpg' },
   { source: require('../assets/images/BackGrounds/zenscapes/bda498c860d011ed38fe8877fe894261.jpg'), filename: 'bda498c860d011ed38fe8877fe894261.jpg' },
-  { source: require('../assets/images/BackGrounds/zenscapes/kilimanjaro-studioz-jM-Fp4J2xvk-unsplash.jpg'), filename: 'kilimanjaro-studioz-jM-Fp4J2xvk-unsplash.jpg' },
-  { source: require('../assets/images/BackGrounds/zenscapes/masaaki-komori-fzHaSRdAi68-unsplash.jpg'), filename: 'masaaki-komori-fzHaSRdAi68-unsplash.jpg' },
 ];
 
 export default function WallpaperPage() {
@@ -27,6 +21,24 @@ export default function WallpaperPage() {
   const router = useRouter();
   const scrollViewRef = useRef<ScrollView>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Initialize to the selected wallpaper or default on mount
+  useEffect(() => {
+    const selectedIndex = backgroundImage 
+      ? WALLPAPER_IMAGES.findIndex(img => img.filename === backgroundImage)
+      : 0; // Default to index 0 (53f9385211ee5c576f8fa058326f479b.jpg)
+    
+    if (selectedIndex !== -1) {
+      setCurrentIndex(selectedIndex);
+      // Small delay to ensure ScrollView is mounted
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({
+          x: selectedIndex * SCREEN_WIDTH,
+          animated: false,
+        });
+      }, 100);
+    }
+  }, [backgroundImage]);
 
   const styles = StyleSheet.create({
     container: {
@@ -149,6 +161,21 @@ export default function WallpaperPage() {
       backgroundColor: tokens.textOnAccent,
       opacity: 1,
     },
+    selectedBadge: {
+      position: 'absolute',
+      top: 100,
+      right: 24,
+      backgroundColor: tokens.accentPrimary,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 20,
+      zIndex: 10,
+    },
+    selectedBadgeText: {
+      color: tokens.textOnAccent,
+      fontSize: 14,
+      fontWeight: '600',
+    },
   });
 
   const handleScroll = (event: any) => {
@@ -183,6 +210,9 @@ export default function WallpaperPage() {
     router.back();
   };
 
+  const currentWallpaper = WALLPAPER_IMAGES[currentIndex];
+  const isCurrentSelected = backgroundImage === currentWallpaper.filename;
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -197,6 +227,13 @@ export default function WallpaperPage() {
 
       {/* Swipeable Wallpapers - Full Screen */}
       <View style={{ flex: 1, position: 'relative' }}>
+        {/* Selected Badge */}
+        {isCurrentSelected && (
+          <View style={styles.selectedBadge}>
+            <Text style={styles.selectedBadgeText}>Selected ✓</Text>
+          </View>
+        )}
+
         {/* Left Arrow */}
         {currentIndex > 0 && (
           <Pressable 

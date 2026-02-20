@@ -1,0 +1,112 @@
+# Breath App - Project-Specific Rules
+
+## Project Overview
+This is a React Native breathing meditation app built with Expo Router. The app helps users practice various breathing techniques with beautiful zen-inspired backgrounds.
+
+## Code Style & Structure
+- Use TypeScript for all new files
+- Follow React Native and Expo best practices
+- Use functional components with hooks (no class components)
+- Keep components small and focused
+- Use StyleSheet.create() for styling instead of inline styles
+
+## File Organization
+- `/app` - Main app routes and pages (Expo Router structure)
+- `/components` - Reusable UI components
+- `/contexts` - React Context providers (theme, breathing)
+- `/hooks` - Custom React hooks
+- `/lib` - Utility functions and storage
+- `/assets/images/BackGrounds/zenscapes` - All wallpaper images
+
+## Naming Conventions
+- Components: PascalCase (e.g., `BreathingPageHeader.tsx`)
+- Hooks: camelCase with 'use' prefix (e.g., `useBreathingSheets.ts`)
+- Files: camelCase for utilities, PascalCase for components
+
+## Important Rules
+1. **Fix at the cause, not the symptom** - Always address the root issue
+2. **Be detailed with summarization** - Don't miss important details
+3. **Match existing patterns** - Follow the established code patterns in the project
+4. **Text-only UI components** - This app uses simple text-based UI, no icons in main components (except header)
+5. **Theme consistency** - Always use `tokens` from `useTheme()` for colors and styling
+
+## Wallpaper Management
+- All wallpapers live in `assets/images/BackGrounds/zenscapes/`
+- Default wallpaper: `53f9385211ee5c576f8fa058326f479b.jpg`
+- Both `themeContext.tsx` and `wallpaper.tsx` must stay in sync with available images
+- Always check folder contents before adding image requires
+
+## Breathing Exercises
+- Exercise data stored in `lib/storage.ts`
+- Exercises have: id, title, description, inhale, hold, exhale, cycles
+- Current exercise managed through `breathingContext`
+
+## State Management
+- Use Context API (not Redux)
+- Theme context: `useApp()` from `contexts/themeContext.tsx`
+- Breathing context: `useBreathing()` from `contexts/breathingContext.tsx`
+- Theme provider: `<AppProvider>` wraps the entire app
+
+## Navigation
+- Use Expo Router for navigation
+- Routes based on file structure in `/app`
+- Use `router.push()` and `router.back()` for navigation
+
+## Bottom Sheets
+- Use `@gorhom/bottom-sheet` for modals
+- Managed through `useBreathingSheets` hook
+- Three types: ExerciseDetail, ExerciseSelection, Support
+
+## Styling Approach
+- Large, bold text (48pt for titles)
+- Simple, minimal design
+- Text opacity for hierarchy (0.8 for descriptions)
+- Consistent spacing using padding/margin
+- Colors from theme tokens only
+
+## Testing & Quality
+- Check linter errors after edits
+- Verify image paths exist before requiring them
+- Test on both iOS and Android if making platform-specific changes
+- Ensure all imports resolve correctly
+
+## Common Patterns
+
+### Theme Usage
+```typescript
+const { tokens } = useTheme();
+// Use tokens.textOnAccent, tokens.sceneBackground, etc.
+```
+
+### Navigation
+```typescript
+const router = useRouter();
+router.push('/wallpaper');
+router.back();
+```
+
+### Background Image Management
+```typescript
+const { backgroundImage, setBackgroundImage } = useApp();
+await setBackgroundImage('filename.jpg');
+```
+
+## Don't Do
+- Don't use inline styles when StyleSheet is more appropriate
+- Don't add new dependencies without discussing
+- Don't create helper scripts or workarounds
+- Don't use emojis unless explicitly requested
+- Don't add icons to main UI components (keep text-only aesthetic)
+- Don't hardcode colors (always use theme tokens)
+
+## Breathing Page Structure
+- Fixed header with back/support buttons
+- Scrollable middle content (horizontal pages)
+- Fixed footer with buttons and technique selector
+- Arrow navigation for page switching
+- Page indicators (dots) at bottom
+
+## Resource Files
+- Information archive: `lib/informationArchive.json`
+- Contains articles, videos, books about breathing
+- Each entry has: id, name, link, type, vibe, shortDescription, AI_description, tags

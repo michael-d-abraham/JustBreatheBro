@@ -181,15 +181,9 @@ export default function Index() {
       fontWeight: '600',
       marginBottom: 12,
     },
-    techniqueRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
     techniqueValue: {
       color: tokens.textOnAccent,
       fontSize: 18,
-      opacity: 0.9,
     },
     techniqueSelectable: {
       flexDirection: 'row',
@@ -199,21 +193,6 @@ export default function Index() {
     chevronIcon: {
       color: tokens.textOnAccent,
       fontSize: 16,
-      opacity: 0.7,
-    },
-    infoButton: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      borderWidth: 1.5,
-      borderColor: tokens.textOnAccent,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    infoText: {
-      color: tokens.textOnAccent,
-      fontSize: 14,
-      fontWeight: '600',
     },
   });
 
@@ -285,18 +264,7 @@ export default function Index() {
             <View style={styles.techniqueContainer}>
               <Text style={styles.techniqueLabel}>Technique:</Text>
             <Pressable onPress={sheets.handleTechniquePress} style={styles.techniqueSelectable}>
-              <View style={styles.techniqueRow}>
                 <Text style={styles.techniqueValue}>{displayExercise.title}</Text>
-                <Pressable 
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    handleInfoPress();
-                  }} 
-                  style={styles.infoButton}
-                >
-                  <Text style={styles.infoText}>i</Text>
-                </Pressable>
-              </View>
               <Text style={styles.chevronIcon}>⌄</Text>
             </Pressable>
             </View>
