@@ -48,6 +48,11 @@ export default function Calm() {
     router.push('/informationarchive');
   };
 
+  const handleCirclePress = () => {
+    // Navigate to scenes screen
+    router.push('/scenes');
+  };
+
   const { backgroundImage } = useApp();
   
   const styles = StyleSheet.create({
@@ -65,6 +70,7 @@ export default function Calm() {
             <BreathingPageHeader
               supportSheetRef={sheets.supportSheetRef}
               onSupportPress={sheets.handleSupportPress}
+              onCirclePress={handleCirclePress}
               onInfoLibraryPress={handleInfoLibraryPress}
             />
 

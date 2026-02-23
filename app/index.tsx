@@ -58,8 +58,8 @@ export default function Index() {
   };
 
   const handleCirclePress = () => {
-    // Navigate to wallpaper selection page
-    router.push('/wallpaper');
+    // Navigate to scenes screen
+    router.push('/scenes');
   };
 
   const handleInfoLibraryPress = () => {

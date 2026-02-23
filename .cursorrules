@@ -1,112 +1,67 @@
-# Breath App - Project-Specific Rules
+# Breath — Cursor Project Rules (.cursorrules)
 
-## Project Overview
-This is a React Native breathing meditation app built with Expo Router. The app helps users practice various breathing techniques with beautiful zen-inspired backgrounds.
+## 1) Prime directive
+- Make small, safe changes that match existing patterns in this repo.
+- Do NOT add dependencies or introduce new architecture patterns unless explicitly asked.
+- Do NOT invent APIs, file paths, or hook signatures. If you can’t find it in the repo, ask.
 
-## Code Style & Structure
-- Use TypeScript for all new files
-- Follow React Native and Expo best practices
-- Use functional components with hooks (no class components)
-- Keep components small and focused
-- Use StyleSheet.create() for styling instead of inline styles
+## 2) How you must work
+For any task beyond a tiny edit:
+1) Provide a short plan (3–6 bullets).
+2) List exact files you will modify.
+3) Implement minimal diffs only (no drive-by refactors).
+4) Provide verification steps (commands + in-app checks).
 
-## File Organization
-- `/app` - Main app routes and pages (Expo Router structure)
-- `/components` - Reusable UI components
-- `/contexts` - React Context providers (theme, breathing)
-- `/hooks` - Custom React hooks
-- `/lib` - Utility functions and storage
-- `/assets/images/BackGrounds/zenscapes` - All wallpaper images
+## 3) Source of truth (use these, don’t recreate them)
+### Context / app state
+- Theme + global settings: `contexts/themeContext.tsx`
+- Current exercise state: `contexts/breathingContext.tsx`
 
-## Naming Conventions
-- Components: PascalCase (e.g., `BreathingPageHeader.tsx`)
-- Hooks: camelCase with 'use' prefix (e.g., `useBreathingSheets.ts`)
-- Files: camelCase for utilities, PascalCase for components
+### Breathing session system (layered hooks)
+- Cycle/state machine: `hooks/useBreathingCycle.ts`
+- Animation: `hooks/useBreathingAnimation.ts`
+- Audio cues: `hooks/useBreathingAudio.ts`
+- Haptics: `hooks/useBreathingHaptics.ts`
 
-## Important Rules
-1. **Fix at the cause, not the symptom** - Always address the root issue
-2. **Be detailed with summarization** - Don't miss important details
-3. **Match existing patterns** - Follow the established code patterns in the project
-4. **Text-only UI components** - This app uses simple text-based UI, no icons in main components (except header)
-5. **Theme consistency** - Always use `tokens` from `useTheme()` for colors and styling
+### Soundscape (ambient background)
+- Hook: `hooks/useBackgroundSoundscape.ts`
+- Player component: `components/BackgroundSoundscapePlayer.tsx`
+Rule: do not create competing global soundscape players.
 
-## Wallpaper Management
-- All wallpapers live in `assets/images/BackGrounds/zenscapes/`
-- Default wallpaper: `53f9385211ee5c576f8fa058326f479b.jpg`
-- Both `themeContext.tsx` and `wallpaper.tsx` must stay in sync with available images
-- Always check folder contents before adding image requires
+### Bottom sheets
+- Base contract: `components/BaseBottomSheet.tsx`
+- Sheet UI building blocks: `components/BottomSheet*.tsx`
+- Sheet state/coordination: `hooks/useBreathingSheets.ts`
+Rule: reuse `BaseBottomSheet` and existing sheet patterns; don’t instantiate new modal systems in screens.
 
-## Breathing Exercises
-- Exercise data stored in `lib/storage.ts`
-- Exercises have: id, title, description, inhale, hold, exhale, cycles
-- Current exercise managed through `breathingContext`
+### Gestures / navigation behavior
+- Swipe behavior: `hooks/useSwipeNavigation.ts`
+Rule: preserve existing swipe behavior unless explicitly asked to change it.
 
-## State Management
-- Use Context API (not Redux)
-- Theme context: `useApp()` from `contexts/themeContext.tsx`
-- Breathing context: `useBreathing()` from `contexts/breathingContext.tsx`
-- Theme provider: `<AppProvider>` wraps the entire app
+### Persistence / content
+- Storage: `lib/storage.ts`
+- Information archive: `lib/informationArchive.ts` + `lib/informationArchive.json`
 
-## Navigation
-- Use Expo Router for navigation
-- Routes based on file structure in `/app`
-- Use `router.push()` and `router.back()` for navigation
+## 4) Non-negotiable invariants (breathing app safety)
+If you touch timers/audio/haptics/animation:
+- No duplicate timers/intervals across re-renders.
+- Start / pause / resume / stop must be idempotent (safe if called multiple times).
+- On stop OR unmount OR navigation-away: stop timers, stop audio, stop haptics, and settle/reset animations as the current system expects.
+- Phase transitions must not double-trigger cues (audio/haptics) on re-render.
 
-## Bottom Sheets
-- Use `@gorhom/bottom-sheet` for modals
-- Managed through `useBreathingSheets` hook
-- Three types: ExerciseDetail, ExerciseSelection, Support
+If you change anything in `useBreathingCycle`:
+- Explain how you prevent drift, duplicate scheduling, and stuck states.
 
-## Styling Approach
-- Large, bold text (48pt for titles)
-- Simple, minimal design
-- Text opacity for hierarchy (0.8 for descriptions)
-- Consistent spacing using padding/margin
-- Colors from theme tokens only
+## 5) Code quality guardrails
+- Prefer editing existing code over creating new files.
+- New files only if clearly reusable and placed alongside similar code.
+- Keep changes localized; do not “cleanup” unrelated files.
+- When referencing assets, use the repo’s existing pattern (avoid dynamic `require()` if the codebase uses static requires).
 
-## Testing & Quality
-- Check linter errors after edits
-- Verify image paths exist before requiring them
-- Test on both iOS and Android if making platform-specific changes
-- Ensure all imports resolve correctly
+## 6) Testing expectations
+- If you change core session logic (cycle/audio/haptics), add or update tests under `hooks/__tests__` when feasible.
+- If tests aren’t practical, provide a manual verification checklist tailored to the change.
 
-## Common Patterns
-
-### Theme Usage
-```typescript
-const { tokens } = useTheme();
-// Use tokens.textOnAccent, tokens.sceneBackground, etc.
-```
-
-### Navigation
-```typescript
-const router = useRouter();
-router.push('/wallpaper');
-router.back();
-```
-
-### Background Image Management
-```typescript
-const { backgroundImage, setBackgroundImage } = useApp();
-await setBackgroundImage('filename.jpg');
-```
-
-## Don't Do
-- Don't use inline styles when StyleSheet is more appropriate
-- Don't add new dependencies without discussing
-- Don't create helper scripts or workarounds
-- Don't use emojis unless explicitly requested
-- Don't add icons to main UI components (keep text-only aesthetic)
-- Don't hardcode colors (always use theme tokens)
-
-## Breathing Page Structure
-- Fixed header with back/support buttons
-- Scrollable middle content (horizontal pages)
-- Fixed footer with buttons and technique selector
-- Arrow navigation for page switching
-- Page indicators (dots) at bottom
-
-## Resource Files
-- Information archive: `lib/informationArchive.json`
-- Contains articles, videos, books about breathing
-- Each entry has: id, name, link, type, vibe, shortDescription, AI_description, tags
+## 7) Output format
+When delivering a change:
+- Plan → Files touched → Patch/diff-style edits (or clearly separated code blocks) → Verification steps.
