@@ -1,5 +1,5 @@
-import { useTheme as useBaseTheme } from '@/components/Theme';
-import { getBackgroundImage } from '@/lib/storage';
+import { useTheme as useBaseTheme, ThemeName } from '@/components/Theme';
+import { getBackgroundImage, getAnimationTheme, saveAnimationTheme } from '@/lib/storage';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { ImageBackground, View } from 'react-native';
 
@@ -13,6 +13,7 @@ type AppSettings = {
   backgroundType: 'solid';
   soundType: SoundType;
   soundscape: SoundscapeType;
+  animationTheme: ThemeName;
 };
 
 type AppContextType = {
@@ -26,6 +27,7 @@ type AppContextType = {
   toggleAnimations: () => void;
   setSoundType: (soundType: SoundType) => void;
   setSoundscape: (soundscape: SoundscapeType) => void;
+  setAnimationTheme: (theme: ThemeName) => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -38,6 +40,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     backgroundType: 'solid',
     soundType: 'sine',
     soundscape: 'dream',
+    animationTheme: 'calm',
   });
   const [backgroundImage, setBackgroundImageState] = useState<string | null>(null);
 
@@ -51,6 +54,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setBackgroundImageState(imagePath);
   };
 
+  const setAnimationTheme = async (theme: ThemeName) => {
+    setSettings(prev => ({ ...prev, animationTheme: theme }));
+    await saveAnimationTheme(theme);
+  };
+
   useEffect(() => {
     // Load background image on mount, or set default zenscape
     getBackgroundImage().then(async (storedImage) => {
@@ -60,6 +68,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         // On first startup, set the default zenscape image
         const defaultZenscape = '53f9385211ee5c576f8fa058326f479b.jpg';
         await setBackgroundImage(defaultZenscape);
+      }
+    });
+
+    // Load animation theme from storage
+    getAnimationTheme().then(stored => {
+      if (stored) {
+        setSettings(prev => ({ ...prev, animationTheme: stored as ThemeName }));
       }
     });
   }, []);
@@ -80,7 +95,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       toggleHaptics,
       toggleAnimations,
       setSoundType,
-      setSoundscape
+      setSoundscape,
+      setAnimationTheme
     }}>
       <ThemedWrapper>
         {children}

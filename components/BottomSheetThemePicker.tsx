@@ -1,9 +1,10 @@
 import React from 'react';
 import BottomSheetCircularButton from './BottomSheetCircularButton';
-import { THEMES, useTheme } from './Theme';
+import { THEMES } from './Theme';
+import { useApp } from '../contexts/themeContext';
 
 export default function BottomSheetThemePicker() {
-  const { themeName, setThemeName } = useTheme();
+  const { settings, setAnimationTheme } = useApp();
 
   return (
     <>
@@ -12,8 +13,8 @@ export default function BottomSheetThemePicker() {
           key={key}
           label={t.name}
           color={t.preview}
-          isSelected={themeName === key}
-          onPress={() => setThemeName(key as keyof typeof THEMES)}
+          isSelected={settings.animationTheme === key}
+          onPress={() => setAnimationTheme(key as keyof typeof THEMES)}
         />
       ))}
     </>

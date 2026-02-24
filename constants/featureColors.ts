@@ -18,7 +18,7 @@
  * Visual identifiers for each theme aesthetic
  */
 export const THEME_PREVIEW_COLORS = {
-  grounded: '#5A7A3F', // Natural earthy green
+  grounded: '#404040', // Black & white (neutral gray for picker)
   calm: '#2B8FD9',     // Peaceful blue
   uplifting: '#6B5BD0', // Energetic purple
 } as const;

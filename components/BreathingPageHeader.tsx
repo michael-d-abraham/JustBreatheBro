@@ -2,7 +2,7 @@ import React, { RefObject, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SupportSheetHandle } from './SupportSheet';
-import { useTheme } from './Theme';
+import { useWallpaperForeground } from './Theme';
 
 interface BreathingPageHeaderProps {
   supportSheetRef: RefObject<SupportSheetHandle | null>;
@@ -17,7 +17,7 @@ export default function BreathingPageHeader({
   onCirclePress,
   onInfoLibraryPress,
 }: BreathingPageHeaderProps) {
-  const { tokens } = useTheme();
+  const wallpaperFg = useWallpaperForeground();
   const insets = useSafeAreaInsets();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -27,12 +27,12 @@ export default function BreathingPageHeader({
       height: 32,
       borderRadius: 16,
       borderWidth: 2,
-      borderColor: tokens.textOnAccent,
+      borderColor: wallpaperFg,
       backgroundColor: 'transparent',
     },
     heartIcon: {
       fontSize: 32,
-      color: tokens.textOnAccent,
+      color: wallpaperFg,
     },
     dropdown: {
       position: 'absolute',
@@ -48,7 +48,7 @@ export default function BreathingPageHeader({
     dropdownItemLast: {
     },
     dropdownItemText: {
-      color: tokens.textOnAccent,
+      color: wallpaperFg,
       fontSize: 16,
       fontWeight: '500',
     },

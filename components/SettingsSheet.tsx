@@ -1,8 +1,6 @@
 import React, { forwardRef } from 'react';
 import BaseBottomSheet, { BaseBottomSheetHandle } from './BaseBottomSheet';
-import BottomSheetAppearancePicker from './BottomSheetAppearancePicker';
 import BottomSheetSettingsSection from './BottomSheetSettingsSection';
-import BottomSheetSoundHapticsPicker from './BottomSheetSoundHapticsPicker';
 import BottomSheetSoundPicker from './BottomSheetSoundPicker';
 import BottomSheetSoundscapePicker from './BottomSheetSoundscapePicker';
 import BottomSheetThemePicker from './BottomSheetThemePicker';
@@ -31,16 +29,8 @@ const SettingsSheet = forwardRef<SettingsSheetHandle, SettingsSheetProps>(
           <BottomSheetSoundscapePicker />
         </BottomSheetSettingsSection>
 
-        <BottomSheetSettingsSection title="Pick A Theme">
+        <BottomSheetSettingsSection title="Animation Theme">
           <BottomSheetThemePicker />
-        </BottomSheetSettingsSection>
-
-        <BottomSheetSettingsSection title="Appearance Mode">
-          <BottomSheetAppearancePicker />
-        </BottomSheetSettingsSection>
-
-        <BottomSheetSettingsSection title="Sound & Haptics">
-          <BottomSheetSoundHapticsPicker />
         </BottomSheetSettingsSection>
       </BaseBottomSheet>
     );

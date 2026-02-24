@@ -18,18 +18,18 @@ export default function BottomSheetToggleButton({ isEnabled, onToggle, label }: 
         paddingHorizontal: 20,
         paddingVertical: 15,
         marginVertical: 5,
-        borderWidth: isEnabled ? 2 : 1.5,
-        borderColor: isEnabled ? tokens.bottomSheetText : tokens.bottomSheetSeparator,
-        backgroundColor: isEnabled ? tokens.bottomSheetSeparator : 'transparent',
-        opacity: isEnabled ? 1 : 0.7,
+        borderWidth: 1.5,
+        borderColor: tokens.bottomSheetSeparator,
+        backgroundColor: 'transparent',
       }}
       onPress={onToggle}
     >
       <Text style={{
         color: tokens.bottomSheetText,
         fontSize: 18,
-        fontWeight: '600',
+        fontWeight: isEnabled ? '700' : '600',
         textAlign: 'center',
+        opacity: isEnabled ? 1 : 0.5,
       }}>
         {`${label}: ${isEnabled ? 'ON' : 'OFF'}`}
       </Text>

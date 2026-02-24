@@ -2,7 +2,7 @@ import BreathingPageHeader from '@/components/BreathingPageHeader';
 import ExerciseDetailSheet from '@/components/ExerciseDetailSheet';
 import ExerciseSelectionSheet from '@/components/ExerciseSelectionSheet';
 import SupportSheet from '@/components/SupportSheet';
-import { useTheme } from '@/components/Theme';
+import { useWallpaperForeground } from '@/components/Theme';
 import { useBreathing } from '@/contexts/breathingContext';
 import { useApp } from '@/contexts/themeContext';
 import { useBreathingSheets } from '@/hooks/useBreathingSheets';
@@ -24,7 +24,7 @@ const PAGES = [
 ];
 
 export default function Index() {
-  const { tokens } = useTheme();
+  const wallpaperFg = useWallpaperForeground();
   const router = useRouter();
   const { currentExercise, updateExercise } = useBreathing();
   const sheets = useBreathingSheets();
@@ -97,7 +97,7 @@ export default function Index() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: backgroundImage ? 'transparent' : tokens.sceneBackground,
+      backgroundColor: backgroundImage ? 'transparent' : '#FFFFFF',
     },
     headerContainer: {
       position: 'absolute',
@@ -122,14 +122,14 @@ export default function Index() {
       justifyContent: 'center',
     },
     subtitle: {
-      color: tokens.textOnAccent,
+      color: wallpaperFg,
       fontSize: 48,
       fontWeight: '700',
       textAlign: 'center',
       marginBottom: 16,
     },
     description: {
-      color: tokens.textOnAccent,
+      color: wallpaperFg,
       fontSize: 18,
       textAlign: 'center',
       opacity: 0.8,
@@ -155,7 +155,7 @@ export default function Index() {
       paddingHorizontal: 32,
     },
     startButtonText: {
-      color: tokens.textOnAccent,
+      color: wallpaperFg,
       fontSize: 28,
       fontWeight: '700',
     },
@@ -168,7 +168,7 @@ export default function Index() {
       zIndex: 5,
     },
     arrowIcon: {
-      color: tokens.textOnAccent,
+      color: wallpaperFg,
       fontSize: 32,
       opacity: 0.7,
     },
@@ -176,13 +176,13 @@ export default function Index() {
       alignItems: 'center',
     },
     techniqueLabel: {
-      color: tokens.textOnAccent,
+      color: wallpaperFg,
       fontSize: 20,
       fontWeight: '600',
       marginBottom: 12,
     },
     techniqueValue: {
-      color: tokens.textOnAccent,
+      color: wallpaperFg,
       fontSize: 18,
     },
     techniqueSelectable: {
@@ -191,7 +191,7 @@ export default function Index() {
       gap: 8,
     },
     chevronIcon: {
-      color: tokens.textOnAccent,
+      color: wallpaperFg,
       fontSize: 16,
     },
   });

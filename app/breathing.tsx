@@ -1,6 +1,6 @@
 import ExerciseDetailSheet, { ExerciseDetailSheetHandle } from '@/components/ExerciseDetailSheet';
 import SettingsSheet, { SettingsSheetHandle } from '@/components/SettingsSheet';
-import { useTheme } from "@/components/Theme";
+import { useBreathingAnimationTokens, useWallpaperForeground } from "@/components/Theme";
 import { useBreathing } from "@/contexts/breathingContext";
 import { useApp } from "@/contexts/themeContext";
 import { useBreathingAnimation } from "@/hooks/useBreathingAnimation";
@@ -25,7 +25,8 @@ import Svg, { Circle } from "react-native-svg";
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 export default function BreathingPage() {
-  const { tokens } = useTheme();
+  const breathingAnim = useBreathingAnimationTokens();
+  const wallpaperFg = useWallpaperForeground();
   const { currentExercise } = useBreathing();
   const { settings, backgroundImage } = useApp();
   const { autoStart } = useLocalSearchParams();
@@ -415,7 +416,7 @@ export default function BreathingPage() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
-        <SafeAreaView style={{ flex: 1, backgroundColor: backgroundImage ? 'transparent' : tokens.sceneBackground }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: backgroundImage ? 'transparent' : '#FFFFFF' }}>
           
           {/* Main Content Area - Tap to toggle UI */}
           <Pressable 
@@ -426,16 +427,16 @@ export default function BreathingPage() {
             <View style={{ alignItems: 'center', position: 'relative' }}>
               <Svg width={400} height={400}>
                 {/* Outer circle */}
-                <Circle cx={200} cy={200} r={180} stroke={tokens.accentPrimary} strokeWidth={1} fill="none" opacity={0.3} />
+                <Circle cx={200} cy={200} r={180} stroke={breathingAnim.guideOuterStroke} strokeWidth={1} fill="none" opacity={0.6} />
                 {/* Middle circle */}
-                <Circle cx={200} cy={200} r={65} stroke={tokens.accentPrimary} strokeWidth={1} fill="none" opacity={0.5} />
+                <Circle cx={200} cy={200} r={65} stroke={breathingAnim.guideInnerStroke} strokeWidth={1} fill="none" opacity={0.6} />
                 {/* Inner animated circle */}
                 <AnimatedCircle 
                   cx={200} 
                   cy={200} 
                   animatedProps={animatedProps} 
-                  stroke={tokens.borderSubtle} 
-                  fill={tokens.accentMuted} 
+                  stroke={breathingAnim.mainStroke} 
+                  fill={breathingAnim.mainFill} 
                   strokeLinecap="round"
                   opacity={0.8}
                 />
@@ -444,7 +445,7 @@ export default function BreathingPage() {
               {/* Phase text overlay */}
               <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={{ 
-                  color: tokens.textPrimary, 
+                  color: wallpaperFg, 
                   fontSize: 32, 
                   fontWeight: '300',
                   letterSpacing: 2,
@@ -505,7 +506,7 @@ export default function BreathingPage() {
           ]}>
             {/* Back Arrow */}
             <Pressable onPress={handleStopAndExit}>
-              <Text style={{ color: tokens.textOnAccent, fontSize: 28 }}>←</Text>
+              <Text style={{ color: wallpaperFg, fontSize: 28 }}>←</Text>
             </Pressable>
             
             {/* Info Icon */}
@@ -514,11 +515,11 @@ export default function BreathingPage() {
               height: 28,
               borderRadius: 14,
               borderWidth: 2,
-              borderColor: tokens.textOnAccent,
+              borderColor: wallpaperFg,
               justifyContent: 'center',
               alignItems: 'center',
             }}>
-              <Text style={{ color: tokens.textOnAccent, fontSize: 16, fontWeight: '600' }}>i</Text>
+              <Text style={{ color: wallpaperFg, fontSize: 16, fontWeight: '600' }}>i</Text>
             </Pressable>
           </Animated.View>
 
@@ -552,7 +553,7 @@ export default function BreathingPage() {
               <Ionicons 
                 name="options" 
                 size={38} 
-                color={tokens.textOnAccent} 
+                color={wallpaperFg} 
               />
             </Pressable>
             
@@ -570,13 +571,13 @@ export default function BreathingPage() {
                 <Ionicons 
                   name="pause" 
                   size={38} 
-                  color={tokens.textOnAccent} 
+                  color={wallpaperFg} 
                 />
               ) : (
                 <Ionicons 
                   name="play" 
                   size={38} 
-                  color={tokens.textOnAccent} 
+                  color={wallpaperFg} 
                 />
               )}
             </Pressable>
@@ -594,7 +595,7 @@ export default function BreathingPage() {
               <Ionicons 
                 name="stop" 
                 size={38} 
-                color={tokens.textOnAccent} 
+                color={wallpaperFg} 
               />
             </Pressable>
           </Animated.View>

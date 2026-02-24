@@ -1,4 +1,4 @@
-import { useTheme } from "@/components/Theme";
+import { useWallpaperForeground } from "@/components/Theme";
 import { useApp } from "@/contexts/themeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -36,7 +36,7 @@ const WALLPAPER_IMAGES = [
 ];
 
 export default function WallpaperPage() {
-  const { tokens } = useTheme();
+  const wallpaperFg = useWallpaperForeground();
   const { backgroundImage, setBackgroundImage } = useApp();
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -74,15 +74,15 @@ export default function WallpaperPage() {
     container: {
       flex: 1,
       backgroundColor: fromScenes
-        ? tokens.bottomSheetBg
-        : tokens.sceneBackground,
+        ? '#FFFFFF'
+        : '#FFFFFF',
       padding: fromScenes ? 20 : 0,
     },
     contentWrapper: {
       flex: 1,
       borderRadius: fromScenes ? 24 : 0,
       borderWidth: fromScenes ? 3 : 0,
-      borderColor: fromScenes ? tokens.bottomSheetSeparator : "transparent",
+      borderColor: fromScenes ? '#E5E5EA' : "transparent",
       overflow: "hidden",
     },
     header: {
@@ -96,7 +96,7 @@ export default function WallpaperPage() {
     },
     headerTitle: {
       flex: 1,
-      color: tokens.textOnAccent,
+      color: wallpaperFg,
       fontSize: 20,
       fontWeight: "600",
       textAlign: "center",
@@ -128,14 +128,14 @@ export default function WallpaperPage() {
       pointerEvents: "none",
     },
     subtitle: {
-      color: tokens.textOnAccent,
+      color: wallpaperFg,
       fontSize: 48,
       fontWeight: "700",
       textAlign: "center",
       marginBottom: 16,
     },
     description: {
-      color: tokens.textOnAccent,
+      color: wallpaperFg,
       fontSize: 18,
       textAlign: "center",
       opacity: 0.8,
@@ -161,7 +161,7 @@ export default function WallpaperPage() {
       paddingHorizontal: 32,
     },
     selectButtonText: {
-      color: tokens.textOnAccent,
+      color: wallpaperFg,
       fontSize: 28,
       fontWeight: "700",
     },
@@ -176,7 +176,7 @@ export default function WallpaperPage() {
       marginTop: -24,
     },
     arrowIcon: {
-      color: tokens.textOnAccent,
+      color: wallpaperFg,
       fontSize: 48,
       opacity: 0.8,
     },
@@ -191,28 +191,28 @@ export default function WallpaperPage() {
       width: 8,
       height: 8,
       borderRadius: 4,
-      backgroundColor: tokens.textOnAccent,
+      backgroundColor: wallpaperFg,
       opacity: 0.3,
     },
     indicatorActive: {
       width: 24,
       height: 8,
       borderRadius: 4,
-      backgroundColor: tokens.textOnAccent,
+      backgroundColor: wallpaperFg,
       opacity: 1,
     },
     selectedBadge: {
       position: "absolute",
       top: 100,
       right: 24,
-      backgroundColor: tokens.accentPrimary,
+      backgroundColor: '#6B5BD0',
       paddingHorizontal: 16,
       paddingVertical: 8,
       borderRadius: 20,
       zIndex: 10,
     },
     selectedBadgeText: {
-      color: tokens.textOnAccent,
+      color: wallpaperFg,
       fontSize: 14,
       fontWeight: "600",
     },
@@ -286,7 +286,7 @@ export default function WallpaperPage() {
               <Ionicons
                 name="arrow-back"
                 size={24}
-                color={tokens.textOnAccent}
+                color={wallpaperFg}
               />
             </Pressable>
             <Text style={styles.headerTitle}>

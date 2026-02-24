@@ -28,10 +28,10 @@ const OffIcon = () => {
 };
 
 const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
+  { label: 'OFF', value: 'off', iconComponent: <OffIcon /> },
   { label: 'Dream', value: 'dream', color: SOUNDSCAPE_COLORS.dream },
   { label: 'Fuzzy', value: 'fuzzy', color: SOUNDSCAPE_COLORS.fuzzy },
   { label: 'Keys', value: 'keys', color: SOUNDSCAPE_COLORS.keys },
-  { label: 'OFF', value: 'off', iconComponent: <OffIcon /> },
 ];
 
 export default function BottomSheetSoundscapePicker() {

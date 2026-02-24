@@ -1,9 +1,12 @@
 import BottomSheetAppearancePicker from "@/components/BottomSheetAppearancePicker";
-import { useTheme } from "@/components/Theme";
+import BottomSheetSoundHapticsPicker from "@/components/BottomSheetSoundHapticsPicker";
+import BottomSheetSoundscapePicker from "@/components/BottomSheetSoundscapePicker";
+import BottomSheetCircularButton from "@/components/BottomSheetCircularButton";
+import { useTheme, THEMES } from "@/components/Theme";
 import { useApp } from "@/contexts/themeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
   Dimensions,
   Image,
@@ -38,9 +41,8 @@ const WALLPAPER_IMAGES = [
 
 export default function ScenesScreen() {
   const { tokens } = useTheme();
-  const { backgroundImage, setBackgroundImage } = useApp();
+  const { backgroundImage, setBackgroundImage, settings, setAnimationTheme } = useApp();
   const router = useRouter();
-  const [zenScapeExpanded, setZenScapeExpanded] = useState(false);
 
   const styles = StyleSheet.create({
     container: {
@@ -89,27 +91,6 @@ export default function ScenesScreen() {
       backgroundColor: tokens.bottomSheetSeparator,
       marginVertical: 20,
     },
-    zenScapeRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      paddingVertical: 16,
-      paddingHorizontal: 4,
-    },
-    zenScapeLabel: {
-      color: tokens.bottomSheetText,
-      fontSize: 17,
-      fontWeight: "600",
-    },
-    zenScapeValue: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-    },
-    zenScapeValueText: {
-      color: tokens.bottomSheetSecondaryText,
-      fontSize: 17,
-    },
     scenesGallery: {
       flexDirection: "row",
       gap: 16,
@@ -152,6 +133,12 @@ export default function ScenesScreen() {
       flexDirection: "row",
       gap: 16,
       marginTop: 12,
+    },
+    appearanceSectionSpaced: {
+      flexDirection: "row",
+      justifyContent: "space-evenly",
+      marginTop: 12,
+      paddingHorizontal: 32,
     },
     fullExperienceButton: {
       backgroundColor: tokens.bottomSheetText,
@@ -196,21 +183,11 @@ export default function ScenesScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* ZenScape Placeholder Row */}
-        <Pressable
-          style={styles.zenScapeRow}
-          onPress={() => setZenScapeExpanded(!zenScapeExpanded)}
-        >
-          <Text style={styles.zenScapeLabel}>ZenScape</Text>
-          <View style={styles.zenScapeValue}>
-            <Text style={styles.zenScapeValueText}>0 MIN</Text>
-            <Ionicons
-              name={zenScapeExpanded ? "chevron-up" : "chevron-down"}
-              size={20}
-              color={tokens.bottomSheetSecondaryText}
-            />
-          </View>
-        </Pressable>
+        {/* Soundscape Section */}
+        <Text style={styles.sectionTitle}>SOUNDSCAPE</Text>
+        <View style={styles.appearanceSection}>
+          <BottomSheetSoundscapePicker />
+        </View>
 
         <View style={styles.divider} />
 
@@ -265,10 +242,34 @@ export default function ScenesScreen() {
 
         <View style={styles.divider} />
 
+        {/* Animation Theme Section */}
+        <Text style={styles.sectionTitle}>ANIMATION THEME</Text>
+        <View style={styles.appearanceSection}>
+          {Object.entries(THEMES).map(([key, t]) => (
+            <BottomSheetCircularButton
+              key={key}
+              label={t.name}
+              color={t.preview}
+              isSelected={settings.animationTheme === key}
+              onPress={() => setAnimationTheme(key as keyof typeof THEMES)}
+            />
+          ))}
+        </View>
+
+        <View style={styles.divider} />
+
         {/* Appearance Mode Section */}
         <Text style={styles.sectionTitle}>APPEARANCE MODE</Text>
-        <View style={styles.appearanceSection}>
+        <View style={styles.appearanceSectionSpaced}>
           <BottomSheetAppearancePicker />
+        </View>
+
+        <View style={styles.divider} />
+
+        {/* Sound & Haptics Section */}
+        <Text style={styles.sectionTitle}>SOUND & HAPTICS</Text>
+        <View style={{ flexDirection: 'row', marginTop: 4, gap: 8 }}>
+          <BottomSheetSoundHapticsPicker />
         </View>
       </ScrollView>
     </SafeAreaView>

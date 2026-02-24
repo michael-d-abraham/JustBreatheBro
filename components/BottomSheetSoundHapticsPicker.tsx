@@ -1,4 +1,5 @@
 import React from 'react';
+import { View } from 'react-native';
 import { useApp } from '../contexts/themeContext';
 import BottomSheetToggleButton from './BottomSheetToggleButton';
 
@@ -7,17 +8,20 @@ export default function BottomSheetSoundHapticsPicker() {
 
   return (
     <>
-      <BottomSheetToggleButton
-        isEnabled={settings.soundEnabled}
-        onToggle={toggleSound}
-        label="Sound"
-      />
-      
-      <BottomSheetToggleButton
-        isEnabled={settings.hapticsEnabled}
-        onToggle={toggleHaptics}
-        label="Haptics"
-      />
+      <View style={{ flex: 1 }}>
+        <BottomSheetToggleButton
+          isEnabled={settings.soundEnabled}
+          onToggle={toggleSound}
+          label="Sound"
+        />
+      </View>
+      <View style={{ flex: 1 }}>
+        <BottomSheetToggleButton
+          isEnabled={settings.hapticsEnabled}
+          onToggle={toggleHaptics}
+          label="Haptics"
+        />
+      </View>
     </>
   );
 }

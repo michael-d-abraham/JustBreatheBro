@@ -7,9 +7,32 @@ import React, {
 import { PlatformColor, useColorScheme } from 'react-native';
 import { THEME_PREVIEW_COLORS } from '../constants/featureColors';
 
+// ============================================================================
+// SYSTEM 1: uiScheme - Bottom sheets / menus
+// ============================================================================
 type Mode = 'light' | 'dark';
-type ThemeName = 'grounded' | 'calm' | 'uplifting';
 type AppearancePref = 'system' | 'light' | 'dark';
+
+// ============================================================================
+// SYSTEM 2: wallpaperContent - Text + icons on wallpaper backgrounds
+// ============================================================================
+type WallpaperContentTokens = {
+  wallpaperForeground: string;
+};
+
+// ============================================================================
+// SYSTEM 3: breathingAnimationTheme - Breathing ring colors
+// ============================================================================
+type ThemeName = 'grounded' | 'calm' | 'uplifting';
+
+type BreathingAnimationTokens = {
+  guideOuterStroke: string;
+  guideInnerStroke: string;
+  mainStroke: string;
+  mainFill: string;
+};
+
+export type { ThemeName };
 
 type PaletteTokens = {
     sceneBackground: string; // (main background color)
@@ -17,6 +40,8 @@ type PaletteTokens = {
     accentPrimary: string; // (primary accent color)
     accentMuted: string; // (muted accent color)
     textOnAccent: string; // (text color on accent)
+    textPrimary: string; // (main text - follows mode: light mode = dark text, dark mode = light text)
+    textSecondary: string; // (secondary text - follows mode)
     borderSubtle: string; // (subtle border color)
     shadow: string; // (shadow color)
 };
@@ -52,6 +77,8 @@ const palettes: Record<ThemeName, Record<Mode, PaletteTokens>> = {
         accentPrimary: '#5A7A3F',
         accentMuted: '#B4D39A',
         textOnAccent: '#1C1E1A',
+        textPrimary: '#1C1E1A',
+        textSecondary: '#3D4039',
         borderSubtle: '#E0DDD5',
         shadow: '#000000',
       },
@@ -59,8 +86,10 @@ const palettes: Record<ThemeName, Record<Mode, PaletteTokens>> = {
         sceneBackground: '#0F110E',
         surface: '#1C1E1A',
         accentPrimary: '#8FB968',
-        accentMuted: '#5A7A3F',
+        accentMuted: '#D9D9D9',
         textOnAccent: '#FFFFFF',
+        textPrimary: '#FFFFFF',
+        textSecondary: '#B8BCB2',
         borderSubtle: '#2D3028',
         shadow: '#000000',
       },
@@ -72,6 +101,8 @@ const palettes: Record<ThemeName, Record<Mode, PaletteTokens>> = {
         accentPrimary: '#2B8FD9',
         accentMuted: '#A3D5F5',
         textOnAccent: '#141820',
+        textPrimary: '#141820',
+        textSecondary: '#3D4852',
         borderSubtle: '#DDE9F3',
         shadow: '#000000',
       },
@@ -81,6 +112,8 @@ const palettes: Record<ThemeName, Record<Mode, PaletteTokens>> = {
         accentPrimary: '#5FB3F0',
         accentMuted: '#2B8FD9',
         textOnAccent: '#FFFFFF',
+        textPrimary: '#FFFFFF',
+        textSecondary: '#9CA8B8',
         borderSubtle: '#222832',
         shadow: '#000000',
       },
@@ -92,6 +125,8 @@ const palettes: Record<ThemeName, Record<Mode, PaletteTokens>> = {
         accentPrimary: '#6B5BD0',
         accentMuted: '#C5BAEB',
         textOnAccent: '#1A1625',
+        textPrimary: '#1A1625',
+        textSecondary: '#3D3648',
         borderSubtle: '#E6E1F7',
         shadow: '#000000',
       },
@@ -101,6 +136,8 @@ const palettes: Record<ThemeName, Record<Mode, PaletteTokens>> = {
         accentPrimary: '#9B8AE8',
         accentMuted: '#6B5BD0',
         textOnAccent: '#FFFFFF',
+        textPrimary: '#FFFFFF',
+        textSecondary: '#B8B0C9',
         borderSubtle: '#2A2535',
         shadow: '#000000',
       },
@@ -110,17 +147,17 @@ const palettes: Record<ThemeName, Record<Mode, PaletteTokens>> = {
   export const THEMES = {
     grounded: {
       name: 'Grounded',
-      description: 'Natural, earthy tones',
+      description: 'Deep forest, moss, stillness',
       preview: THEME_PREVIEW_COLORS.grounded
     },
     calm: {
       name: 'Calm', 
-      description: 'Peaceful blue tones',
+      description: 'Cream, sage, gentle breath',
       preview: THEME_PREVIEW_COLORS.calm
     },
     uplifting: {
-      name: 'Uplifting',
-      description: 'Energetic purple tones', 
+      name: 'Earth',
+      description: 'Warm sand, clay, embodied', 
       preview: THEME_PREVIEW_COLORS.uplifting
     }
   } as const;
@@ -160,17 +197,15 @@ const palettes: Record<ThemeName, Record<Mode, PaletteTokens>> = {
     const base = palettes[themeName][mode];
     return {
       ...base,
-      // iOS semantic colors (auto Light/Dark/High-Contrast):
-      textPrimary: PlatformColor('label'),
-      textSecondary: PlatformColor('secondaryLabel'),
+      // textPrimary/textSecondary come from palette so they follow app mode (light bg = dark text, dark bg = light text)
       separator: PlatformColor('separator'),
       systemBg: PlatformColor('systemBackground'),
       systemGroupedBg: PlatformColor('systemGroupedBackground'),
-      // Dynamic colors for bottom sheets (system light/dark, independent of theme)
-      bottomSheetBg: PlatformColor('systemBackground'),
-      bottomSheetText: PlatformColor('label'),
-      bottomSheetSecondaryText: PlatformColor('secondaryLabel'),
-      bottomSheetSeparator: PlatformColor('separator'),
+      // Bottom sheets: follow app mode so they match the rest of the app
+      bottomSheetBg: base.surface,
+      bottomSheetText: base.textPrimary,
+      bottomSheetSecondaryText: base.textSecondary,
+      bottomSheetSeparator: base.borderSubtle,
     };
   }, [themeName, mode]);
 
@@ -186,4 +221,46 @@ export function useTheme() {
   const ctx = useContext(ThemeContext);
   if (!ctx) throw new Error('useTheme must be used inside <ThemeProvider>');
   return ctx;
+}
+
+// ============================================================================
+// SYSTEM 2: Wallpaper Content Hook
+// ============================================================================
+export function useWallpaperForeground(): string {
+  return '#FFFFFF';
+}
+
+// ============================================================================
+// SYSTEM 3: Breathing Animation Theme Hook
+// ============================================================================
+export function useBreathingAnimationTokens(): BreathingAnimationTokens {
+  // Import from themeContext to get animation settings
+  const { useApp } = require('../contexts/themeContext');
+  const { settings } = useApp();
+  
+  const themeName: ThemeName = settings.animationTheme || 'calm';
+  
+  // Breathing palettes with natural, earthy tones (flattened structure)
+  const breathingPalettes: Record<ThemeName, BreathingAnimationTokens> = {
+    grounded: {
+      guideOuterStroke: '#8C916C', // Moss
+      guideInnerStroke: '#697254', // Forest
+      mainStroke: '#697254',       // Forest
+      mainFill: '#A7AD89',         // Sage
+    },
+    calm: {
+      guideOuterStroke: '#DBD0C4', // Cream
+      guideInnerStroke: '#A7AD89', // Sage
+      mainStroke: '#A7AD89',       // Sage
+      mainFill: '#DBD0C4',         // Cream
+    },
+    uplifting: {
+      guideOuterStroke: '#B69C85', // Sand
+      guideInnerStroke: '#92735C', // Earth
+      mainStroke: '#92735C',       // Earth
+      mainFill: '#B69C85',         // Sand
+    },
+  };
+  
+  return breathingPalettes[themeName];
 }

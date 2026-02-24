@@ -1,32 +1,32 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { useTheme } from './Theme';
+import { AnimMode } from './Theme';
+import { useApp } from '../contexts/themeContext';
 import BottomSheetCircularButton from './BottomSheetCircularButton';
 
-type AppearanceOption = {
+type AnimationModeOption = {
   label: string;
-  value: 'light' | 'dark' | 'system';
+  value: AnimMode;
   icon: keyof typeof Ionicons.glyphMap;
 };
 
-const APPEARANCE_OPTIONS: AppearanceOption[] = [
+const ANIMATION_MODE_OPTIONS: AnimationModeOption[] = [
   { label: 'Light', value: 'light', icon: 'sunny' },
   { label: 'Dark',  value: 'dark',  icon: 'moon' },
-  { label: 'System', value: 'system', icon: 'phone-portrait' },
 ];
 
-export default function BottomSheetAppearancePicker() {
-  const { appearance, setAppearance } = useTheme();
+export default function BottomSheetAnimationModePicker() {
+  const { settings, setAnimationMode } = useApp();
 
   return (
     <>
-      {APPEARANCE_OPTIONS.map(({ label, value, icon }) => (
+      {ANIMATION_MODE_OPTIONS.map(({ label, value, icon }) => (
         <BottomSheetCircularButton
           key={value}
           label={label}
           icon={icon}
-          isSelected={appearance === value}
-          onPress={() => setAppearance(value)}
+          isSelected={settings.animationMode === value}
+          onPress={() => setAnimationMode(value)}
         />
       ))}
     </>
