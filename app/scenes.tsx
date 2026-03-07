@@ -1,8 +1,8 @@
 import BottomSheetAppearancePicker from "@/components/BottomSheetAppearancePicker";
 import BottomSheetSoundHapticsPicker from "@/components/BottomSheetSoundHapticsPicker";
 import BottomSheetSoundscapePicker from "@/components/BottomSheetSoundscapePicker";
-import BottomSheetCircularButton from "@/components/BottomSheetCircularButton";
-import { useTheme, THEMES } from "@/components/Theme";
+import BottomSheetThemePicker from "@/components/BottomSheetThemePicker";
+import { useTheme } from "@/components/Theme";
 import { useApp } from "@/contexts/themeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -41,7 +41,7 @@ const WALLPAPER_IMAGES = [
 
 export default function ScenesScreen() {
   const { tokens } = useTheme();
-  const { backgroundImage, setBackgroundImage, settings, setAnimationTheme } = useApp();
+  const { backgroundImage, setBackgroundImage } = useApp();
   const router = useRouter();
 
   const styles = StyleSheet.create({
@@ -245,15 +245,7 @@ export default function ScenesScreen() {
         {/* Animation Theme Section */}
         <Text style={styles.sectionTitle}>ANIMATION THEME</Text>
         <View style={styles.appearanceSection}>
-          {Object.entries(THEMES).map(([key, t]) => (
-            <BottomSheetCircularButton
-              key={key}
-              label={t.name}
-              color={t.preview}
-              isSelected={settings.animationTheme === key}
-              onPress={() => setAnimationTheme(key as keyof typeof THEMES)}
-            />
-          ))}
+          <BottomSheetThemePicker />
         </View>
 
         <View style={styles.divider} />

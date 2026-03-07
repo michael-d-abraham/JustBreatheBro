@@ -62,7 +62,6 @@ const EXERCISES_KEY = 'breathing_exercises';
 const CURRENT_EXERCISE_KEY = 'current_exercise';
 const BACKGROUND_IMAGE_KEY = 'background_image';
 const ANIMATION_THEME_KEY = 'animation_theme';
-const ANIMATION_MODE_KEY = 'animation_mode';
 
 // Get all exercises
 export const getExercises = async (): Promise<Exercise[]> => {
@@ -137,15 +136,4 @@ export const getAnimationTheme = async (): Promise<string | null> => {
 // Save animation theme
 export const saveAnimationTheme = async (theme: string): Promise<void> => {
   await AsyncStorage.setItem(ANIMATION_THEME_KEY, theme);
-};
-
-// Get animation mode
-export const getAnimationMode = async (): Promise<string | null> => {
-  const stored = await AsyncStorage.getItem(ANIMATION_MODE_KEY);
-  return stored;
-};
-
-// Save animation mode
-export const saveAnimationMode = async (mode: string): Promise<void> => {
-  await AsyncStorage.setItem(ANIMATION_MODE_KEY, mode);
 };

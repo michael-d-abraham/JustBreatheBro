@@ -3,7 +3,6 @@ import BaseBottomSheet, { BaseBottomSheetHandle } from './BaseBottomSheet';
 import BottomSheetSettingsSection from './BottomSheetSettingsSection';
 import BottomSheetSoundPicker from './BottomSheetSoundPicker';
 import BottomSheetSoundscapePicker from './BottomSheetSoundscapePicker';
-import BottomSheetThemePicker from './BottomSheetThemePicker';
 
 export type SettingsSheetHandle = BaseBottomSheetHandle;
 
@@ -27,10 +26,6 @@ const SettingsSheet = forwardRef<SettingsSheetHandle, SettingsSheetProps>(
 
         <BottomSheetSettingsSection title="Soundscape">
           <BottomSheetSoundscapePicker />
-        </BottomSheetSettingsSection>
-
-        <BottomSheetSettingsSection title="Animation Theme">
-          <BottomSheetThemePicker />
         </BottomSheetSettingsSection>
       </BaseBottomSheet>
     );
