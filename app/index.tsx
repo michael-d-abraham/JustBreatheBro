@@ -10,37 +10,16 @@ import { defaultExercises } from '@/lib/storage';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-const PAGES = [
-  { subtitle: 'Calm', description: 'Find peace and tranquility' },
-  { subtitle: 'Relax', description: 'Quiet your mind and relieve stress' },
-  { subtitle: 'Energize', description: 'Boost your energy and focus' },
-];
 
 export default function Index() {
   const wallpaperFg = useWallpaperForeground();
   const router = useRouter();
   const { currentExercise, updateExercise } = useBreathing();
   const sheets = useBreathingSheets();
-  const scrollViewRef = useRef<ScrollView>(null);
-  const [currentPageIndex, setCurrentPageIndex] = useState(1); // Start at Relax (middle page)
-
-  // Set initial scroll position to middle page (Relax)
-  useEffect(() => {
-    // Small delay to ensure ScrollView is mounted
-    setTimeout(() => {
-      scrollViewRef.current?.scrollTo({
-        x: 1 * SCREEN_WIDTH, // Middle page (index 1)
-        animated: false,
-      });
-    }, 100);
-  }, []);
 
   // Get current exercise or default to Deep Breathing
   const displayExercise = currentExercise || defaultExercises.find(ex => ex.id === "1") || defaultExercises[0];
@@ -66,32 +45,6 @@ export default function Index() {
     router.push('/informationarchive');
   };
 
-  const scrollToPage = (index: number) => {
-    scrollViewRef.current?.scrollTo({
-      x: index * SCREEN_WIDTH,
-      animated: false, // No animation as requested
-    });
-    setCurrentPageIndex(index);
-  };
-
-  const handleScroll = (event: any) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const pageIndex = Math.round(offsetX / SCREEN_WIDTH);
-    setCurrentPageIndex(pageIndex);
-  };
-
-  const handleLeftArrow = () => {
-    if (currentPageIndex > 0) {
-      scrollToPage(currentPageIndex - 1);
-    }
-  };
-
-  const handleRightArrow = () => {
-    if (currentPageIndex < PAGES.length - 1) {
-      scrollToPage(currentPageIndex + 1);
-    }
-  };
-
   const { backgroundImage } = useApp();
 
   const styles = StyleSheet.create({
@@ -106,16 +59,12 @@ export default function Index() {
       right: 0,
       zIndex: 10,
     },
-    scrollableContent: {
+    contentArea: {
       flex: 1,
       marginTop: 60, // Space for fixed header
       marginBottom: 180, // Space for fixed footer
     },
-    scrollView: {
-      flex: 1,
-    },
     pageContainer: {
-      width: SCREEN_WIDTH,
       flex: 1,
       paddingHorizontal: 24,
       alignItems: 'center',
@@ -159,19 +108,6 @@ export default function Index() {
       fontSize: 28,
       fontWeight: '700',
     },
-    arrowButton: {
-      position: 'absolute',
-      width: 48,
-      height: 48,
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 5,
-    },
-    arrowIcon: {
-      color: wallpaperFg,
-      fontSize: 32,
-      opacity: 0.7,
-    },
     techniqueContainer: {
       alignItems: 'center',
     },
@@ -210,54 +146,20 @@ export default function Index() {
           />
         </View>
 
-        {/* Scrollable Middle Content */}
-        <View style={styles.scrollableContent}>
-          <ScrollView
-            ref={scrollViewRef}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onMomentumScrollEnd={handleScroll}
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
-            style={styles.scrollView}
-            contentContainerStyle={{ flexDirection: 'row' }}
-          >
-            {PAGES.map((page, index) => (
-              <View key={index} style={styles.pageContainer}>
-                <Text style={styles.subtitle}>{page.subtitle}</Text>
-                <Text style={styles.description}>{page.description}</Text>
-              </View>
-            ))}
-          </ScrollView>
+        {/* Fixed middle content: Relax only */}
+        <View style={styles.contentArea}>
+          <View style={styles.pageContainer}>
+            <Text style={styles.subtitle}>Relax</Text>
+            <Text style={styles.description}>Quiet your mind and relieve stress</Text>
+          </View>
         </View>
 
         {/* Fixed Footer */}
         <View style={styles.footerContainer}>
           <View style={styles.startButtonContainer}>
-            {/* Left Arrow */}
-            {currentPageIndex > 0 && (
-              <Pressable 
-                onPress={handleLeftArrow} 
-                style={[styles.arrowButton, { left: 20 }]}
-          >
-                <Text style={styles.arrowIcon}>‹</Text>
-          </Pressable>
-            )}
-            
             <Pressable onPress={handleStartPress} style={styles.startButton}>
               <Text style={styles.startButtonText}>Start</Text>
             </Pressable>
-            
-            {/* Right Arrow */}
-            {currentPageIndex < PAGES.length - 1 && (
-              <Pressable 
-                onPress={handleRightArrow} 
-                style={[styles.arrowButton, { right: 20 }]}
-              >
-                <Text style={styles.arrowIcon}>›</Text>
-              </Pressable>
-            )}
             </View>
             
             {/* Technique Section */}

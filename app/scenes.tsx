@@ -140,28 +140,10 @@ export default function ScenesScreen() {
       marginTop: 12,
       paddingHorizontal: 32,
     },
-    fullExperienceButton: {
-      backgroundColor: tokens.bottomSheetText,
-      paddingVertical: 16,
-      paddingHorizontal: 32,
-      borderRadius: 12,
-      alignItems: "center",
-      marginTop: 20,
-      marginBottom: 8,
-    },
-    fullExperienceButtonText: {
-      color: tokens.bottomSheetBg,
-      fontSize: 17,
-      fontWeight: "600",
-    },
   });
 
   const handleScenePress = async (filename: string) => {
     await setBackgroundImage(filename);
-  };
-
-  const handleFullExperience = () => {
-    router.push(`/wallpaper?from=scenes&selected=${backgroundImage}`);
   };
 
   const handleClosePress = () => {
@@ -231,14 +213,6 @@ export default function ScenesScreen() {
             );
           })}
         </ScrollView>
-
-        {/* Full Experience Button */}
-        <Pressable
-          style={styles.fullExperienceButton}
-          onPress={handleFullExperience}
-        >
-          <Text style={styles.fullExperienceButtonText}>Full Experience</Text>
-        </Pressable>
 
         <View style={styles.divider} />
 
