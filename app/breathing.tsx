@@ -7,7 +7,6 @@ import { useBreathingAnimation } from "@/hooks/useBreathingAnimation";
 import { useBreathingAudio } from "@/hooks/useBreathingAudio";
 import { useBreathingCycle } from "@/hooks/useBreathingCycle";
 import { useBreathingHaptics } from "@/hooks/useBreathingHaptics";
-import { defaultExercises } from "@/lib/storage";
 import { trackBreathingEntered, trackBreathingExited, trackBreathingStarted } from "@/utils/sentryTracking";
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -51,9 +50,6 @@ export default function BreathingPage() {
   
   const exercise = currentExercise || { inhale: 4, hold1: 4, exhale: 4, hold2: 4 };
   const { inhale, hold1, exhale, hold2 } = exercise;
-  
-  // Get Deep Breathing exercise for info sheet (id: "1")
-  const deepBreathingExercise = defaultExercises.find(ex => ex.id === "1") || defaultExercises[0];
 
   // Initialize custom hooks
   const { radius, strokeWidth, animateInhale, animateExhale, pause: pauseAnimation, resume: resumeAnimation, reset } = useBreathingAnimation();
@@ -610,7 +606,7 @@ export default function BreathingPage() {
           {/* Bottom Sheet Modals */}
           <ExerciseDetailSheet 
             ref={sheetRef} 
-            exercise={deepBreathingExercise}
+            exercise={currentExercise}
             onChange={handleSheetChange}
             onDismiss={handleSheetDismiss}
           />
