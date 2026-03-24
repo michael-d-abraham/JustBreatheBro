@@ -39,12 +39,10 @@
     "react-native-svg": "^15.14.0",
     "react-native-web": "~0.21.0",
     "react-native-wheel-picker-expo": "^0.5.4",
-    "react-native-worklets": "0.5.1",
-    "suncalc": "^1.9.0"
+    "react-native-worklets": "0.5.1"
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
-    "@types/suncalc": "^1.9.2",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
     "typescript": "~5.9.2"

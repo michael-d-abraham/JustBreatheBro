@@ -2,12 +2,12 @@ import CustomSlider from "@/components/Slider";
 import { useTheme } from "@/components/Theme";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-type PatternStep = {
-  count: number;
+type PhasePatternConfig = {
+  durationMs: number;
   intensity: Haptics.ImpactFeedbackStyle;
   interval: number;
 };
@@ -17,15 +17,35 @@ export default function HapticPlayground() {
   const [continuousVibration, setContinuousVibration] = useState(false);
   const [customInterval, setCustomInterval] = useState(100);
   const [customIntensity, setCustomIntensity] = useState<Haptics.ImpactFeedbackStyle>(Haptics.ImpactFeedbackStyle.Medium);
-  const [patternSteps, setPatternSteps] = useState<PatternStep[]>([
-    { count: 5, intensity: Haptics.ImpactFeedbackStyle.Soft, interval: 140 },
-    { count: 3, intensity: Haptics.ImpactFeedbackStyle.Soft, interval: 100 },
-    { count: 2, intensity: Haptics.ImpactFeedbackStyle.Soft, interval: 80 },
-  ]);
+  const [inhalePattern, setInhalePattern] = useState<PhasePatternConfig>({
+    durationMs: 4000,
+    intensity: Haptics.ImpactFeedbackStyle.Light,
+    interval: 200,
+  });
+  const [holdPattern, setHoldPattern] = useState<PhasePatternConfig>({
+    durationMs: 4000,
+    intensity: Haptics.ImpactFeedbackStyle.Soft,
+    interval: 80,
+  });
+  const [exhalePattern, setExhalePattern] = useState<PhasePatternConfig>({
+    durationMs: 4000,
+    intensity: Haptics.ImpactFeedbackStyle.Light,
+    interval: 170,
+  });
+  const [transitionEnabled, setTransitionEnabled] = useState(false);
+  const [transitionIntensity, setTransitionIntensity] = useState<Haptics.ImpactFeedbackStyle>(
+    Haptics.ImpactFeedbackStyle.Heavy
+  );
   const [isPlayingDynamicPattern, setIsPlayingDynamicPattern] = useState(false);
+  const [isPlayingPattern7, setIsPlayingPattern7] = useState(false);
+  const [isPlayingPattern8, setIsPlayingPattern8] = useState(false);
+  const [isPlayingPattern9, setIsPlayingPattern9] = useState(false);
+  const [previewSection, setPreviewSection] = useState<"inhale" | "hold" | "exhale" | "transition" | null>(null);
   const vibrationIntervalRef = useRef<number | null>(null);
   const patternTimeoutRef = useRef<number | null>(null);
   const dynamicPatternCancelRef = useRef<boolean>(false);
+  const breathingLoopCancelRef = useRef<boolean>(false);
+  const previewCancelRef = useRef<boolean>(false);
 
   // Impact Feedback Styles
   const triggerImpact = async (style: Haptics.ImpactFeedbackStyle) => {
@@ -65,24 +85,35 @@ export default function HapticPlayground() {
     setContinuousVibration(false);
   };
 
-  // Dynamic Pattern Player - plays sequence with varying intervals
+  // Dynamic Pattern Builder Player - inhale -> hold -> exhale -> hold
   const playDynamicPattern = async () => {
     stopAllHaptics();
     setIsPlayingDynamicPattern(true);
     dynamicPatternCancelRef.current = false;
-    
-    for (const step of patternSteps) {
+
+    const phases: PhasePatternConfig[] = [
+      inhalePattern,
+      holdPattern,
+      exhalePattern,
+      holdPattern,
+    ];
+
+    for (let phaseIndex = 0; phaseIndex < phases.length; phaseIndex++) {
       if (dynamicPatternCancelRef.current) break;
-      
-      for (let i = 0; i < step.count; i++) {
-        if (dynamicPatternCancelRef.current) break;
-        
-        await Haptics.impactAsync(step.intensity);
-        
-        // Wait for the interval (except after the last haptic in the sequence)
-        if (i < step.count - 1 || step !== patternSteps[patternSteps.length - 1]) {
-          await new Promise(resolve => setTimeout(resolve, step.interval));
-        }
+      const phase = phases[phaseIndex];
+      const phaseStart = Date.now();
+
+      while (!dynamicPatternCancelRef.current && Date.now() - phaseStart < phase.durationMs) {
+        await Haptics.impactAsync(phase.intensity);
+        const elapsed = Date.now() - phaseStart;
+        const remaining = phase.durationMs - elapsed;
+        if (remaining <= 0) break;
+        await new Promise((resolve) => setTimeout(resolve, Math.min(phase.interval, remaining)));
+      }
+
+      const isLastPhase = phaseIndex === phases.length - 1;
+      if (!dynamicPatternCancelRef.current && transitionEnabled && !isLastPhase) {
+        await Haptics.impactAsync(transitionIntensity);
       }
     }
     
@@ -94,22 +125,215 @@ export default function HapticPlayground() {
     setIsPlayingDynamicPattern(false);
   };
 
-  // Add a new step to the pattern
-  const addPatternStep = () => {
-    setPatternSteps([...patternSteps, { count: 1, intensity: Haptics.ImpactFeedbackStyle.Medium, interval: 100 }]);
+  const playPhasePreview = async (
+    section: "inhale" | "hold" | "exhale",
+    phase: PhasePatternConfig
+  ) => {
+    stopAllHaptics();
+    previewCancelRef.current = false;
+    setPreviewSection(section);
+    const phaseStart = Date.now();
+
+    while (!previewCancelRef.current && Date.now() - phaseStart < phase.durationMs) {
+      await Haptics.impactAsync(phase.intensity);
+      const elapsed = Date.now() - phaseStart;
+      const remaining = phase.durationMs - elapsed;
+      if (remaining <= 0) {
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, Math.min(phase.interval, remaining)));
+    }
+
+    setPreviewSection((current) => (current === section ? null : current));
   };
 
-  // Remove a step from the pattern
-  const removePatternStep = (index: number) => {
-    setPatternSteps(patternSteps.filter((_, i) => i !== index));
+  const playTransitionPreview = async () => {
+    stopAllHaptics();
+    previewCancelRef.current = false;
+    setPreviewSection("transition");
+    await Haptics.impactAsync(transitionIntensity);
+    if (!previewCancelRef.current) {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    }
+    setPreviewSection((current) => (current === "transition" ? null : current));
   };
 
-  // Update a step in the pattern
-  const updatePatternStep = (index: number, updates: Partial<PatternStep>) => {
-    const newSteps = [...patternSteps];
-    newSteps[index] = { ...newSteps[index], ...updates };
-    setPatternSteps(newSteps);
+  const stopPreview = () => {
+    previewCancelRef.current = true;
+    setPreviewSection(null);
   };
+
+  const runPhaseFixed = async ({
+    durationMs,
+    intensity,
+    intervalMs,
+  }: {
+    durationMs: number;
+    intensity: Haptics.ImpactFeedbackStyle;
+    intervalMs: number;
+  }) => {
+    let elapsed = 0;
+    while (!breathingLoopCancelRef.current && elapsed < durationMs) {
+      await Haptics.impactAsync(intensity);
+      const waitMs = Math.min(intervalMs, durationMs - elapsed);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+      elapsed += waitMs;
+    }
+  };
+
+
+  const playPattern7 = async () => {
+    stopAllHaptics();
+    breathingLoopCancelRef.current = false;
+    setIsPlayingPattern7(true);
+
+    while (!breathingLoopCancelRef.current) {
+      await runPhaseFixed({
+        durationMs: 4000,
+        intensity: Haptics.ImpactFeedbackStyle.Light,
+        intervalMs: 400,
+      });
+      if (breathingLoopCancelRef.current) break;
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+      await runPhaseFixed({
+        durationMs: 4000,
+        intensity: Haptics.ImpactFeedbackStyle.Soft,
+        intervalMs: 400,
+      });
+      if (breathingLoopCancelRef.current) break;
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+      await runPhaseFixed({
+        durationMs: 4000,
+        intensity: Haptics.ImpactFeedbackStyle.Light,
+        intervalMs: 400,
+      });
+      if (breathingLoopCancelRef.current) break;
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+      await runPhaseFixed({
+        durationMs: 4000,
+        intensity: Haptics.ImpactFeedbackStyle.Soft,
+        intervalMs: 400,
+      });
+      if (breathingLoopCancelRef.current) break;
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    }
+
+    setIsPlayingPattern7(false);
+  };
+
+  const stopPattern7 = () => {
+    breathingLoopCancelRef.current = true;
+    setIsPlayingPattern7(false);
+  };
+
+  const playPattern8 = async () => {
+    stopAllHaptics();
+    breathingLoopCancelRef.current = false;
+    setIsPlayingPattern8(true);
+
+    while (!breathingLoopCancelRef.current) {
+      await runPhaseFixed({
+        durationMs: 4000,
+        intensity: Haptics.ImpactFeedbackStyle.Soft,
+        intervalMs: 800,
+      });
+      if (breathingLoopCancelRef.current) break;
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+      await runPhaseFixed({
+        durationMs: 4000,
+        intensity: Haptics.ImpactFeedbackStyle.Soft,
+        intervalMs: 800,
+      });
+      if (breathingLoopCancelRef.current) break;
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+      await runPhaseFixed({
+        durationMs: 4000,
+        intensity: Haptics.ImpactFeedbackStyle.Soft,
+        intervalMs: 800,
+      });
+      if (breathingLoopCancelRef.current) break;
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+      await runPhaseFixed({
+        durationMs: 4000,
+        intensity: Haptics.ImpactFeedbackStyle.Soft,
+        intervalMs: 800,
+      });
+      if (breathingLoopCancelRef.current) break;
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    }
+
+    setIsPlayingPattern8(false);
+  };
+
+  const stopPattern8 = () => {
+    breathingLoopCancelRef.current = true;
+    setIsPlayingPattern8(false);
+  };
+
+  const playPattern9 = async () => {
+    stopAllHaptics();
+    breathingLoopCancelRef.current = false;
+    setIsPlayingPattern9(true);
+
+    while (!breathingLoopCancelRef.current) {
+      await runPhaseFixed({
+        durationMs: 4000,
+        intensity: Haptics.ImpactFeedbackStyle.Light,
+        intervalMs: 800,
+      });
+      if (breathingLoopCancelRef.current) break;
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+      await runPhaseFixed({
+        durationMs: 4000,
+        intensity: Haptics.ImpactFeedbackStyle.Soft,
+        intervalMs: 800,
+      });
+      if (breathingLoopCancelRef.current) break;
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+      await runPhaseFixed({
+        durationMs: 4000,
+        intensity: Haptics.ImpactFeedbackStyle.Light,
+        intervalMs: 800,
+      });
+      if (breathingLoopCancelRef.current) break;
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+      await runPhaseFixed({
+        durationMs: 4000,
+        intensity: Haptics.ImpactFeedbackStyle.Soft,
+        intervalMs: 800,
+      });
+      if (breathingLoopCancelRef.current) break;
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    }
+
+    setIsPlayingPattern9(false);
+  };
+
+  const stopPattern9 = () => {
+    breathingLoopCancelRef.current = true;
+    setIsPlayingPattern9(false);
+  };
+
+
+  const getIntensityLabel = (intensity: Haptics.ImpactFeedbackStyle) =>
+    intensity === Haptics.ImpactFeedbackStyle.Light
+      ? "Light"
+      : intensity === Haptics.ImpactFeedbackStyle.Soft
+      ? "Soft"
+      : intensity === Haptics.ImpactFeedbackStyle.Medium
+      ? "Medium"
+      : intensity === Haptics.ImpactFeedbackStyle.Heavy
+      ? "Heavy"
+      : "Rigid";
 
   // Stop all haptics - clears intervals and timeouts
   const stopAllHaptics = () => {
@@ -118,6 +342,10 @@ export default function HapticPlayground() {
     
     // Stop dynamic pattern
     stopDynamicPattern();
+    stopPattern7();
+    stopPattern8();
+    stopPattern9();
+    stopPreview();
     
     // Clear any pending pattern timeouts
     if (patternTimeoutRef.current !== null) {
@@ -125,6 +353,12 @@ export default function HapticPlayground() {
       patternTimeoutRef.current = null;
     }
   };
+
+  useEffect(() => {
+    return () => {
+      stopAllHaptics();
+    };
+  }, []);
 
   // Breathing-like pattern (gradual intensity)
   const triggerBreathingPattern = async () => {
@@ -620,41 +854,258 @@ export default function HapticPlayground() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Dynamic Pattern Builder</Text>
           <Text style={styles.controlLabel}>
-            Create sequences with varying intervals and intensities
+            Configure inhale, hold, and exhale. Play runs inhale - hold - exhale - hold.
           </Text>
-          
-          {/* Pattern Steps */}
-          {patternSteps.map((step, index) => (
-            <View key={index} style={styles.patternStepContainer}>
-              <View style={styles.patternStepHeader}>
-                <Text style={styles.patternStepLabel}>Step {index + 1}</Text>
-                {patternSteps.length > 1 && (
-                  <Pressable
-                    style={styles.removeStepButton}
-                    onPress={() => removePatternStep(index)}
-                  >
-                    <Text style={styles.removeStepButtonText}>×</Text>
-                  </Pressable>
-                )}
+
+          {/* Inhale */}
+          <View style={styles.patternStepContainer}>
+            <View style={styles.patternStepHeader}>
+              <Text style={styles.patternStepLabel}>Inhale</Text>
+              <Pressable
+                style={[styles.presetButton, previewSection === "inhale" && styles.intensityButtonActive]}
+                onPress={
+                  previewSection === "inhale"
+                    ? stopPreview
+                    : () => playPhasePreview("inhale", inhalePattern)
+                }
+              >
+                <Text style={styles.presetButtonText}>
+                  {previewSection === "inhale" ? "Stop Preview" : "Preview"}
+                </Text>
+              </Pressable>
+            </View>
+            <View style={styles.patternStepControls}>
+              <View style={styles.patternControlGroup}>
+                <Text style={styles.patternControlLabel}>Duration: {inhalePattern.durationMs}ms</Text>
+                <CustomSlider
+                  label=""
+                  value={inhalePattern.durationMs}
+                  min={500}
+                  max={10000}
+                  step={100}
+                  onValueChange={(value) => setInhalePattern({ ...inhalePattern, durationMs: value })}
+                  unit="ms"
+                />
               </View>
-              
-              <View style={styles.patternStepControls}>
-                {/* Count */}
-                <View style={styles.patternControlGroup}>
-                  <Text style={styles.patternControlLabel}>Count:</Text>
-                  <CustomSlider
-                    label=""
-                    value={step.count}
-                    min={1}
-                    max={20}
-                    step={1}
-                    onValueChange={(value) => updatePatternStep(index, { count: value })}
-                    unit="x"
-                  />
-                </View>
-                
-                {/* Intensity */}
-                <Text style={styles.patternControlLabel}>Intensity:</Text>
+              <View style={styles.patternControlGroup}>
+                <Text style={styles.patternControlLabel}>Interval: {inhalePattern.interval}ms</Text>
+                <CustomSlider
+                  label=""
+                  value={inhalePattern.interval}
+                  min={20}
+                  max={1000}
+                  step={10}
+                  onValueChange={(value) => setInhalePattern({ ...inhalePattern, interval: value })}
+                  unit="ms"
+                />
+              </View>
+              <Text style={styles.patternControlLabel}>Intensity: {getIntensityLabel(inhalePattern.intensity)}</Text>
+              <View style={styles.intensityRow}>
+                {[
+                  Haptics.ImpactFeedbackStyle.Light,
+                  Haptics.ImpactFeedbackStyle.Soft,
+                  Haptics.ImpactFeedbackStyle.Medium,
+                  Haptics.ImpactFeedbackStyle.Heavy,
+                  Haptics.ImpactFeedbackStyle.Rigid,
+                ].map((intensity) => (
+                  <Pressable
+                    key={`inhale-${intensity}`}
+                    style={[
+                      styles.intensityButton,
+                      inhalePattern.intensity === intensity && styles.intensityButtonActive,
+                    ]}
+                    onPress={() => setInhalePattern({ ...inhalePattern, intensity })}
+                  >
+                    <Text
+                      style={[
+                        styles.intensityButtonText,
+                        inhalePattern.intensity === intensity && styles.intensityButtonTextActive,
+                      ]}
+                    >
+                      {getIntensityLabel(intensity)}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          </View>
+
+          {/* Hold */}
+          <View style={styles.patternStepContainer}>
+            <View style={styles.patternStepHeader}>
+              <Text style={styles.patternStepLabel}>Hold (used for both holds)</Text>
+              <Pressable
+                style={[styles.presetButton, previewSection === "hold" && styles.intensityButtonActive]}
+                onPress={
+                  previewSection === "hold"
+                    ? stopPreview
+                    : () => playPhasePreview("hold", holdPattern)
+                }
+              >
+                <Text style={styles.presetButtonText}>
+                  {previewSection === "hold" ? "Stop Preview" : "Preview"}
+                </Text>
+              </Pressable>
+            </View>
+            <View style={styles.patternStepControls}>
+              <View style={styles.patternControlGroup}>
+                <Text style={styles.patternControlLabel}>Duration: {holdPattern.durationMs}ms</Text>
+                <CustomSlider
+                  label=""
+                  value={holdPattern.durationMs}
+                  min={500}
+                  max={10000}
+                  step={100}
+                  onValueChange={(value) => setHoldPattern({ ...holdPattern, durationMs: value })}
+                  unit="ms"
+                />
+              </View>
+              <View style={styles.patternControlGroup}>
+                <Text style={styles.patternControlLabel}>Interval: {holdPattern.interval}ms</Text>
+                <CustomSlider
+                  label=""
+                  value={holdPattern.interval}
+                  min={20}
+                  max={1000}
+                  step={10}
+                  onValueChange={(value) => setHoldPattern({ ...holdPattern, interval: value })}
+                  unit="ms"
+                />
+              </View>
+              <Text style={styles.patternControlLabel}>Intensity: {getIntensityLabel(holdPattern.intensity)}</Text>
+              <View style={styles.intensityRow}>
+                {[
+                  Haptics.ImpactFeedbackStyle.Light,
+                  Haptics.ImpactFeedbackStyle.Soft,
+                  Haptics.ImpactFeedbackStyle.Medium,
+                  Haptics.ImpactFeedbackStyle.Heavy,
+                  Haptics.ImpactFeedbackStyle.Rigid,
+                ].map((intensity) => (
+                  <Pressable
+                    key={`hold-${intensity}`}
+                    style={[
+                      styles.intensityButton,
+                      holdPattern.intensity === intensity && styles.intensityButtonActive,
+                    ]}
+                    onPress={() => setHoldPattern({ ...holdPattern, intensity })}
+                  >
+                    <Text
+                      style={[
+                        styles.intensityButtonText,
+                        holdPattern.intensity === intensity && styles.intensityButtonTextActive,
+                      ]}
+                    >
+                      {getIntensityLabel(intensity)}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          </View>
+
+          {/* Exhale */}
+          <View style={styles.patternStepContainer}>
+            <View style={styles.patternStepHeader}>
+              <Text style={styles.patternStepLabel}>Exhale</Text>
+              <Pressable
+                style={[styles.presetButton, previewSection === "exhale" && styles.intensityButtonActive]}
+                onPress={
+                  previewSection === "exhale"
+                    ? stopPreview
+                    : () => playPhasePreview("exhale", exhalePattern)
+                }
+              >
+                <Text style={styles.presetButtonText}>
+                  {previewSection === "exhale" ? "Stop Preview" : "Preview"}
+                </Text>
+              </Pressable>
+            </View>
+            <View style={styles.patternStepControls}>
+              <View style={styles.patternControlGroup}>
+                <Text style={styles.patternControlLabel}>Duration: {exhalePattern.durationMs}ms</Text>
+                <CustomSlider
+                  label=""
+                  value={exhalePattern.durationMs}
+                  min={500}
+                  max={10000}
+                  step={100}
+                  onValueChange={(value) => setExhalePattern({ ...exhalePattern, durationMs: value })}
+                  unit="ms"
+                />
+              </View>
+              <View style={styles.patternControlGroup}>
+                <Text style={styles.patternControlLabel}>Interval: {exhalePattern.interval}ms</Text>
+                <CustomSlider
+                  label=""
+                  value={exhalePattern.interval}
+                  min={20}
+                  max={1000}
+                  step={10}
+                  onValueChange={(value) => setExhalePattern({ ...exhalePattern, interval: value })}
+                  unit="ms"
+                />
+              </View>
+              <Text style={styles.patternControlLabel}>Intensity: {getIntensityLabel(exhalePattern.intensity)}</Text>
+              <View style={styles.intensityRow}>
+                {[
+                  Haptics.ImpactFeedbackStyle.Light,
+                  Haptics.ImpactFeedbackStyle.Soft,
+                  Haptics.ImpactFeedbackStyle.Medium,
+                  Haptics.ImpactFeedbackStyle.Heavy,
+                  Haptics.ImpactFeedbackStyle.Rigid,
+                ].map((intensity) => (
+                  <Pressable
+                    key={`exhale-${intensity}`}
+                    style={[
+                      styles.intensityButton,
+                      exhalePattern.intensity === intensity && styles.intensityButtonActive,
+                    ]}
+                    onPress={() => setExhalePattern({ ...exhalePattern, intensity })}
+                  >
+                    <Text
+                      style={[
+                        styles.intensityButtonText,
+                        exhalePattern.intensity === intensity && styles.intensityButtonTextActive,
+                      ]}
+                    >
+                      {getIntensityLabel(intensity)}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          </View>
+
+          {/* Optional Transition */}
+          <View style={styles.patternStepContainer}>
+            <View style={styles.patternStepHeader}>
+              <Text style={styles.patternStepLabel}>Transition (Optional)</Text>
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                <Pressable
+                  style={[styles.presetButton, transitionEnabled && styles.intensityButtonActive]}
+                  onPress={() => setTransitionEnabled((prev) => !prev)}
+                >
+                  <Text style={styles.presetButtonText}>
+                    {transitionEnabled ? "Enabled" : "Disabled"}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.presetButton, previewSection === "transition" && styles.intensityButtonActive]}
+                  onPress={
+                    previewSection === "transition" ? stopPreview : playTransitionPreview
+                  }
+                >
+                  <Text style={styles.presetButtonText}>
+                    {previewSection === "transition" ? "Stop" : "Preview"}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+            {transitionEnabled && (
+              <>
+                <Text style={styles.patternControlLabel}>
+                  Transition Intensity: {getIntensityLabel(transitionIntensity)}
+                </Text>
                 <View style={styles.intensityRow}>
                   {[
                     Haptics.ImpactFeedbackStyle.Light,
@@ -664,50 +1115,27 @@ export default function HapticPlayground() {
                     Haptics.ImpactFeedbackStyle.Rigid,
                   ].map((intensity) => (
                     <Pressable
-                      key={intensity}
+                      key={`transition-${intensity}`}
                       style={[
                         styles.intensityButton,
-                        step.intensity === intensity && styles.intensityButtonActive
+                        transitionIntensity === intensity && styles.intensityButtonActive,
                       ]}
-                      onPress={() => updatePatternStep(index, { intensity })}
+                      onPress={() => setTransitionIntensity(intensity)}
                     >
-                      <Text style={[
-                        styles.intensityButtonText,
-                        step.intensity === intensity && styles.intensityButtonTextActive
-                      ]}>
-                        {intensity === Haptics.ImpactFeedbackStyle.Light ? 'Light' :
-                         intensity === Haptics.ImpactFeedbackStyle.Soft ? 'Soft' :
-                         intensity === Haptics.ImpactFeedbackStyle.Medium ? 'Medium' :
-                         intensity === Haptics.ImpactFeedbackStyle.Heavy ? 'Heavy' : 'Rigid'}
+                      <Text
+                        style={[
+                          styles.intensityButtonText,
+                          transitionIntensity === intensity && styles.intensityButtonTextActive,
+                        ]}
+                      >
+                        {getIntensityLabel(intensity)}
                       </Text>
                     </Pressable>
                   ))}
                 </View>
-                
-                {/* Interval */}
-                <View style={styles.patternControlGroup}>
-                  <Text style={styles.patternControlLabel}>Interval:</Text>
-                  <CustomSlider
-                    label=""
-                    value={step.interval}
-                    min={10}
-                    max={1000}
-                    step={10}
-                    onValueChange={(value) => updatePatternStep(index, { interval: value })}
-                    unit="ms"
-                  />
-                </View>
-              </View>
-            </View>
-          ))}
-          
-          {/* Add Step Button */}
-          <Pressable
-            style={styles.addStepButton}
-            onPress={addPatternStep}
-          >
-            <Text style={styles.addStepButtonText}>+ Add Step</Text>
-          </Pressable>
+              </>
+            )}
+          </View>
           
           {/* Play/Stop Dynamic Pattern */}
           <Pressable
@@ -715,10 +1143,71 @@ export default function HapticPlayground() {
             onPress={isPlayingDynamicPattern ? stopDynamicPattern : playDynamicPattern}
           >
             <Text style={styles.buttonText}>
-              {isPlayingDynamicPattern ? 'Stop Pattern' : 'Play Dynamic Pattern'}
+              {isPlayingDynamicPattern ? 'Stop Pattern' : 'Play Inhale-Hold-Exhale-Hold'}
             </Text>
           </Pressable>
         </View>
+
+        {/* Pattern 7 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Pattern 7</Text>
+          <Text style={styles.controlLabel}>
+            4s inhale: light 400ms{"\n"}
+            4s hold: soft 400ms{"\n"}
+            4s exhale: light 400ms{"\n"}
+            4s hold: soft 400ms{"\n"}
+            transition: heavy
+          </Text>
+          <Pressable
+            style={[styles.button, isPlayingPattern7 && styles.buttonActive]}
+            onPress={isPlayingPattern7 ? stopPattern7 : playPattern7}
+          >
+            <Text style={styles.buttonText}>
+              {isPlayingPattern7 ? "Stop Pattern 7" : "Start Pattern 7"}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Pattern 8 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Pattern 8</Text>
+          <Text style={styles.controlLabel}>
+            4s inhale: soft 800ms{"\n"}
+            4s hold: soft 800ms{"\n"}
+            4s exhale: soft 800ms{"\n"}
+            4s hold: soft 800ms{"\n"}
+            transition: heavy
+          </Text>
+          <Pressable
+            style={[styles.button, isPlayingPattern8 && styles.buttonActive]}
+            onPress={isPlayingPattern8 ? stopPattern8 : playPattern8}
+          >
+            <Text style={styles.buttonText}>
+              {isPlayingPattern8 ? "Stop Pattern 8" : "Start Pattern 8"}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Pattern 9 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Pattern 9</Text>
+          <Text style={styles.controlLabel}>
+            4s inhale: light 800ms{"\n"}
+            4s hold: soft 800ms{"\n"}
+            4s exhale: light 800ms{"\n"}
+            4s hold: soft 800ms{"\n"}
+            transition: heavy
+          </Text>
+          <Pressable
+            style={[styles.button, isPlayingPattern9 && styles.buttonActive]}
+            onPress={isPlayingPattern9 ? stopPattern9 : playPattern9}
+          >
+            <Text style={styles.buttonText}>
+              {isPlayingPattern9 ? "Stop Pattern 9" : "Start Pattern 9"}
+            </Text>
+          </Pressable>
+        </View>
+
 
         {/* Breathing Patterns */}
         <View style={styles.section}>
