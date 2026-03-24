@@ -37,9 +37,9 @@ export default function HapticPlayground() {
     Haptics.ImpactFeedbackStyle.Heavy
   );
   const [isPlayingDynamicPattern, setIsPlayingDynamicPattern] = useState(false);
-  const [isPlayingPattern7, setIsPlayingPattern7] = useState(false);
-  const [isPlayingPattern8, setIsPlayingPattern8] = useState(false);
   const [isPlayingPattern9, setIsPlayingPattern9] = useState(false);
+  const [isPlayingPattern10, setIsPlayingPattern10] = useState(false);
+  const [isPlayingPattern11, setIsPlayingPattern11] = useState(false);
   const [previewSection, setPreviewSection] = useState<"inhale" | "hold" | "exhale" | "transition" | null>(null);
   const vibrationIntervalRef = useRef<number | null>(null);
   const patternTimeoutRef = useRef<number | null>(null);
@@ -181,100 +181,36 @@ export default function HapticPlayground() {
     }
   };
 
-
-  const playPattern7 = async () => {
-    stopAllHaptics();
-    breathingLoopCancelRef.current = false;
-    setIsPlayingPattern7(true);
-
+  const waitUntil = async (targetTimeMs: number) => {
     while (!breathingLoopCancelRef.current) {
-      await runPhaseFixed({
-        durationMs: 4000,
-        intensity: Haptics.ImpactFeedbackStyle.Light,
-        intervalMs: 400,
-      });
-      if (breathingLoopCancelRef.current) break;
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-
-      await runPhaseFixed({
-        durationMs: 4000,
-        intensity: Haptics.ImpactFeedbackStyle.Soft,
-        intervalMs: 400,
-      });
-      if (breathingLoopCancelRef.current) break;
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-
-      await runPhaseFixed({
-        durationMs: 4000,
-        intensity: Haptics.ImpactFeedbackStyle.Light,
-        intervalMs: 400,
-      });
-      if (breathingLoopCancelRef.current) break;
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-
-      await runPhaseFixed({
-        durationMs: 4000,
-        intensity: Haptics.ImpactFeedbackStyle.Soft,
-        intervalMs: 400,
-      });
-      if (breathingLoopCancelRef.current) break;
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      const remaining = targetTimeMs - Date.now();
+      if (remaining <= 0) {
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, Math.min(remaining, 20)));
     }
-
-    setIsPlayingPattern7(false);
   };
 
-  const stopPattern7 = () => {
-    breathingLoopCancelRef.current = true;
-    setIsPlayingPattern7(false);
-  };
-
-  const playPattern8 = async () => {
-    stopAllHaptics();
-    breathingLoopCancelRef.current = false;
-    setIsPlayingPattern8(true);
-
-    while (!breathingLoopCancelRef.current) {
-      await runPhaseFixed({
-        durationMs: 4000,
-        intensity: Haptics.ImpactFeedbackStyle.Soft,
-        intervalMs: 800,
-      });
+  const runPhaseAligned = async ({
+    phaseStartMs,
+    durationMs,
+    intensity,
+    intervalMs,
+  }: {
+    phaseStartMs: number;
+    durationMs: number;
+    intensity: Haptics.ImpactFeedbackStyle;
+    intervalMs: number;
+  }) => {
+    const phaseEndMs = phaseStartMs + durationMs;
+    for (let hitAt = phaseStartMs; hitAt < phaseEndMs && !breathingLoopCancelRef.current; hitAt += intervalMs) {
+      await waitUntil(hitAt);
       if (breathingLoopCancelRef.current) break;
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-
-      await runPhaseFixed({
-        durationMs: 4000,
-        intensity: Haptics.ImpactFeedbackStyle.Soft,
-        intervalMs: 800,
-      });
-      if (breathingLoopCancelRef.current) break;
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-
-      await runPhaseFixed({
-        durationMs: 4000,
-        intensity: Haptics.ImpactFeedbackStyle.Soft,
-        intervalMs: 800,
-      });
-      if (breathingLoopCancelRef.current) break;
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-
-      await runPhaseFixed({
-        durationMs: 4000,
-        intensity: Haptics.ImpactFeedbackStyle.Soft,
-        intervalMs: 800,
-      });
-      if (breathingLoopCancelRef.current) break;
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      await Haptics.impactAsync(intensity);
     }
-
-    setIsPlayingPattern8(false);
+    await waitUntil(phaseEndMs);
   };
 
-  const stopPattern8 = () => {
-    breathingLoopCancelRef.current = true;
-    setIsPlayingPattern8(false);
-  };
 
   const playPattern9 = async () => {
     stopAllHaptics();
@@ -323,6 +259,131 @@ export default function HapticPlayground() {
     setIsPlayingPattern9(false);
   };
 
+  const playPattern10 = async () => {
+    stopAllHaptics();
+    breathingLoopCancelRef.current = false;
+    setIsPlayingPattern10(true);
+
+    while (!breathingLoopCancelRef.current) {
+      const cycleStartMs = Date.now();
+
+      // Inhale 0s -> 4s (Light 800ms)
+      await runPhaseAligned({
+        phaseStartMs: cycleStartMs,
+        durationMs: 4000,
+        intensity: Haptics.ImpactFeedbackStyle.Medium,
+        intervalMs: 800,
+      });
+      if (breathingLoopCancelRef.current) break;
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+      // Hold 4s -> 8s (Soft 200ms, 4x pulse rate)
+      await runPhaseAligned({
+        phaseStartMs: cycleStartMs + 4000,
+        durationMs: 4000,
+        intensity: Haptics.ImpactFeedbackStyle.Soft,
+        intervalMs: 200,
+      });
+      if (breathingLoopCancelRef.current) break;
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+      // Exhale 8s -> 12s (Light 800ms)
+      await runPhaseAligned({
+        phaseStartMs: cycleStartMs + 8000,
+        durationMs: 4000,
+        intensity: Haptics.ImpactFeedbackStyle.Medium,
+        intervalMs: 800,
+      });
+      if (breathingLoopCancelRef.current) break;
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+      // Hold 12s -> 16s (Soft 200ms, 4x pulse rate)
+      await runPhaseAligned({
+        phaseStartMs: cycleStartMs + 12000,
+        durationMs: 4000,
+        intensity: Haptics.ImpactFeedbackStyle.Soft,
+        intervalMs: 200,
+      });
+      if (breathingLoopCancelRef.current) break;
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    }
+
+    setIsPlayingPattern10(false);
+  };
+
+  const stopPattern10 = () => {
+    breathingLoopCancelRef.current = true;
+    setIsPlayingPattern10(false);
+  };
+
+  const playPattern11 = async () => {
+    stopAllHaptics();
+    breathingLoopCancelRef.current = false;
+    setIsPlayingPattern11(true);
+
+    while (!breathingLoopCancelRef.current) {
+      const cycleStartMs = Date.now();
+      const cycleLengthMs = 15200;
+      const events: Array<{ atOffsetMs: number; style: Haptics.ImpactFeedbackStyle }> = [
+        // Inhale
+        { atOffsetMs: 0, style: Haptics.ImpactFeedbackStyle.Light },
+        { atOffsetMs: 800, style: Haptics.ImpactFeedbackStyle.Light },
+        { atOffsetMs: 1600, style: Haptics.ImpactFeedbackStyle.Light },
+        { atOffsetMs: 2400, style: Haptics.ImpactFeedbackStyle.Light },
+
+        // Transition (replaces beat hit at this time)
+        { atOffsetMs: 3200, style: Haptics.ImpactFeedbackStyle.Heavy },
+
+        // Hold 1
+        { atOffsetMs: 4000, style: Haptics.ImpactFeedbackStyle.Light },
+        { atOffsetMs: 4400, style: Haptics.ImpactFeedbackStyle.Soft },
+        { atOffsetMs: 4800, style: Haptics.ImpactFeedbackStyle.Light },
+        { atOffsetMs: 5200, style: Haptics.ImpactFeedbackStyle.Soft },
+        { atOffsetMs: 5600, style: Haptics.ImpactFeedbackStyle.Light },
+        { atOffsetMs: 6000, style: Haptics.ImpactFeedbackStyle.Soft },
+        { atOffsetMs: 6400, style: Haptics.ImpactFeedbackStyle.Light },
+
+        // Transition (replaces beat hit at this time)
+        { atOffsetMs: 7200, style: Haptics.ImpactFeedbackStyle.Heavy },
+
+        // Exhale
+        { atOffsetMs: 8000, style: Haptics.ImpactFeedbackStyle.Light },
+        { atOffsetMs: 8800, style: Haptics.ImpactFeedbackStyle.Light },
+        { atOffsetMs: 9600, style: Haptics.ImpactFeedbackStyle.Light },
+        { atOffsetMs: 10400, style: Haptics.ImpactFeedbackStyle.Light },
+
+        // Transition (replaces beat hit at this time)
+        { atOffsetMs: 11200, style: Haptics.ImpactFeedbackStyle.Heavy },
+
+        // Hold 2
+        { atOffsetMs: 12000, style: Haptics.ImpactFeedbackStyle.Light },
+        { atOffsetMs: 12400, style: Haptics.ImpactFeedbackStyle.Soft },
+        { atOffsetMs: 12800, style: Haptics.ImpactFeedbackStyle.Light },
+        { atOffsetMs: 13200, style: Haptics.ImpactFeedbackStyle.Soft },
+        { atOffsetMs: 13600, style: Haptics.ImpactFeedbackStyle.Light },
+        { atOffsetMs: 14000, style: Haptics.ImpactFeedbackStyle.Soft },
+        { atOffsetMs: 14400, style: Haptics.ImpactFeedbackStyle.Light },
+      ];
+
+      for (const event of events) {
+        if (breathingLoopCancelRef.current) break;
+        await waitUntil(cycleStartMs + event.atOffsetMs);
+        if (breathingLoopCancelRef.current) break;
+        await Haptics.impactAsync(event.style);
+      }
+
+      if (breathingLoopCancelRef.current) break;
+      await waitUntil(cycleStartMs + cycleLengthMs);
+    }
+
+    setIsPlayingPattern11(false);
+  };
+
+  const stopPattern11 = () => {
+    breathingLoopCancelRef.current = true;
+    setIsPlayingPattern11(false);
+  };
+
 
   const getIntensityLabel = (intensity: Haptics.ImpactFeedbackStyle) =>
     intensity === Haptics.ImpactFeedbackStyle.Light
@@ -342,9 +403,9 @@ export default function HapticPlayground() {
     
     // Stop dynamic pattern
     stopDynamicPattern();
-    stopPattern7();
-    stopPattern8();
     stopPattern9();
+    stopPattern10();
+    stopPattern11();
     stopPreview();
     
     // Clear any pending pattern timeouts
@@ -1148,46 +1209,6 @@ export default function HapticPlayground() {
           </Pressable>
         </View>
 
-        {/* Pattern 7 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Pattern 7</Text>
-          <Text style={styles.controlLabel}>
-            4s inhale: light 400ms{"\n"}
-            4s hold: soft 400ms{"\n"}
-            4s exhale: light 400ms{"\n"}
-            4s hold: soft 400ms{"\n"}
-            transition: heavy
-          </Text>
-          <Pressable
-            style={[styles.button, isPlayingPattern7 && styles.buttonActive]}
-            onPress={isPlayingPattern7 ? stopPattern7 : playPattern7}
-          >
-            <Text style={styles.buttonText}>
-              {isPlayingPattern7 ? "Stop Pattern 7" : "Start Pattern 7"}
-            </Text>
-          </Pressable>
-        </View>
-
-        {/* Pattern 8 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Pattern 8</Text>
-          <Text style={styles.controlLabel}>
-            4s inhale: soft 800ms{"\n"}
-            4s hold: soft 800ms{"\n"}
-            4s exhale: soft 800ms{"\n"}
-            4s hold: soft 800ms{"\n"}
-            transition: heavy
-          </Text>
-          <Pressable
-            style={[styles.button, isPlayingPattern8 && styles.buttonActive]}
-            onPress={isPlayingPattern8 ? stopPattern8 : playPattern8}
-          >
-            <Text style={styles.buttonText}>
-              {isPlayingPattern8 ? "Stop Pattern 8" : "Start Pattern 8"}
-            </Text>
-          </Pressable>
-        </View>
-
         {/* Pattern 9 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Pattern 9</Text>
@@ -1204,6 +1225,46 @@ export default function HapticPlayground() {
           >
             <Text style={styles.buttonText}>
               {isPlayingPattern9 ? "Stop Pattern 9" : "Start Pattern 9"}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Pattern 10 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Pattern 10</Text>
+          <Text style={styles.controlLabel}>
+            4s inhale: medium 800ms{"\n"}
+            4s hold: soft 200ms{"\n"}
+            4s exhale: medium 800ms{"\n"}
+            4s hold: soft 200ms{"\n"}
+            transition: heavy
+          </Text>
+          <Pressable
+            style={[styles.button, isPlayingPattern10 && styles.buttonActive]}
+            onPress={isPlayingPattern10 ? stopPattern10 : playPattern10}
+          >
+            <Text style={styles.buttonText}>
+              {isPlayingPattern10 ? "Stop Pattern 10" : "Start Pattern 10"}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Pattern 11 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Pattern 11</Text>
+          <Text style={styles.controlLabel}>
+            base tempo: beat 800ms / offbeat 400ms{"\n"}
+            inhale/exhale: light on beats{"\n"}
+            holds: light-soft alternating on 400ms grid{"\n"}
+            transitions: heavy at 3200ms, 7200ms, 11200ms{"\n"}
+            loop restart: 15200ms
+          </Text>
+          <Pressable
+            style={[styles.button, isPlayingPattern11 && styles.buttonActive]}
+            onPress={isPlayingPattern11 ? stopPattern11 : playPattern11}
+          >
+            <Text style={styles.buttonText}>
+              {isPlayingPattern11 ? "Stop Pattern 11" : "Start Pattern 11"}
             </Text>
           </Pressable>
         </View>
