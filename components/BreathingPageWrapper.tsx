@@ -27,13 +27,6 @@ export default function BreathingPageWrapper({
     }
   };
 
-  const scrollToPage = (page: number) => {
-    scrollViewRef.current?.scrollTo({
-      x: page * screenWidth,
-      animated: true,
-    });
-  };
-
   const styles = StyleSheet.create({
     container: {
       flex: 1,

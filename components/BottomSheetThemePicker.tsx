@@ -1,10 +1,8 @@
 import React from 'react';
-import { Pressable, ScrollView, Dimensions } from 'react-native';
+import { Pressable, ScrollView } from 'react-native';
 import BreathingThemePreview from './BreathingThemePreview';
 import { THEMES, ThemeName } from './Theme';
 import { useApp } from '../contexts/themeContext';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function BottomSheetThemePicker() {
   const { settings, setAnimationTheme } = useApp();

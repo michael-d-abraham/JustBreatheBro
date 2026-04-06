@@ -32,10 +32,6 @@ export default function Index() {
     });
   };
 
-  const handleInfoPress = (exercise?: typeof displayExercise) => {
-    sheets.handleInfoPress(exercise, displayExercise);
-  };
-
   const handleCirclePress = () => {
     // Navigate to scenes screen
     router.push('/scenes');

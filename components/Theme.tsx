@@ -14,13 +14,6 @@ type Mode = 'light' | 'dark';
 type AppearancePref = 'system' | 'light' | 'dark';
 
 // ============================================================================
-// SYSTEM 2: wallpaperContent - Text + icons on wallpaper backgrounds
-// ============================================================================
-type WallpaperContentTokens = {
-  wallpaperForeground: string;
-};
-
-// ============================================================================
 // SYSTEM 3: breathingAnimationTheme - Breathing ring colors
 // ============================================================================
 type ThemeName = 'grounded' | 'calm' | 'uplifting';
@@ -262,6 +255,8 @@ export function getBreathingTokensForTheme(themeName: ThemeName): BreathingAnima
 
 export function useBreathingAnimationTokens(): BreathingAnimationTokens {
   // Import from themeContext to get animation settings
+  // Keep this as a runtime require to avoid circular imports (themeContext imports Theme.tsx).
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { useApp } = require('../contexts/themeContext');
   const { settings } = useApp();
   

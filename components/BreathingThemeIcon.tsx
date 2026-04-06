@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { getBreathingTokensForTheme, THEMES, ThemeName } from './Theme';
-import { useTheme } from './Theme';
+import { getBreathingTokensForTheme, THEMES, ThemeName, useTheme } from './Theme';
 
 interface BreathingThemeIconProps {
   themeName: ThemeName;

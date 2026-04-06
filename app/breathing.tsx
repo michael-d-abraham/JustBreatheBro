@@ -31,6 +31,9 @@ export default function BreathingPage() {
   const { autoStart } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   
+  // ==========================================================================
+  // State/setup
+  // ==========================================================================
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isUIVisible, setIsUIVisible] = useState(false);
   const sheetRef = useRef<ExerciseDetailSheetHandle>(null);
@@ -48,13 +51,19 @@ export default function BreathingPage() {
   const hasTrackedEnteredRef = useRef(false);
   const hasTrackedStartedRef = useRef(false);
   
+  // Current exercise pattern (fallback to a safe default)
   const exercise = currentExercise || { inhale: 4, hold1: 4, exhale: 4, hold2: 4 };
-  const { inhale, hold1, exhale, hold2 } = exercise;
 
+  // ==========================================================================
+  // Animation logic (breathing ring)
+  // ==========================================================================
   // Initialize custom hooks
   const { radius, strokeWidth, animateInhale, animateExhale, pause: pauseAnimation, resume: resumeAnimation, reset } = useBreathingAnimation();
   
-  // Use refs to store callbacks so they can be accessed before hooks are defined
+  // ==========================================================================
+  // Side-effect callback refs (audio/haptics/animation driven from phase changes)
+  // ==========================================================================
+  // Use refs to store callbacks so they can be accessed from inside `useBreathingCycle` config.
   const playInhaleSoundRef = useRef<(() => Promise<void>) | null>(null);
   const playExhaleSoundRef = useRef<(() => Promise<void>) | null>(null);
   const triggerHapticRef = useRef<((style: Haptics.ImpactFeedbackStyle) => Promise<void>) | null>(null);
@@ -66,6 +75,9 @@ export default function BreathingPage() {
   const pauseAnimationRef = useRef<(() => void) | null>(null);
   const resumeAnimationRef = useRef<((phase: 'inhale' | 'exhale' | 'hold1' | 'hold2', remainingDuration: number) => void) | null>(null);
   
+  // ==========================================================================
+  // Core logic (breathing cycle state machine)
+  // ==========================================================================
   const { phase, timeLeft, isRunning, isPaused, start, pause, resume, stop } = useBreathingCycle({
     exercise,
     onPhaseChange: async (phase, duration) => {
@@ -92,18 +104,26 @@ export default function BreathingPage() {
     }
   });
   
+  // ==========================================================================
+  // Audio logic (inhale/exhale sounds)
+  // ==========================================================================
   const { playInhaleSound, playExhaleSound, stopSound, forceStop: forceStopSound } = useBreathingAudio({
     soundEnabled: settings.soundEnabled,
     isRunning,
     soundType: settings.soundType
   });
   
+  // ==========================================================================
+  // Haptics logic (cycle start cue + continuous vibration)
+  // ==========================================================================
   const { triggerHaptic, startContinuousVibration, stopVibration, forceStop: forceStopHaptics } = useBreathingHaptics({
     hapticsEnabled: settings.hapticsEnabled,
     isRunning
   });
   
-  // Update refs when callbacks are available
+  // ==========================================================================
+  // Effects (wiring: keep latest callbacks in refs)
+  // ==========================================================================
   useEffect(() => {
     playInhaleSoundRef.current = playInhaleSound;
     playExhaleSoundRef.current = playExhaleSound;
@@ -122,6 +142,9 @@ export default function BreathingPage() {
     }
   }, [playInhaleSound, playExhaleSound, stopSound, forceStopSound, triggerHaptic, startContinuousVibration, stopVibration, forceStopHaptics, pauseAnimation, resumeAnimation]);
 
+  // ==========================================================================
+  // Effects (UI visibility controller)
+  // ==========================================================================
   // Sync uiOpacity shared value with isUIVisible state (moved from render to effect)
   useEffect(() => {
     // Clear existing timeout when visibility changes
@@ -160,8 +183,11 @@ export default function BreathingPage() {
         uiHideTimeoutRef.current = null;
       }
     };
-  }, [isUIVisible]);
+  }, [isUIVisible, uiOpacity]);
 
+  // ==========================================================================
+  // Derived animated values
+  // ==========================================================================
   const animatedProps = useAnimatedProps(() => ({
     r: radius.value,
     strokeWidth: strokeWidth.value,
@@ -171,6 +197,9 @@ export default function BreathingPage() {
     opacity: uiOpacity.value,
   }));
 
+  // ==========================================================================
+  // Event handlers (session controls)
+  // ==========================================================================
   const handleStart = () => {
     start();
     
@@ -262,6 +291,9 @@ export default function BreathingPage() {
     }
   };
 
+  // ==========================================================================
+  // Event handlers (bottom sheets)
+  // ==========================================================================
   const handleInfoPress = () => {
     setIsSheetOpen(true);
     sheetRef.current?.open();
@@ -296,6 +328,9 @@ export default function BreathingPage() {
     setIsUIVisible(prev => !prev);
   };
 
+  // ==========================================================================
+  // Effects (analytics + auto-start)
+  // ==========================================================================
   // Track breathing_entered when component mounts
   useEffect(() => {
     if (!hasTrackedEnteredRef.current) {
@@ -330,6 +365,9 @@ export default function BreathingPage() {
     }
   }, [autoStart, start, settings.soundEnabled, settings.hapticsEnabled]);
 
+  // ==========================================================================
+  // Effects (navigation/system UI)
+  // ==========================================================================
   // Hide status bar when screen is focused, restore when screen loses focus
   // Using useFocusEffect ensures it works reliably with Expo Router navigation
   useFocusEffect(
@@ -344,6 +382,9 @@ export default function BreathingPage() {
     }, [])
   );
 
+  // ==========================================================================
+  // Effects (session exit tracking)
+  // ==========================================================================
   // Track AppState changes for background detection
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
@@ -372,7 +413,7 @@ export default function BreathingPage() {
     };
   }, [settings.soundEnabled, settings.hapticsEnabled]);
 
-  // Cleanup on unmount - force stop everything
+  // Cleanup on unmount - force stop everything (and track unmount exit)
   useEffect(() => {
     return () => {
       // Track exit due to unmount (if not already tracked)
@@ -409,6 +450,9 @@ export default function BreathingPage() {
     };
   }, [stop, settings.soundEnabled, settings.hapticsEnabled]);
 
+  // ==========================================================================
+  // Main render
+  // ==========================================================================
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
