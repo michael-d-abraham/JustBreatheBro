@@ -5,8 +5,8 @@ import { useBreathing } from "@/contexts/breathingContext";
 import { useApp } from "@/contexts/themeContext";
 import { useBreathingAnimation } from "@/hooks/useBreathingAnimation";
 import { useBreathingAudio } from "@/hooks/useBreathingAudio";
-import { useBreathingCycle } from "@/hooks/useBreathingCycle";
-import { useBreathingHaptics } from "@/hooks/useBreathingHaptics";
+import { BreathingPhase, useBreathingCycle } from "@/hooks/useBreathingCycle";
+import { BeginBreathingPhaseHapticsArgs, useBreathingHaptics } from "@/hooks/useBreathingHaptics";
 import { trackBreathingEntered, trackBreathingExited, trackBreathingStarted } from "@/utils/sentryTracking";
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -22,6 +22,42 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import Svg, { Circle } from "react-native-svg";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
+const BREATHING_PHASE_HAPTICS: Record<
+  "inhale" | "hold" | "exhale",
+  Omit<BeginBreathingPhaseHapticsArgs, "durationMs" | "resumeMidPhase">
+> = {
+  inhale: {
+    targetIntervalMs: 800,
+    pulseIntensity: Haptics.ImpactFeedbackStyle.Soft,
+    transitionIntensity: Haptics.ImpactFeedbackStyle.Medium,
+  },
+  hold: {
+    targetIntervalMs: 800,
+    pulseIntensity: Haptics.ImpactFeedbackStyle.Soft,
+    transitionIntensity: Haptics.ImpactFeedbackStyle.Light,
+  },
+  exhale: {
+    targetIntervalMs: 800,
+    pulseIntensity: Haptics.ImpactFeedbackStyle.Soft,
+    transitionIntensity: Haptics.ImpactFeedbackStyle.Medium,
+  },
+};
+
+function hapticArgsForBreathingPhase(
+  phase: BreathingPhase,
+  durationMs: number,
+  resumeMidPhase: boolean
+): BeginBreathingPhaseHapticsArgs | null {
+  if (phase === "idle") return null;
+  const base =
+    phase === "inhale"
+      ? BREATHING_PHASE_HAPTICS.inhale
+      : phase === "exhale"
+        ? BREATHING_PHASE_HAPTICS.exhale
+        : BREATHING_PHASE_HAPTICS.hold;
+  return { ...base, durationMs, resumeMidPhase };
+}
 
 export default function BreathingPage() {
   const breathingAnim = useBreathingAnimationTokens();
@@ -66,12 +102,9 @@ export default function BreathingPage() {
   // Use refs to store callbacks so they can be accessed from inside `useBreathingCycle` config.
   const playInhaleSoundRef = useRef<(() => Promise<void>) | null>(null);
   const playExhaleSoundRef = useRef<(() => Promise<void>) | null>(null);
-  const triggerHapticRef = useRef<((style: Haptics.ImpactFeedbackStyle) => Promise<void>) | null>(null);
-  const startContinuousVibrationRef = useRef<(() => void) | null>(null);
-  const stopVibrationRef = useRef<(() => void) | null>(null);
+  const beginPhaseHapticsRef = useRef<((args: BeginBreathingPhaseHapticsArgs) => void) | null>(null);
   const stopSoundRef = useRef<(() => void) | null>(null);
   const forceStopSoundRef = useRef<(() => void) | null>(null);
-  const forceStopHapticsRef = useRef<(() => void) | null>(null);
   const pauseAnimationRef = useRef<(() => void) | null>(null);
   const resumeAnimationRef = useRef<((phase: 'inhale' | 'exhale' | 'hold1' | 'hold2', remainingDuration: number) => void) | null>(null);
   
@@ -81,27 +114,19 @@ export default function BreathingPage() {
   const { phase, timeLeft, isRunning, isPaused, start, pause, resume, stop } = useBreathingCycle({
     exercise,
     onPhaseChange: async (phase, duration) => {
-      // Handle animations and sounds based on phase
+      const hapticArgs = hapticArgsForBreathingPhase(phase, duration, false);
+      if (hapticArgs) {
+        beginPhaseHapticsRef.current?.(hapticArgs);
+      }
+
       if (phase === 'inhale') {
         animateInhale(duration);
-        startContinuousVibrationRef.current?.();
-        // Play inhale sound
         await playInhaleSoundRef.current?.();
       } else if (phase === 'exhale') {
         animateExhale(duration);
-        // Play exhale sound
         await playExhaleSoundRef.current?.();
       }
-      
-      // Stop vibration after inhale phase completes
-      if (phase === 'hold1') {
-        stopVibrationRef.current?.();
-      }
     },
-    onCycleStart: async () => {
-      // Play haptic at cycle start
-      await triggerHapticRef.current?.(Haptics.ImpactFeedbackStyle.Medium);
-    }
   });
   
   // ==========================================================================
@@ -114,12 +139,12 @@ export default function BreathingPage() {
   });
   
   // ==========================================================================
-  // Haptics logic (cycle start cue + continuous vibration)
+  // Haptics logic (quantized phase pulses + transitions)
   // ==========================================================================
-  const { triggerHaptic, startContinuousVibration, stopVibration, forceStop: forceStopHaptics } = useBreathingHaptics({
+  const { beginPhase: beginPhaseHaptics, cancel: cancelHaptics } = useBreathingHaptics({
     hapticsEnabled: settings.hapticsEnabled,
-    isRunning
   });
+  beginPhaseHapticsRef.current = beginPhaseHaptics;
   
   // ==========================================================================
   // Effects (wiring: keep latest callbacks in refs)
@@ -129,10 +154,6 @@ export default function BreathingPage() {
     playExhaleSoundRef.current = playExhaleSound;
     stopSoundRef.current = stopSound;
     forceStopSoundRef.current = forceStopSound;
-    triggerHapticRef.current = triggerHaptic;
-    startContinuousVibrationRef.current = startContinuousVibration;
-    stopVibrationRef.current = stopVibration;
-    forceStopHapticsRef.current = forceStopHaptics;
     pauseAnimationRef.current = pauseAnimation;
     resumeAnimationRef.current = resumeAnimation;
     
@@ -140,7 +161,7 @@ export default function BreathingPage() {
     if (breathingReadyTimeRef.current === null) {
       breathingReadyTimeRef.current = Date.now();
     }
-  }, [playInhaleSound, playExhaleSound, stopSound, forceStopSound, triggerHaptic, startContinuousVibration, stopVibration, forceStopHaptics, pauseAnimation, resumeAnimation]);
+  }, [playInhaleSound, playExhaleSound, stopSound, forceStopSound, pauseAnimation, resumeAnimation]);
 
   // ==========================================================================
   // Effects (UI visibility controller)
@@ -221,23 +242,24 @@ export default function BreathingPage() {
     // Pause everything: cycle, animation, sounds, haptics
     pause();
     pauseAnimationRef.current?.();
-    stopVibration();
+    cancelHaptics();
     stopSound();
   };
 
   const handleResume = () => {
-    // Resume from where we paused
     resume();
-    
-    // Resume animation from current position to target for current phase
-    // Calculate remaining duration from timeLeft (convert seconds to milliseconds)
+
     const remainingDuration = timeLeft * 1000;
     if (remainingDuration > 0 && (phase === 'inhale' || phase === 'exhale')) {
       resumeAnimationRef.current?.(phase, remainingDuration);
     }
-    // For hold phases, animation stays at current position (no animation needed)
-    
-    // Sounds and haptics will resume when cycle continues
+
+    if (remainingDuration > 0 && phase !== 'idle') {
+      const args = hapticArgsForBreathingPhase(phase, remainingDuration, true);
+      if (args) {
+        beginPhaseHaptics(args);
+      }
+    }
   };
 
   const handleStopAndExit = () => {
@@ -263,7 +285,7 @@ export default function BreathingPage() {
     // Force stop everything immediately, even mid-sound
     stop();
     pauseAnimationRef.current?.();
-    forceStopHapticsRef.current?.();
+    cancelHaptics();
     forceStopSoundRef.current?.();
     reset();
     
@@ -436,7 +458,7 @@ export default function BreathingPage() {
       // Force stop everything when component unmounts
       stop();
       pauseAnimationRef.current?.();
-      forceStopHapticsRef.current?.();
+      cancelHaptics();
       forceStopSoundRef.current?.();
       
       // Clear UI hide timeout and immediately hide UI
@@ -448,7 +470,7 @@ export default function BreathingPage() {
       setIsUIVisible(false);
       // Note: uiOpacity.value will be set to 0 in useEffect when isUIVisible becomes false
     };
-  }, [stop, settings.soundEnabled, settings.hapticsEnabled]);
+  }, [stop, settings.soundEnabled, settings.hapticsEnabled, cancelHaptics]);
 
   // ==========================================================================
   // Main render

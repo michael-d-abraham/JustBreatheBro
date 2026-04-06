@@ -1,73 +1,103 @@
+import { resolvePhasePulsePlan } from "@/lib/breathingHapticsResolve";
 import * as Haptics from "expo-haptics";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
+
+const DEFAULT_TOLERANCE_MS = 50;
+
+export type BeginBreathingPhaseHapticsArgs = {
+  durationMs: number;
+  targetIntervalMs: number;
+  toleranceMs?: number;
+  pulseIntensity: Haptics.ImpactFeedbackStyle;
+  transitionIntensity: Haptics.ImpactFeedbackStyle;
+  /**
+   * When true (mid-phase resume), all scheduled beats use pulseIntensity — no transition accent.
+   */
+  resumeMidPhase?: boolean;
+};
 
 interface UseBreathingHapticsProps {
   hapticsEnabled: boolean;
-  isRunning: boolean;
 }
 
 /**
- * Hook to manage haptic feedback for breathing exercises
- * Handles vibration intervals and ensures proper cleanup
+ * Phase-quantized haptics: pulses divide each phase evenly; transition accent at phase start
+ * (unless resumeMidPhase). One active schedule at a time; cancel is idempotent.
  */
-export function useBreathingHaptics({ hapticsEnabled, isRunning }: UseBreathingHapticsProps) {
-  const vibrationIntervalRef = useRef<number | null>(null);
-  const isRunningRef = useRef(isRunning);
-  
-  // Keep ref in sync with isRunning
-  useEffect(() => {
-    isRunningRef.current = isRunning;
-  }, [isRunning]);
-  
-  // Cleanup vibration on unmount
-  useEffect(() => {
-    return () => {
-      if (vibrationIntervalRef.current !== null) {
-        clearInterval(vibrationIntervalRef.current);
-        vibrationIntervalRef.current = null;
-      }
-    };
+export function useBreathingHaptics({ hapticsEnabled }: UseBreathingHapticsProps) {
+  const generationRef = useRef(0);
+  const timeoutIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearTimeouts = useCallback(() => {
+    timeoutIdsRef.current.forEach(clearTimeout);
+    timeoutIdsRef.current = [];
   }, []);
 
+  const cancel = useCallback(() => {
+    generationRef.current += 1;
+    clearTimeouts();
+  }, [clearTimeouts]);
 
+  const beginPhase = useCallback(
+    (args: BeginBreathingPhaseHapticsArgs) => {
+      clearTimeouts();
+      generationRef.current += 1;
+      const gen = generationRef.current;
 
-  const triggerHaptic = async (style: Haptics.ImpactFeedbackStyle = Haptics.ImpactFeedbackStyle.Medium) => {
-    if (!hapticsEnabled) return;
-    
-    await Haptics.impactAsync(style);
-  };
+      if (!hapticsEnabled) return;
 
-  const startContinuousVibration = () => {
-    if (!hapticsEnabled) return;
-    
-    // Clear any existing vibration first
-    stopVibration();
-    
-    vibrationIntervalRef.current = setInterval(() => {
-      // Double-check if still running before vibrating
-      if (!isRunningRef.current) {
-        stopVibration();
-        return;
+      const {
+        durationMs,
+        targetIntervalMs,
+        toleranceMs = DEFAULT_TOLERANCE_MS,
+        pulseIntensity,
+        transitionIntensity,
+        resumeMidPhase = false,
+      } = args;
+
+      if (!(durationMs > 0)) return;
+
+      const plan = resolvePhasePulsePlan({
+        durationMs,
+        targetIntervalMs,
+        toleranceMs,
+      });
+
+      if (!(plan.resolvedIntervalMs > 0)) return;
+
+      const schedulePulse = (delayMs: number, style: Haptics.ImpactFeedbackStyle) => {
+        const id = setTimeout(() => {
+          if (gen !== generationRef.current) return;
+          void Haptics.impactAsync(style);
+        }, delayMs);
+        timeoutIdsRef.current.push(id);
+      };
+
+      if (!resumeMidPhase) {
+        void Haptics.impactAsync(transitionIntensity);
+        for (let k = 1; k < plan.pulseCount; k++) {
+          schedulePulse(k * plan.resolvedIntervalMs, pulseIntensity);
+        }
+      } else {
+        for (let k = 0; k < plan.pulseCount; k++) {
+          schedulePulse(k * plan.resolvedIntervalMs, pulseIntensity);
+        }
       }
-      
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
-    }, 118); // Vibrate every 140ms
-  };
+    },
+    [hapticsEnabled, clearTimeouts],
+  );
 
-  const stopVibration = () => {
-    if (vibrationIntervalRef.current !== null) {
-      clearInterval(vibrationIntervalRef.current);
-      vibrationIntervalRef.current = null;
+  useEffect(() => {
+    if (!hapticsEnabled) {
+      cancel();
     }
-  };
+  }, [hapticsEnabled, cancel]);
 
-  const forceStop = () => {
-    // Force stop all vibrations immediately
-    stopVibration();
-    // Cancel any pending haptic feedback
-    // Note: expo-haptics doesn't have a cancel method, but stopping the interval should be enough
-  };
+  useEffect(() => {
+    return () => {
+      cancel();
+    };
+  }, [cancel]);
 
-  return { triggerHaptic, startContinuousVibration, stopVibration, forceStop };
+  return { beginPhase, cancel };
 }
-
