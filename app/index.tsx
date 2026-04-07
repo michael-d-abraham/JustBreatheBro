@@ -1,19 +1,19 @@
-import BreathingPageHeader from '@/components/BreathingPageHeader';
-import ExerciseDetailSheet from '@/components/ExerciseDetailSheet';
-import ExerciseSelectionSheet from '@/components/ExerciseSelectionSheet';
-import SupportSheet from '@/components/SupportSheet';
-import { useWallpaperForeground } from '@/components/Theme';
-import { useBreathing } from '@/contexts/breathingContext';
-import { useApp } from '@/contexts/themeContext';
-import { useBreathingSheets } from '@/hooks/useBreathingSheets';
-import { defaultExercises } from '@/lib/storage';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { BlurView } from 'expo-blur';
-import { useRouter } from 'expo-router';
-import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import BreathingPageHeader from "@/components/BreathingPageHeader";
+import ExerciseDetailSheet from "@/components/ExerciseDetailSheet";
+import ExerciseSelectionSheet from "@/components/ExerciseSelectionSheet";
+import SupportSheet from "@/components/SupportSheet";
+import { useWallpaperForeground } from "@/components/Theme";
+import { useBreathing } from "@/contexts/breathingContext";
+import { useApp } from "@/contexts/themeContext";
+import { useBreathingSheets } from "@/hooks/useBreathingSheets";
+import { defaultExercises } from "@/lib/storage";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { BlurView } from "expo-blur";
+import { useRouter } from "expo-router";
+import React from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
   const wallpaperFg = useWallpaperForeground();
@@ -22,23 +22,26 @@ export default function Index() {
   const sheets = useBreathingSheets();
 
   // Get current exercise or default to Deep Breathing
-  const displayExercise = currentExercise || defaultExercises.find(ex => ex.id === "1") || defaultExercises[0];
+  const displayExercise =
+    currentExercise ||
+    defaultExercises.find((ex) => ex.id === "1") ||
+    defaultExercises[0];
 
   const handleStartPress = async () => {
     await updateExercise(displayExercise);
     router.push({
-      pathname: '/breathing',
-      params: { autoStart: 'true' }
+      pathname: "/breathing",
+      params: { autoStart: "true" },
     });
   };
 
   const handleCirclePress = () => {
     // Navigate to scenes screen
-    router.push('/scenes');
+    router.push("/scenes");
   };
 
   const handleInfoLibraryPress = () => {
-    router.push('/informationarchive');
+    router.push("/informationarchive");
   };
 
   const { backgroundImage } = useApp();
@@ -46,10 +49,10 @@ export default function Index() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: backgroundImage ? 'transparent' : '#FFFFFF',
+      backgroundColor: backgroundImage ? "transparent" : "#FFFFFF",
     },
     headerContainer: {
-      position: 'absolute',
+      position: "absolute",
       top: 0,
       left: 0,
       right: 0,
@@ -63,24 +66,24 @@ export default function Index() {
     pageContainer: {
       flex: 1,
       paddingHorizontal: 24,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
     },
     subtitle: {
       color: wallpaperFg,
       fontSize: 48,
-      fontWeight: '700',
-      textAlign: 'center',
+      fontWeight: "700",
+      textAlign: "center",
       marginBottom: 16,
     },
     description: {
       color: wallpaperFg,
       fontSize: 18,
-      textAlign: 'center',
+      textAlign: "center",
       opacity: 0.8,
     },
     footerContainer: {
-      position: 'absolute',
+      position: "absolute",
       bottom: 0,
       left: 0,
       right: 0,
@@ -89,10 +92,10 @@ export default function Index() {
       zIndex: 10,
     },
     startButtonContainer: {
-      width: '100%',
-      justifyContent: 'center',
-      alignItems: 'center',
-      position: 'relative',
+      width: "100%",
+      justifyContent: "center",
+      alignItems: "center",
+      position: "relative",
       marginBottom: 40,
     },
     startButton: {
@@ -102,15 +105,15 @@ export default function Index() {
     startButtonText: {
       color: wallpaperFg,
       fontSize: 28,
-      fontWeight: '700',
+      fontWeight: "700",
     },
     techniqueContainer: {
-      alignItems: 'center',
+      alignItems: "center",
     },
     techniqueLabel: {
       color: wallpaperFg,
       fontSize: 20,
-      fontWeight: '600',
+      fontWeight: "600",
       marginBottom: 12,
     },
     techniqueValue: {
@@ -118,8 +121,8 @@ export default function Index() {
       fontSize: 18,
     },
     techniqueSelectable: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: 8,
     },
     chevronIcon: {
@@ -132,46 +135,55 @@ export default function Index() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
         <SafeAreaView style={styles.container}>
-        {/* Fixed Header */}
-        <View style={styles.headerContainer}>
-          <BreathingPageHeader
-            supportSheetRef={sheets.supportSheetRef}
-            onSupportPress={sheets.handleSupportPress}
-            onCirclePress={handleCirclePress}
-            onInfoLibraryPress={handleInfoLibraryPress}
-          />
-        </View>
-
-        {/* Fixed middle content: Relax only */}
-        <View style={styles.contentArea}>
-          <View style={styles.pageContainer}>
-            <Text style={styles.subtitle}>Relax</Text>
-            <Text style={styles.description}>Quiet your mind and relieve stress</Text>
+          {/* Fixed Header */}
+          <View style={styles.headerContainer}>
+            <BreathingPageHeader
+              supportSheetRef={sheets.supportSheetRef}
+              onSupportPress={sheets.handleSupportPress}
+              onCirclePress={handleCirclePress}
+              onInfoLibraryPress={handleInfoLibraryPress}
+            />
           </View>
-        </View>
 
-        {/* Fixed Footer */}
-        <View style={styles.footerContainer}>
-          <View style={styles.startButtonContainer}>
-            <Pressable onPress={handleStartPress} style={styles.startButton}>
-              <Text style={styles.startButtonText}>Start</Text>
-            </Pressable>
+          {/* Fixed middle content: Relax only */}
+          <View style={styles.contentArea}>
+            <View style={styles.pageContainer}>
+              <Text style={styles.subtitle}>Relax</Text>
+              <Text style={styles.description}>
+                Quiet your mind and relieve stress
+              </Text>
             </View>
-            
+          </View>
+
+          {/* Fixed Footer */}
+          <View style={styles.footerContainer}>
+            <View style={styles.startButtonContainer}>
+              <Pressable onPress={handleStartPress} style={styles.startButton}>
+                <Text style={styles.startButtonText}>Start</Text>
+              </Pressable>
+            </View>
+
             {/* Technique Section */}
             <View style={styles.techniqueContainer}>
               <Text style={styles.techniqueLabel}>Technique:</Text>
-            <Pressable onPress={sheets.handleTechniquePress} style={styles.techniqueSelectable}>
-                <Text style={styles.techniqueValue}>{displayExercise.title}</Text>
-              <Text style={styles.chevronIcon}>⌄</Text>
-            </Pressable>
+              <Pressable
+                onPress={sheets.handleTechniquePress}
+                style={styles.techniqueSelectable}
+              >
+                <Text style={styles.techniqueValue}>
+                  {displayExercise.title}
+                </Text>
+                <Text style={styles.chevronIcon}>⌄</Text>
+              </Pressable>
             </View>
           </View>
 
           {/* Blurred backdrop (tap to dismiss) */}
-        {(sheets.isSheetOpen || sheets.isSupportSheetOpen || sheets.isSelectionSheetOpen) && (
-            <Pressable 
-            onPress={sheets.closeAllSheets} 
+          {(sheets.isSheetOpen ||
+            sheets.isSupportSheetOpen ||
+            sheets.isSelectionSheetOpen) && (
+            <Pressable
+              onPress={sheets.closeAllSheets}
               style={StyleSheet.absoluteFill}
             >
               <BlurView intensity={20} style={StyleSheet.absoluteFill} />
@@ -179,28 +191,27 @@ export default function Index() {
           )}
 
           {/* Bottom Sheet Modals */}
-          <ExerciseDetailSheet 
-          ref={sheets.sheetRef} 
-          exercise={sheets.selectedExerciseForInfo}
-          onChange={sheets.handleSheetChange}
-          onDismiss={sheets.handleSheetDismiss}
-        />
-        <ExerciseSelectionSheet
-          ref={sheets.selectionSheetRef}
-          exercises={sheets.exercises}
-          currentExercise={sheets.currentExercise}
-          onSelectExercise={sheets.handleSelectExercise}
-          onChange={sheets.handleSelectionSheetChange}
-          onDismiss={sheets.handleSelectionSheetDismiss}
+          <ExerciseDetailSheet
+            ref={sheets.sheetRef}
+            exercise={sheets.selectedExerciseForInfo}
+            onChange={sheets.handleSheetChange}
+            onDismiss={sheets.handleSheetDismiss}
+          />
+          <ExerciseSelectionSheet
+            ref={sheets.selectionSheetRef}
+            exercises={sheets.exercises}
+            currentExercise={sheets.currentExercise}
+            onSelectExercise={sheets.handleSelectExercise}
+            onChange={sheets.handleSelectionSheetChange}
+            onDismiss={sheets.handleSelectionSheetDismiss}
           />
           <SupportSheet
-          ref={sheets.supportSheetRef}
-          onChange={sheets.handleSupportSheetChange}
-          onDismiss={sheets.handleSupportSheetDismiss}
+            ref={sheets.supportSheetRef}
+            onChange={sheets.handleSupportSheetChange}
+            onDismiss={sheets.handleSupportSheetDismiss}
           />
         </SafeAreaView>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
   );
 }
-

@@ -10,13 +10,17 @@ const SOUNDSCAPE_FILES: Record<Exclude<SoundscapeType, 'off'>, any> = {
 
 interface UseBackgroundSoundscapeProps {
   soundscape: SoundscapeType;
+  /** Master mute: when false, soundscape never plays (same as global sound off). */
+  soundEnabled: boolean;
 }
 
 /**
  * Hook to manage background soundscape playback
  * Plays continuously in a loop throughout the app
  */
-export function useBackgroundSoundscape({ soundscape }: UseBackgroundSoundscapeProps) {
+export function useBackgroundSoundscape({ soundscape, soundEnabled }: UseBackgroundSoundscapeProps) {
+  const audioActive = soundEnabled && soundscape !== 'off';
+
   // Always call useAudioPlayer to maintain hook order (Rules of Hooks)
   // Use a placeholder source when 'off' to ensure hook is always called
   const audioSource = soundscape !== 'off' 
@@ -29,8 +33,7 @@ export function useBackgroundSoundscape({ soundscape }: UseBackgroundSoundscapeP
 
   // Handle looping when sound finishes
   useEffect(() => {
-    // Don't loop if soundscape is 'off'
-    if (soundscape === 'off' || !player) return;
+    if (!audioActive || !player) return;
 
     const checkAndLoop = () => {
       try {
@@ -63,12 +66,11 @@ export function useBackgroundSoundscape({ soundscape }: UseBackgroundSoundscapeP
         loopIntervalRef.current = null;
       }
     };
-  }, [player, soundscape]);
+  }, [player, audioActive]);
 
   // Handle soundscape changes - stop current playback when switching
   useEffect(() => {
     if (previousSoundscapeRef.current !== null && previousSoundscapeRef.current !== soundscape) {
-      // If switching to 'off', stop any currently playing soundscape
       if (soundscape === 'off' && player) {
         try {
           if (player.playing) {
@@ -83,18 +85,37 @@ export function useBackgroundSoundscape({ soundscape }: UseBackgroundSoundscapeP
     previousSoundscapeRef.current = soundscape;
   }, [soundscape, player]);
 
-  // Start playing when player is available and soundscape is not 'off'
+  // Master mute: stop immediately when sound is turned off app-wide
   useEffect(() => {
-    if (!player || soundscape === 'off') return;
+    if (!player || soundEnabled) return;
+    try {
+      if (player.playing) {
+        player.pause();
+      }
+      if (typeof player.seekTo === 'function') {
+        player.seekTo(0);
+      }
+    } catch {
+      // Ignore
+    }
+  }, [player, soundEnabled]);
+
+  // Start playing when player is available and audio should be active
+  useEffect(() => {
+    if (!player || !audioActive) return;
+
+    let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
     const startPlayback = () => {
+      if (cancelled) return;
       try {
         player.seekTo(0);
         player.play();
       } catch (error) {
         console.error('Failed to start soundscape:', error);
-        // Retry after a short delay
-        setTimeout(() => {
+        retryTimer = setTimeout(() => {
+          if (cancelled) return;
           try {
             player.seekTo(0);
             player.play();
@@ -105,11 +126,14 @@ export function useBackgroundSoundscape({ soundscape }: UseBackgroundSoundscapeP
       }
     };
 
-    // Small delay to ensure player is ready
     const timer = setTimeout(startPlayback, 100);
 
     return () => {
+      cancelled = true;
       clearTimeout(timer);
+      if (retryTimer) {
+        clearTimeout(retryTimer);
+      }
       if (player) {
         try {
           if (player.playing) {
@@ -120,7 +144,7 @@ export function useBackgroundSoundscape({ soundscape }: UseBackgroundSoundscapeP
         }
       }
     };
-  }, [player, soundscape]);
+  }, [player, audioActive]);
 
   return { player };
 }

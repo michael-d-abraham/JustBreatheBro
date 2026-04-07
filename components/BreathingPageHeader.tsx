@@ -1,8 +1,8 @@
-import React, { RefObject, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SupportSheetHandle } from './SupportSheet';
-import { useWallpaperForeground } from './Theme';
+import React, { RefObject, useState } from "react";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SupportSheetHandle } from "./SupportSheet";
+import { useTheme } from "./Theme";
 
 interface BreathingPageHeaderProps {
   supportSheetRef: RefObject<SupportSheetHandle | null>;
@@ -11,31 +11,31 @@ interface BreathingPageHeaderProps {
   onInfoLibraryPress?: () => void;
 }
 
-export default function BreathingPageHeader({ 
+export default function BreathingPageHeader({
   supportSheetRef,
   onSupportPress,
   onCirclePress,
   onInfoLibraryPress,
 }: BreathingPageHeaderProps) {
-  const wallpaperFg = useWallpaperForeground();
+  const { tokens } = useTheme();
+  /** Follows system light/dark via ThemeProvider (palette text for current mode). */
+  const headerContentColor = tokens.textPrimary;
   const insets = useSafeAreaInsets();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const styles = StyleSheet.create({
-    circleIcon: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      borderWidth: 2,
-      borderColor: wallpaperFg,
-      backgroundColor: 'transparent',
+    leftHeaderIcon: {
+      width: 28,
+      height: 28,
+      tintColor: headerContentColor,
     },
-    heartIcon: {
-      fontSize: 32,
-      color: wallpaperFg,
+    moreIcon: {
+      width: 28,
+      height: 28,
+      tintColor: headerContentColor,
     },
     dropdown: {
-      position: 'absolute',
+      position: "absolute",
       top: insets.top + 48,
       right: 16,
       minWidth: 120,
@@ -45,12 +45,11 @@ export default function BreathingPageHeader({
       paddingVertical: 12,
       paddingHorizontal: 16,
     },
-    dropdownItemLast: {
-    },
+    dropdownItemLast: {},
     dropdownItemText: {
-      color: wallpaperFg,
+      color: headerContentColor,
       fontSize: 16,
-      fontWeight: '500',
+      fontWeight: "500",
     },
   });
 
@@ -58,11 +57,11 @@ export default function BreathingPageHeader({
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleMenuItemPress = (item: 'Love' | 'Benefits' | 'Support') => {
+  const handleMenuItemPress = (item: "Love" | "Benefits" | "Support") => {
     setIsDropdownOpen(false);
-    if (item === 'Support') {
+    if (item === "Support") {
       onSupportPress();
-    } else if (item === 'Benefits' && onInfoLibraryPress) {
+    } else if (item === "Benefits" && onInfoLibraryPress) {
       onInfoLibraryPress();
     }
     // Love can be handled later if needed
@@ -75,7 +74,7 @@ export default function BreathingPageHeader({
         <Pressable
           onPress={() => setIsDropdownOpen(false)}
           style={{
-            position: 'absolute',
+            position: "absolute",
             top: 0,
             left: 0,
             right: 0,
@@ -85,51 +84,59 @@ export default function BreathingPageHeader({
         />
       )}
 
-      {/* Circle Button - Top Left */}
-      <Pressable 
-        onPress={onCirclePress || onSupportPress} 
+      {/* Flower — Top Left (e.g. scenes / appearance) */}
+      <Pressable
+        onPress={onCirclePress || onSupportPress}
         style={{
-          position: 'absolute',
+          position: "absolute",
           top: insets.top + 8,
           left: 16,
           padding: 8,
           zIndex: 10,
         }}
       >
-        <View style={styles.circleIcon} />
+        <Image
+          source={require("../assets/icons/tulip.png")}
+          style={styles.leftHeaderIcon}
+          resizeMode="contain"
+        />
       </Pressable>
 
-      {/* Heart Button - Top Right */}
-      <Pressable 
-        onPress={handleHeartPress} 
+      {/* Menu (more) — Top Right */}
+      <Pressable
+        onPress={handleHeartPress}
         style={{
-          position: 'absolute',
+          position: "absolute",
           top: insets.top + 8,
           right: 16,
           padding: 8,
           zIndex: 10,
         }}
       >
-        <Text style={styles.heartIcon}>♡</Text>
+        <Image
+          source={require("../assets/icons/more.png")}
+          style={styles.moreIcon}
+          resizeMode="contain"
+        />
       </Pressable>
 
       {/* Dropdown Menu */}
       {isDropdownOpen && (
         <View style={styles.dropdown}>
-          <Pressable 
-            onPress={() => handleMenuItemPress('Love')}
+          <Pressable
+            onPress={() => handleMenuItemPress("Love")}
             style={styles.dropdownItem}
           >
             <Text style={styles.dropdownItemText}>Love</Text>
           </Pressable>
-          <Pressable 
-            onPress={() => handleMenuItemPress('Benefits')}
+          <Pressable
+            onPress={() => handleMenuItemPress("Benefits")}
             style={styles.dropdownItem}
           >
             <Text style={styles.dropdownItemText}>Benefits</Text>
           </Pressable>
-          <Pressable 
-            onPress={() => handleMenuItemPress('Support')}
+          <Pressable
+            onPress={() => handleMenuItemPress("Support")}
             style={[styles.dropdownItem, styles.dropdownItemLast]}
           >
             <Text style={styles.dropdownItemText}>Support</Text>

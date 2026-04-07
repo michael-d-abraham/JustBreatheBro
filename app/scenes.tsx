@@ -234,7 +234,7 @@ export default function ScenesScreen() {
 
         {/* Sound & Haptics Section */}
         <Text style={styles.sectionTitle}>SOUND & HAPTICS</Text>
-        <View style={{ flexDirection: 'row', marginTop: 4, gap: 8 }}>
+        <View style={{ marginTop: 4, alignSelf: 'stretch' }}>
           <BottomSheetSoundHapticsPicker />
         </View>
       </ScrollView>

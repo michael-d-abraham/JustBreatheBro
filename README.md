@@ -54,7 +54,7 @@ Description: My app is a breathing app with custom themes for certain emotions. 
 
 Screen shot of my outline of my project
 
-![Outline](assets/images/wireframe.png)
+![Outline](assets/icons/wireframe.png)
 
 
 ## Human Interface Guidelines Implementation

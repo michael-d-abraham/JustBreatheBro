@@ -1,34 +1,25 @@
-import { Pressable, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Pressable, StyleProp, ViewStyle } from 'react-native';
 import { useTheme } from './Theme';
 
 interface BackButtonProps {
   onPress: () => void;
+  /** Optional layout override (e.g. align in a header row). */
+  style?: StyleProp<ViewStyle>;
 }
 
-export default function BackButton({ onPress }: BackButtonProps) {
+/** App-wide back control: chevron, matches Scenes / breathing navigation affordances. */
+export default function BackButton({ onPress, style }: BackButtonProps) {
   const { tokens } = useTheme();
-  
+
   return (
     <Pressable
-      style={{
-        backgroundColor: tokens.accentPrimary,
-        borderRadius: 8,
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        marginBottom: 20,
-        borderWidth: 1,
-        borderColor: tokens.borderSubtle,
-        alignSelf: 'flex-start'
-      }}
       onPress={onPress}
+      style={[{ width: 40, height: 40, justifyContent: 'center', alignItems: 'center' }, style]}
+      accessibilityRole="button"
+      accessibilityLabel="Back"
     >
-      <Text style={{
-        color: tokens.textOnAccent,
-        fontSize: 16,
-        fontWeight: '500'
-      }}>
-        ← Back
-      </Text>
+      <Ionicons name="chevron-back" size={28} color={tokens.textOnAccent} />
     </Pressable>
   );
 }

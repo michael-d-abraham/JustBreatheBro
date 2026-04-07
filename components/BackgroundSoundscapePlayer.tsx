@@ -7,7 +7,10 @@ import { useBackgroundSoundscape } from "@/hooks/useBackgroundSoundscape";
  */
 export default function BackgroundSoundscapePlayer() {
   const { settings } = useApp();
-  useBackgroundSoundscape({ soundscape: settings.soundscape });
+  useBackgroundSoundscape({
+    soundscape: settings.soundscape,
+    soundEnabled: settings.soundEnabled,
+  });
 
   // This component doesn't render anything - the hook handles everything
   return null;

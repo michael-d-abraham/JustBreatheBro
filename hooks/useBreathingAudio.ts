@@ -81,6 +81,35 @@ export function useBreathingAudio({ soundEnabled, isRunning, soundType }: UseBre
       }
     }
   }, [inhalePlayer, exhalePlayer]);
+
+  // Master sound off: stop breathing cues immediately (top-level mute)
+  useEffect(() => {
+    if (soundEnabled) return;
+    if (inhalePlayer && isPlayerValid(inhalePlayer)) {
+      try {
+        if (inhalePlayer.playing) {
+          inhalePlayer.pause();
+        }
+        if (typeof inhalePlayer.seekTo === 'function') {
+          inhalePlayer.seekTo(0);
+        }
+      } catch {
+        // ignore
+      }
+    }
+    if (exhalePlayer && isPlayerValid(exhalePlayer)) {
+      try {
+        if (exhalePlayer.playing) {
+          exhalePlayer.pause();
+        }
+        if (typeof exhalePlayer.seekTo === 'function') {
+          exhalePlayer.seekTo(0);
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }, [soundEnabled, inhalePlayer, exhalePlayer]);
   
   // Cleanup audio players on unmount
   useEffect(() => {
