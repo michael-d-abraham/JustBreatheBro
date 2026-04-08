@@ -4,21 +4,20 @@
     "slug": "Breathe Bro",
     "version": "2.0.1",
     "orientation": "portrait",
-    "icon": "./assets/icons/icon.png",
+    "icon": "./assets/icons/AppIcon.png",
     "scheme": "breath",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "icon": "./assets/icons/AppIcon.png",
       "bundleIdentifier": "com.michaelabraham.breathbro",
       "supportsTablet": true,
       "buildNumber": "6"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/icons/android-icon-foreground.png",
-        "backgroundImage": "./assets/icons/android-icon-background.png",
-        "monochromeImage": "./assets/icons/android-icon-monochrome.png"
+        "foregroundImage": "./assets/icons/adaptive-icon.png",
+        "backgroundColor": "#E6F4FE"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
