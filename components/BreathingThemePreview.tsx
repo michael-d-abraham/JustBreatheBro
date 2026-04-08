@@ -1,8 +1,13 @@
-import React from 'react';
-import { View, Text } from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
-import { Ionicons } from '@expo/vector-icons';
-import { getBreathingTokensForTheme, THEMES, ThemeName, useTheme } from './Theme';
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { Text, View } from "react-native";
+import Svg, { Circle } from "react-native-svg";
+import {
+  getBreathingTokensForTheme,
+  ThemeName,
+  THEMES,
+  useTheme,
+} from "./Theme";
 
 interface BreathingThemePreviewProps {
   themeName: ThemeName;
@@ -15,29 +20,25 @@ export default function BreathingThemePreview({
 }: BreathingThemePreviewProps) {
   const { tokens } = useTheme();
   const breathingTokens = getBreathingTokensForTheme(themeName);
-  
+
   const PREVIEW_SIZE = 110;
   const SVG_SIZE = 100;
   const MAIN_RADIUS = 155;
-  
+
   return (
-    <View style={{ alignItems: 'center', width: PREVIEW_SIZE }}>
+    <View style={{ alignItems: "center", width: PREVIEW_SIZE }}>
       {/* Preview container */}
       <View
         style={{
           width: PREVIEW_SIZE,
           height: PREVIEW_SIZE,
-          justifyContent: 'center',
-          alignItems: 'center',
-          position: 'relative',
+          justifyContent: "center",
+          alignItems: "center",
+          position: "relative",
         }}
       >
         {/* SVG breathing preview - captured mid-breath moment */}
-        <Svg 
-          width={SVG_SIZE} 
-          height={SVG_SIZE} 
-          viewBox="0 0 400 400"
-        >
+        <Svg width={SVG_SIZE} height={SVG_SIZE} viewBox="0 0 400 400">
           {/* Very subtle outer guide ring - barely visible */}
           <Circle
             cx={200}
@@ -48,7 +49,7 @@ export default function BreathingThemePreview({
             fill="none"
             opacity={0.25}
           />
-          
+
           {/* Main breathing form - dominant visual element */}
           <Circle
             cx={200}
@@ -60,7 +61,7 @@ export default function BreathingThemePreview({
             strokeLinecap="round"
             opacity={0.95}
           />
-          
+
           {/* Soft inner glow/center */}
           <Circle
             cx={200}
@@ -70,38 +71,34 @@ export default function BreathingThemePreview({
             opacity={0.4}
           />
         </Svg>
-        
+
         {/* Checkmark indicator for selected state */}
         {selected && (
           <View
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: 5,
               left: 5,
               width: 28,
               height: 28,
               borderRadius: 14,
               backgroundColor: tokens.bottomSheetText,
-              justifyContent: 'center',
-              alignItems: 'center',
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
-            <Ionicons
-              name="checkmark"
-              size={18}
-              color={tokens.bottomSheetBg}
-            />
+            <Ionicons name="checkmark" size={18} color={tokens.bottomSheetBg} />
           </View>
         )}
       </View>
-      
+
       {/* Label below preview */}
       <Text
         style={{
           color: tokens.bottomSheetText,
           fontSize: 15,
-          fontWeight: '500',
-          textAlign: 'center',
+          fontWeight: "500",
+          textAlign: "center",
           marginTop: 8,
         }}
       >

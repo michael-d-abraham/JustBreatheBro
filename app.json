@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "breath",
-    "slug": "breath",
-    "version": "1.0.1",
+    "name": "Just Breathe Bro",
+    "slug": "Breathe Bro",
+    "version": "2.0.1",
     "orientation": "portrait",
     "icon": "./assets/icons/icon.png",
     "scheme": "breath",
@@ -11,7 +11,7 @@
     "ios": {
       "bundleIdentifier": "com.michaelabraham.breathbro",
       "supportsTablet": true,
-      "buildNumber": "5"
+      "buildNumber": "6"
     },
     "android": {
       "adaptiveIcon": {

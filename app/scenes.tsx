@@ -6,7 +6,7 @@ import { useTheme } from "@/components/Theme";
 import { useApp } from "@/contexts/themeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Dimensions,
   Image,
@@ -19,6 +19,18 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+/** Slight see-through over root wallpaper (aligned with BaseBottomSheet). */
+const SCENES_BACKGROUND_ALPHA = 0.96;
+
+function hexWithAlpha(hex: string, alpha: number): string {
+  const clean = hex.replace("#", "");
+  if (clean.length !== 6) return hex;
+  const a = Math.min(255, Math.max(0, Math.round(alpha * 255)))
+    .toString(16)
+    .padStart(2, "0");
+  return `#${clean}${a}`;
+}
 
 // All wallpaper images from zenscapes folder
 const WALLPAPER_IMAGES = [
@@ -44,10 +56,18 @@ export default function ScenesScreen() {
   const { backgroundImage, setBackgroundImage } = useApp();
   const router = useRouter();
 
+  const containerBackgroundColor = useMemo(() => {
+    const bg = tokens.bottomSheetBg;
+    if (typeof bg === "string" && /^#[0-9A-Fa-f]{6}$/.test(bg)) {
+      return hexWithAlpha(bg, SCENES_BACKGROUND_ALPHA);
+    }
+    return bg;
+  }, [tokens.bottomSheetBg]);
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: tokens.bottomSheetBg,
+      backgroundColor: containerBackgroundColor,
     },
     header: {
       flexDirection: "row",

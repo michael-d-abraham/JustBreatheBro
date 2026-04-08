@@ -1,9 +1,9 @@
-import React from 'react';
-import Svg, { Path } from 'react-native-svg';
-import { SOUNDSCAPE_COLORS } from '../constants/featureColors';
-import { SoundscapeType, useApp } from '../contexts/themeContext';
-import CircularOptionButton from './CircularOptionButton';
-import { useTheme } from './Theme';
+import React from "react";
+import Svg, { Path } from "react-native-svg";
+import { SOUNDSCAPE_COLORS } from "../constants/featureColors";
+import { SoundscapeType, useApp } from "../contexts/themeContext";
+import CircularOptionButton from "./CircularOptionButton";
+import { useTheme } from "./Theme";
 
 type SoundscapeOption = {
   label: string;
@@ -28,10 +28,10 @@ const OffIcon = () => {
 };
 
 const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
-  { label: 'Dream', value: 'dream', color: SOUNDSCAPE_COLORS.dream },
-  { label: 'Fuzzy', value: 'fuzzy', color: SOUNDSCAPE_COLORS.fuzzy },
-  { label: 'Keys', value: 'keys', color: SOUNDSCAPE_COLORS.keys },
-  { label: 'OFF', value: 'off', iconComponent: <OffIcon /> },
+  { label: "Dream", value: "dream", color: SOUNDSCAPE_COLORS.dream },
+  { label: "Fuzzy", value: "fuzzy", color: SOUNDSCAPE_COLORS.fuzzy },
+  { label: "Keys", value: "keys", color: SOUNDSCAPE_COLORS.keys },
+  { label: "OFF", value: "off", iconComponent: <OffIcon /> },
 ];
 
 export default function SoundscapePicker() {
@@ -52,4 +52,3 @@ export default function SoundscapePicker() {
     </>
   );
 }
-
