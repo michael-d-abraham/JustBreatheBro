@@ -125,7 +125,7 @@ const palettes: Record<ThemeName, Record<Mode, PaletteTokens>> = {
       },
       dark: {
         sceneBackground: '#0D0B14',
-        surface: '#1A1625',
+        surface: '#0e1111',
         accentPrimary: '#9B8AE8',
         accentMuted: '#6B5BD0',
         textOnAccent: '#FFFFFF',

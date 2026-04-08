@@ -6,10 +6,12 @@ interface BackButtonProps {
   onPress: () => void;
   /** Optional layout override (e.g. align in a header row). */
   style?: StyleProp<ViewStyle>;
+  /** Chevron color; defaults to theme `textOnAccent` (dark on solid screens). */
+  iconColor?: string;
 }
 
 /** App-wide back control: chevron, matches Scenes / breathing navigation affordances. */
-export default function BackButton({ onPress, style }: BackButtonProps) {
+export default function BackButton({ onPress, style, iconColor }: BackButtonProps) {
   const { tokens } = useTheme();
 
   return (
@@ -19,7 +21,7 @@ export default function BackButton({ onPress, style }: BackButtonProps) {
       accessibilityRole="button"
       accessibilityLabel="Back"
     >
-      <Ionicons name="chevron-back" size={28} color={tokens.textOnAccent} />
+      <Ionicons name="chevron-back" size={28} color={iconColor ?? tokens.textOnAccent} />
     </Pressable>
   );
 }

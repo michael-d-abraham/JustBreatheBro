@@ -2,7 +2,7 @@ import React, { RefObject, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SupportSheetHandle } from "./SupportSheet";
-import { useTheme } from "./Theme";
+import { useWallpaperForeground } from "./Theme";
 
 interface BreathingPageHeaderProps {
   supportSheetRef: RefObject<SupportSheetHandle | null>;
@@ -17,9 +17,8 @@ export default function BreathingPageHeader({
   onCirclePress,
   onInfoLibraryPress,
 }: BreathingPageHeaderProps) {
-  const { tokens } = useTheme();
-  /** Follows system light/dark via ThemeProvider (palette text for current mode). */
-  const headerContentColor = tokens.textPrimary;
+  /** Always light — header sits on scene wallpapers (index / calm / energize). */
+  const headerContentColor = useWallpaperForeground();
   const insets = useSafeAreaInsets();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 

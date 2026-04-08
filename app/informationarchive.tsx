@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "@/components/BackButton";
-import { useTheme } from "@/components/Theme";
+import { useTheme, useWallpaperForeground } from "@/components/Theme";
 import { useApp } from "@/contexts/themeContext";
 import { getResources, InformationResource, ResourceType } from "@/lib/informationArchive";
 
@@ -45,6 +45,8 @@ const CARD_BORDER_ALPHA = 0.55;
 
 export default function InformationArchiveScreen() {
   const { tokens } = useTheme();
+  /** Header over scene wallpaper — match index header (always light). */
+  const headerLightColor = useWallpaperForeground();
   const { backgroundImage } = useApp();
   const [resources, setResources] = useState<InformationResource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,7 +93,7 @@ export default function InformationArchiveScreen() {
       paddingVertical: 12,
     },
     headerTitle: {
-      color: tokens.textOnAccent,
+      color: headerLightColor,
       fontSize: 20,
       fontWeight: "700",
       position: "absolute",
@@ -196,7 +198,10 @@ export default function InformationArchiveScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <View style={styles.header}>
-        <BackButton onPress={() => router.back()} />
+        <BackButton
+          onPress={() => router.back()}
+          iconColor={headerLightColor}
+        />
         <Text style={styles.headerTitle}>Information Archive</Text>
         <View style={{ width: 40 }} />
       </View>

@@ -1,7 +1,19 @@
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import React, { forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
 import { Text, View } from 'react-native';
 import { useTheme } from './Theme';
+
+/** Light frosted sheet: ~12% see-through over content behind. */
+const BOTTOM_SHEET_BACKGROUND_ALPHA = 0.88;
+
+function hexWithAlpha(hex: string, alpha: number): string {
+  const clean = hex.replace('#', '');
+  if (clean.length !== 6) return hex;
+  const a = Math.min(255, Math.max(0, Math.round(alpha * 255)))
+    .toString(16)
+    .padStart(2, '0');
+  return `#${clean}${a}`;
+}
 
 /**
  * Handle type for imperative control of BaseBottomSheet
@@ -38,7 +50,7 @@ interface BaseBottomSheetProps {
  * 
  * COLOR TOKEN CONTRACT:
  * This component uses ONLY the following tokens from Theme.tsx:
- * - tokens.bottomSheetBg: Background color (PlatformColor('systemBackground'))
+ * - tokens.bottomSheetBg: Base sheet fill (palette surface), blended to ~88% opacity for slight see-through
  * - tokens.bottomSheetText: Primary text color (PlatformColor('label'))
  * - tokens.bottomSheetSeparator: Handle indicator color (PlatformColor('separator'))
  * 
@@ -77,6 +89,14 @@ const BaseBottomSheet = forwardRef<BaseBottomSheetHandle, BaseBottomSheetProps>(
     const { tokens } = useTheme();
     const modalRef = useRef<BottomSheetModal>(null);
 
+    const sheetBackgroundColor = useMemo(() => {
+      const bg = tokens.bottomSheetBg;
+      if (typeof bg === 'string' && /^#[0-9A-Fa-f]{6}$/.test(bg)) {
+        return hexWithAlpha(bg, BOTTOM_SHEET_BACKGROUND_ALPHA);
+      }
+      return bg;
+    }, [tokens.bottomSheetBg]);
+
     useImperativeHandle(ref, () => ({
       open: () => modalRef.current?.present(),
       close: () => modalRef.current?.dismiss(),
@@ -92,7 +112,7 @@ const BaseBottomSheet = forwardRef<BaseBottomSheetHandle, BaseBottomSheetProps>(
         enableDynamicSizing={false}
         onChange={onChange}
         onDismiss={onDismiss}
-        backgroundStyle={{ backgroundColor: tokens.bottomSheetBg }}
+        backgroundStyle={{ backgroundColor: sheetBackgroundColor }}
         handleIndicatorStyle={{ backgroundColor: tokens.bottomSheetSeparator }}
       >
         <BottomSheetScrollView 
