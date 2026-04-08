@@ -71,8 +71,8 @@ export default function BottomSheetExerciseCard({
           <View style={{ flex: 1 }}>
             <Text style={{ 
               color: tokens.bottomSheetText, 
-              fontSize: 18, 
-              fontWeight: isSelected ? '700' : '600',
+              fontSize: 21, 
+              fontWeight: isSelected ? '700' : '500',
               marginBottom: 6,
             }}>
               {exercise.title}

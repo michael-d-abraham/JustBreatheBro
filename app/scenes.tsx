@@ -150,9 +150,8 @@ export default function ScenesScreen() {
       marginTop: 8,
     },
     appearanceSection: {
-      flexDirection: "row",
-      gap: 16,
       marginTop: 12,
+      alignSelf: "stretch",
     },
     appearanceSectionSpaced: {
       flexDirection: "row",
@@ -254,7 +253,7 @@ export default function ScenesScreen() {
 
         {/* Sound & Haptics Section */}
         <Text style={styles.sectionTitle}>SOUND & HAPTICS</Text>
-        <View style={{ marginTop: 4, alignSelf: 'stretch' }}>
+        <View style={{ marginTop: 4, alignSelf: "stretch" }}>
           <BottomSheetSoundHapticsPicker />
         </View>
       </ScrollView>

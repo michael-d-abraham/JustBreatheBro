@@ -24,13 +24,35 @@ export const THEME_PREVIEW_COLORS = {
 } as const;
 
 /**
- * Soundscape Preview Colors
- * Visual identifiers for ambient soundscape options
+ * Soundscape ring preview — same roles as breathing animation themes
+ * (`BreathingAnimationTokens` in Theme.tsx): outer guide, main ring stroke, body fill.
+ */
+export const SOUNDSCAPE_PALETTES = {
+  dream: {
+    guideOuterStroke: "#9DAA8F", // airy green-gray halo
+    mainStroke: "#5A6848", // deep forest edge
+    mainFill: "#7D8B6A", // dream / meadow body
+  },
+  fuzzy: {
+    guideOuterStroke: "#9A8068", // warm terracotta mist
+    mainStroke: "#4F3D2A", // deep brown ring
+    mainFill: "#7A5B40", // fuzzy / earth body
+  },
+  keys: {
+    guideOuterStroke: "#E4DFD5", // soft ivory ring
+    mainStroke: "#A89888", // readable taupe stroke on cream
+    mainFill: "#F5F1EA", // piano keys / cream body
+  },
+} as const;
+
+/**
+ * Primary swatch per soundscape (fill tone) — circular pickers, quick references.
+ * Prefer `SOUNDSCAPE_PALETTES` for ring previews that need stroke/outer depth.
  */
 export const SOUNDSCAPE_COLORS = {
-  dream: "#7D8B6A", // Dark green - dream state
-  fuzzy: "#7A5B40", // Light blue - fuzzy ambient
-  keys: "#F5F1EA", // Light gray - piano keys
+  dream: SOUNDSCAPE_PALETTES.dream.mainFill,
+  fuzzy: SOUNDSCAPE_PALETTES.fuzzy.mainFill,
+  keys: SOUNDSCAPE_PALETTES.keys.mainFill,
 } as const;
 
 /**
@@ -38,3 +60,4 @@ export const SOUNDSCAPE_COLORS = {
  */
 export type ThemeColorKey = keyof typeof THEME_PREVIEW_COLORS;
 export type SoundscapeColorKey = keyof typeof SOUNDSCAPE_COLORS;
+export type SoundscapePaletteKey = keyof typeof SOUNDSCAPE_PALETTES;

@@ -120,7 +120,7 @@ const palettes: Record<ThemeName, Record<Mode, PaletteTokens>> = {
         textOnAccent: '#1A1625',
         textPrimary: '#1A1625',
         textSecondary: '#3D3648',
-        borderSubtle: '#3F3C37',
+        borderSubtle: '#5E5F5D',
         shadow: '#000000',
       },
       dark: {
