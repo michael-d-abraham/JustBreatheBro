@@ -1,7 +1,21 @@
 import { useTheme as useBaseTheme, ThemeName } from '@/components/Theme';
-import { getBackgroundImage, getAnimationTheme, saveAnimationTheme } from '@/lib/storage';
+import { getBackgroundImage, getAnimationTheme, saveAnimationTheme, saveBackgroundImage } from '@/lib/storage';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { ImageBackground, View } from 'react-native';
+
+/** Default zenscape on first install and when stored value is missing or unknown. */
+export const DEFAULT_ZENSCAPE_BACKGROUND_FILENAME =
+  '53f9385211ee5c576f8fa058326f479b.jpg';
+
+const ZENSCAPE_IMAGE_MAP: Record<string, number> = {
+  [DEFAULT_ZENSCAPE_BACKGROUND_FILENAME]: require('../assets/images/BackGrounds/zenscapes/53f9385211ee5c576f8fa058326f479b.jpg'),
+  'a173ab0f7d9a7427676a776831bc8154.jpg': require('../assets/images/BackGrounds/zenscapes/a173ab0f7d9a7427676a776831bc8154.jpg'),
+  'bda498c860d011ed38fe8877fe894261.jpg': require('../assets/images/BackGrounds/zenscapes/bda498c860d011ed38fe8877fe894261.jpg'),
+};
+
+function isKnownZenscapeFilename(name: string | null | undefined): name is string {
+  return typeof name === 'string' && name in ZENSCAPE_IMAGE_MAP;
+}
 
 export type SoundType = 'synth' | 'guzheng' | 'sine' | 'off';
 export type SoundscapeType = 'dream' | 'fuzzy' | 'keys' | 'off';
@@ -42,7 +56,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     soundscape: 'dream',
     animationTheme: 'calm',
   });
-  const [backgroundImage, setBackgroundImageState] = useState<string | null>(null);
+  // Start with default zenscape so the first paint matches first-launch storage (no solid flash).
+  const [backgroundImage, setBackgroundImageState] = useState<string | null>(
+    DEFAULT_ZENSCAPE_BACKGROUND_FILENAME,
+  );
 
   const updateSettings = (newSettings: Partial<AppSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
@@ -60,16 +77,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // Load background image on mount, or set default zenscape
-    getBackgroundImage().then(async (storedImage) => {
-      if (storedImage) {
+    let cancelled = false;
+    // Load background image on mount; first install or bad legacy value → default zenscape + persist
+    (async () => {
+      const storedImage = await getBackgroundImage();
+      if (cancelled) return;
+      if (isKnownZenscapeFilename(storedImage)) {
         setBackgroundImageState(storedImage);
       } else {
-        // On first startup, set the default zenscape image
-        const defaultZenscape = '53f9385211ee5c576f8fa058326f479b.jpg';
-        await setBackgroundImage(defaultZenscape);
+        setBackgroundImageState(DEFAULT_ZENSCAPE_BACKGROUND_FILENAME);
+        await saveBackgroundImage(DEFAULT_ZENSCAPE_BACKGROUND_FILENAME);
       }
-    });
+    })();
 
     // Load animation theme from storage
     getAnimationTheme().then(stored => {
@@ -77,6 +96,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setSettings(prev => ({ ...prev, animationTheme: stored as ThemeName }));
       }
     });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const toggleSound = () => setSettings(prev => ({ ...prev, soundEnabled: !prev.soundEnabled }));
@@ -116,29 +138,23 @@ const ThemedWrapper = ({ children }: { children: ReactNode }) => {
     backgroundColor: theme.tokens.sceneBackground,
   };
 
-  if (backgroundImage) {
-    // Map image paths to require statements - all images from zenscapes folder
-    const imageMap: Record<string, any> = {
-      '53f9385211ee5c576f8fa058326f479b.jpg': require('../assets/images/BackGrounds/zenscapes/53f9385211ee5c576f8fa058326f479b.jpg'),
-      'a173ab0f7d9a7427676a776831bc8154.jpg': require('../assets/images/BackGrounds/zenscapes/a173ab0f7d9a7427676a776831bc8154.jpg'),
-      'bda498c860d011ed38fe8877fe894261.jpg': require('../assets/images/BackGrounds/zenscapes/bda498c860d011ed38fe8877fe894261.jpg'),
-    };
+  const resolvedFilename = isKnownZenscapeFilename(backgroundImage)
+    ? backgroundImage
+    : DEFAULT_ZENSCAPE_BACKGROUND_FILENAME;
+  const imageSource = ZENSCAPE_IMAGE_MAP[resolvedFilename];
 
-    const imageSource = imageMap[backgroundImage];
-    
-    if (imageSource) {
-      return (
-        <ImageBackground
-          source={imageSource}
-          style={backgroundStyle}
-          resizeMode="cover"
-        >
-          {children}
-        </ImageBackground>
-      );
-    }
+  if (imageSource != null) {
+    return (
+      <ImageBackground
+        source={imageSource}
+        style={backgroundStyle}
+        resizeMode="cover"
+      >
+        {children}
+      </ImageBackground>
+    );
   }
-  
+
   return (
     <View style={backgroundStyle}>
       {children}

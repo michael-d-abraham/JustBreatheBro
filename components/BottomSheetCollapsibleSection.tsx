@@ -7,20 +7,26 @@ interface BottomSheetCollapsibleSectionProps {
   content: string | React.ReactNode;
   expanded: boolean;
   onToggle: () => void;
+  /** Called when the section title row is pressed, before expand/collapse toggles. */
+  onTitlePress?: () => void;
 }
 
 export default function BottomSheetCollapsibleSection({ 
   title, 
   content, 
   expanded, 
-  onToggle 
+  onToggle,
+  onTitlePress,
 }: BottomSheetCollapsibleSectionProps) {
   const { tokens } = useTheme();
 
   return (
     <>
       <Pressable 
-        onPress={onToggle} 
+        onPress={() => {
+          onTitlePress?.();
+          onToggle();
+        }} 
         style={{ 
           flexDirection: 'row', 
           justifyContent: 'space-between', 

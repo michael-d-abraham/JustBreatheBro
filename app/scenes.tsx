@@ -3,7 +3,7 @@ import BottomSheetSoundHapticsPicker from "@/components/BottomSheetSoundHapticsP
 import BottomSheetSoundscapePicker from "@/components/BottomSheetSoundscapePicker";
 import BottomSheetThemePicker from "@/components/BottomSheetThemePicker";
 import { useTheme } from "@/components/Theme";
-import { useApp } from "@/contexts/themeContext";
+import { DEFAULT_ZENSCAPE_BACKGROUND_FILENAME, useApp } from "@/contexts/themeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
@@ -36,7 +36,7 @@ function hexWithAlpha(hex: string, alpha: number): string {
 const WALLPAPER_IMAGES = [
   {
     source: require("../assets/images/BackGrounds/zenscapes/53f9385211ee5c576f8fa058326f479b.jpg"),
-    filename: "53f9385211ee5c576f8fa058326f479b.jpg",
+    filename: DEFAULT_ZENSCAPE_BACKGROUND_FILENAME,
     name: "Jasper Lake",
   },
   {

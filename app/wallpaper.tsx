@@ -1,5 +1,5 @@
 import { useWallpaperForeground } from "@/components/Theme";
-import { useApp } from "@/contexts/themeContext";
+import { DEFAULT_ZENSCAPE_BACKGROUND_FILENAME, useApp } from "@/contexts/themeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -20,7 +20,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const WALLPAPER_IMAGES = [
   {
     source: require("../assets/images/BackGrounds/zenscapes/53f9385211ee5c576f8fa058326f479b.jpg"),
-    filename: "53f9385211ee5c576f8fa058326f479b.jpg",
+    filename: DEFAULT_ZENSCAPE_BACKGROUND_FILENAME,
     name: "Jasper Lake",
   },
   {
@@ -52,7 +52,7 @@ export default function WallpaperPage() {
     const targetFilename =
       selectedParam ||
       backgroundImage ||
-      "53f9385211ee5c576f8fa058326f479b.jpg";
+      DEFAULT_ZENSCAPE_BACKGROUND_FILENAME;
     const selectedIndex = WALLPAPER_IMAGES.findIndex(
       (img) => img.filename === targetFilename,
     );

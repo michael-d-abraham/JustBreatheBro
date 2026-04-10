@@ -19,10 +19,13 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
     const [aboutExpanded, setAboutExpanded] = useState(false);
     const [getInTouchExpanded, setGetInTouchExpanded] = useState(false);
     const [feedbackExpanded, setFeedbackExpanded] = useState(false);
+    const [supportTipExpanded, setSupportTipExpanded] = useState(false);
     const [legalExpanded, setLegalExpanded] = useState(false);
 
-    const handleEmailPress = () => {
-      Linking.openURL('mailto:hello@breathbro.app');
+    const SUPPORT_VIDEO_URL = 'https://www.youtube.com/watch?v=8WPaO819-_g';
+
+    const handleSupportVideoPress = () => {
+      Linking.openURL(SUPPORT_VIDEO_URL);
     };
 
     const handlePrivacyPolicyPress = () => {
@@ -31,6 +34,12 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
 
     const handleTermsPress = () => {
       Linking.openURL('https://www.youtube.com/watch?v=8WPaO819-_g');
+    };
+
+    const BUY_ME_A_COFFEE_URL = 'https://buymeacoffee.com/michaeldabraham';
+
+    const handleBuyMeACoffeePress = () => {
+      Linking.openURL(BUY_ME_A_COFFEE_URL);
     };
 
     return (
@@ -74,12 +83,12 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
           title="GET IN TOUCH"
           expanded={getInTouchExpanded}
           onToggle={() => setGetInTouchExpanded(!getInTouchExpanded)}
+          onTitlePress={handleSupportVideoPress}
           content={
             <BottomSheetRow
               title="📧 Email Support"
               subtitle="hello@breathbro.app"
-              onPress={handleEmailPress}
-              showArrow={false}
+              onPress={handleSupportVideoPress}
             />
           }
         />
@@ -91,12 +100,28 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
           title="WE'D LOVE YOUR FEEDBACK"
           expanded={feedbackExpanded}
           onToggle={() => setFeedbackExpanded(!feedbackExpanded)}
+          onTitlePress={handleSupportVideoPress}
           content={
             <BottomSheetRow
               title="Send Feedback"
               subtitle="Help us improve by sharing your thoughts"
-              onPress={handleEmailPress}
-              showArrow={false}
+              onPress={handleSupportVideoPress}
+            />
+          }
+        />
+
+        <BottomSheetDivider />
+
+        {/* Tip / support */}
+        <BottomSheetCollapsibleSection
+          title="SUPPORT"
+          expanded={supportTipExpanded}
+          onToggle={() => setSupportTipExpanded(!supportTipExpanded)}
+          content={
+            <BottomSheetRow
+              title="☕ Buy me a coffee"
+              subtitle="buymeacoffee.com/michaeldabraham"
+              onPress={handleBuyMeACoffeePress}
             />
           }
         />
