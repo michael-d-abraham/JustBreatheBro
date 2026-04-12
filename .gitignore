@@ -33,6 +33,9 @@ yarn-error.*
 # local env files
 .env*.local
 
+# Sentry upload during Xcode archive (see .env.sentry-build-plugin.example)
+.env.sentry-build-plugin
+
 # typescript
 *.tsbuildinfo
 

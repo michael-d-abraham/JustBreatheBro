@@ -2,7 +2,7 @@
   "expo": {
     "name": "JustBreatheBro",
     "slug": "JustBreatheBro",
-    "version": "2.0.3",
+    "version": "2.0.4",
     "orientation": "portrait",
     "icon": "./assets/icons/AppIcon.png",
     "scheme": "breath",
