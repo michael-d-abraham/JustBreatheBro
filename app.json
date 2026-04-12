@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "Just Breathe Bro",
-    "slug": "Breathe Bro",
-    "version": "2.0.1",
+    "slug": "Just Breathe Bro",
+    "version": "2.0.2",
     "orientation": "portrait",
     "icon": "./assets/icons/AppIcon.png",
     "scheme": "breath",
