@@ -15,10 +15,6 @@ export default function SupportScreen() {
     Linking.openURL('https://www.youtube.com/watch?v=8WPaO819-_g');
   };
 
-  const handleBuyMeACoffeePress = () => {
-    Linking.openURL('https://buymeacoffee.com/michaeldabraham');
-  };
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: backgroundImage ? 'transparent' : tokens.sceneBackground, padding: 12 }}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -137,44 +133,6 @@ export default function SupportScreen() {
                 opacity: 0.8,
               }}>
                 Help us improve by sharing your thoughts
-              </Text>
-            </View>
-            <Text style={{ color: tokens.textOnAccent, fontSize: 18 }}>→</Text>
-          </Pressable>
-        </SettingsSection>
-
-        {/* Support / tip */}
-        <SettingsSection title="Support">
-          <Pressable
-            style={{
-              backgroundColor: tokens.surface,
-              borderRadius: 12,
-              padding: 16,
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-            onPress={handleBuyMeACoffeePress}
-          >
-            <View style={{ flex: 1, paddingRight: 12 }}>
-              <Text
-                style={{
-                  color: tokens.textOnAccent,
-                  fontSize: 16,
-                  fontWeight: '600',
-                }}
-              >
-                ☕ Buy me a coffee
-              </Text>
-              <Text
-                style={{
-                  color: tokens.textOnAccent,
-                  fontSize: 12,
-                  marginTop: 4,
-                  opacity: 0.8,
-                }}
-              >
-                buymeacoffee.com/michaeldabraham
               </Text>
             </View>
             <Text style={{ color: tokens.textOnAccent, fontSize: 18 }}>→</Text>

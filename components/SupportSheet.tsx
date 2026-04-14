@@ -19,7 +19,6 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
     const [aboutExpanded, setAboutExpanded] = useState(false);
     const [getInTouchExpanded, setGetInTouchExpanded] = useState(false);
     const [feedbackExpanded, setFeedbackExpanded] = useState(false);
-    const [supportTipExpanded, setSupportTipExpanded] = useState(false);
     const [legalExpanded, setLegalExpanded] = useState(false);
 
     const SUPPORT_VIDEO_URL = 'https://www.youtube.com/watch?v=8WPaO819-_g';
@@ -34,12 +33,6 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
 
     const handleTermsPress = () => {
       Linking.openURL('https://www.youtube.com/watch?v=8WPaO819-_g');
-    };
-
-    const BUY_ME_A_COFFEE_URL = 'https://buymeacoffee.com/michaeldabraham';
-
-    const handleBuyMeACoffeePress = () => {
-      Linking.openURL(BUY_ME_A_COFFEE_URL);
     };
 
     return (
@@ -106,22 +99,6 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
               title="Send Feedback"
               subtitle="Help us improve by sharing your thoughts"
               onPress={handleSupportVideoPress}
-            />
-          }
-        />
-
-        <BottomSheetDivider />
-
-        {/* Tip / support */}
-        <BottomSheetCollapsibleSection
-          title="SUPPORT"
-          expanded={supportTipExpanded}
-          onToggle={() => setSupportTipExpanded(!supportTipExpanded)}
-          content={
-            <BottomSheetRow
-              title="☕ Buy me a coffee"
-              subtitle="buymeacoffee.com/michaeldabraham"
-              onPress={handleBuyMeACoffeePress}
             />
           }
         />
