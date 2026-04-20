@@ -1,7 +1,10 @@
 import { getBreathRoomWsUrl } from "@/lib/breathRoomBackend";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-export { getBreathRoomApiBaseUrl, getBreathRoomWsUrl } from "@/lib/breathRoomBackend";
+export {
+  getBreathRoomApiBaseUrl,
+  getBreathRoomWsUrl
+} from "@/lib/breathRoomBackend";
 
 /** Server pattern (seconds). From snapshot only. */
 export type BreathRoomPattern = {
@@ -46,18 +49,22 @@ export type CanonicalBreathRoomId = (typeof BREATH_ROOM_CATALOG)[number]["id"];
 
 export type BreathRoomCatalogEntry = (typeof BREATH_ROOM_CATALOG)[number];
 
-const CANONICAL_ROOM_IDS = new Set<string>(BREATH_ROOM_CATALOG.map((o) => o.id));
-
-const CATALOG_BY_ID = new Map<CanonicalBreathRoomId, BreathRoomCatalogEntry>(
-  BREATH_ROOM_CATALOG.map((e) => [e.id, e])
+const CANONICAL_ROOM_IDS = new Set<string>(
+  BREATH_ROOM_CATALOG.map((o) => o.id),
 );
 
-export function isCanonicalBreathRoomId(id: string): id is CanonicalBreathRoomId {
+const CATALOG_BY_ID = new Map<CanonicalBreathRoomId, BreathRoomCatalogEntry>(
+  BREATH_ROOM_CATALOG.map((e) => [e.id, e]),
+);
+
+export function isCanonicalBreathRoomId(
+  id: string,
+): id is CanonicalBreathRoomId {
   return CANONICAL_ROOM_IDS.has(id);
 }
 
 export function getBreathRoomCatalogEntry(
-  roomId: string | null | undefined
+  roomId: string | null | undefined,
 ): BreathRoomCatalogEntry | null {
   if (typeof roomId !== "string" || !roomId) return null;
   if (!isCanonicalBreathRoomId(roomId)) return null;
@@ -69,7 +76,7 @@ export function getBreathRoomCatalogEntry(
  * Always fills deep / box / extended-exhale (defaults 0 if missing in JSON).
  */
 export async function fetchBreathRoomStats(
-  apiBase: string
+  apiBase: string,
 ): Promise<Record<CanonicalBreathRoomId, number> | null> {
   const base = apiBase.replace(/\/$/, "");
   try {
@@ -101,7 +108,8 @@ function isRecord(x: unknown): x is Record<string, unknown> {
 }
 
 function asPhase(s: unknown): GlobalRoomPhase | null {
-  if (s === "inhale" || s === "hold1" || s === "exhale" || s === "hold2") return s;
+  if (s === "inhale" || s === "hold1" || s === "exhale" || s === "hold2")
+    return s;
   return null;
 }
 
@@ -142,13 +150,15 @@ export function useGlobalBreathingRoom({
   const onPhaseStepRef = useRef(onPhaseStep);
   onPhaseStepRef.current = onPhaseStep;
 
-  const [connectionState, setConnectionState] = useState<BreathRoomConnectionState>("idle");
+  const [connectionState, setConnectionState] =
+    useState<BreathRoomConnectionState>("idle");
   const [wsError, setWsError] = useState<string | null>(null);
 
   const [participantCount, setParticipantCount] = useState(0);
   const [pattern, setPattern] = useState<BreathRoomPattern | null>(null);
   const [roomId, setRoomId] = useState<string | null>(null);
-  const [selectedRoomId, setSelectedRoomId] = useState<CanonicalBreathRoomId>(initialRoomId);
+  const [selectedRoomId, setSelectedRoomId] =
+    useState<CanonicalBreathRoomId>(initialRoomId);
 
   const [phase, setPhase] = useState<GlobalRoomPhase | null>(null);
   const [phaseSeq, setPhaseSeq] = useState<number | null>(null);
@@ -167,9 +177,15 @@ export function useGlobalBreathingRoom({
   const wsRef = useRef<WebSocket | null>(null);
   /** Stops auto-reconnect and closes the socket (user leave or unmount). */
   const haltReconnectRef = useRef<(() => void) | null>(null);
-  const handleSnapshotRef = useRef<(payload: Record<string, unknown>) => void>(() => {});
-  const handlePhasePayloadRef = useRef<(payload: Record<string, unknown>) => void>(() => {});
-  const handlePresenceRef = useRef<(payload: Record<string, unknown>) => void>(() => {});
+  const handleSnapshotRef = useRef<(payload: Record<string, unknown>) => void>(
+    () => {},
+  );
+  const handlePhasePayloadRef = useRef<
+    (payload: Record<string, unknown>) => void
+  >(() => {});
+  const handlePresenceRef = useRef<(payload: Record<string, unknown>) => void>(
+    () => {},
+  );
   /** Last known room from server (phase may repeat omit roomId in some builds). */
   const lastServerRoomIdRef = useRef<string | null>(null);
 
@@ -186,7 +202,8 @@ export function useGlobalBreathingRoom({
   }, [initialRoomId]);
 
   const applyServerTime = useCallback((serverTimeMs: unknown) => {
-    if (typeof serverTimeMs !== "number" || !Number.isFinite(serverTimeMs)) return;
+    if (typeof serverTimeMs !== "number" || !Number.isFinite(serverTimeMs))
+      return;
     setOffsetMs(serverTimeMs - Date.now());
   }, []);
 
@@ -206,7 +223,10 @@ export function useGlobalBreathingRoom({
       if (typeof pEnd !== "number" || !Number.isFinite(pEnd)) return;
       if (typeof cIdx !== "number" || !Number.isFinite(cIdx)) return;
 
-      const incomingRid = typeof payload.roomId === "string" && payload.roomId ? payload.roomId : null;
+      const incomingRid =
+        typeof payload.roomId === "string" && payload.roomId
+          ? payload.roomId
+          : null;
       const rId = incomingRid ?? lastServerRoomIdRef.current;
       if (!rId) return;
 
@@ -230,7 +250,10 @@ export function useGlobalBreathingRoom({
 
       lastHandledRoomPhaseKeyRef.current = roomPhaseKey;
 
-      const off = typeof sTime === "number" && Number.isFinite(sTime) ? sTime - Date.now() : 0;
+      const off =
+        typeof sTime === "number" && Number.isFinite(sTime)
+          ? sTime - Date.now()
+          : 0;
       const remainingMs = Math.max(0, pEnd - (Date.now() + off));
 
       onPhaseStepRef.current({
@@ -241,7 +264,7 @@ export function useGlobalBreathingRoom({
         skipBreathCueAudio: roomChangedForAudio,
       });
     },
-    [applyServerTime]
+    [applyServerTime],
   );
 
   const handleSnapshot = useCallback(
@@ -274,7 +297,7 @@ export function useGlobalBreathingRoom({
 
       handlePhasePayload(payload);
     },
-    [handlePhasePayload]
+    [handlePhasePayload],
   );
 
   const handlePresence = useCallback(
@@ -290,7 +313,7 @@ export function useGlobalBreathingRoom({
         setParticipantCount(Math.max(0, Math.floor(pc)));
       }
     },
-    [applyServerTime]
+    [applyServerTime],
   );
 
   handleSnapshotRef.current = handleSnapshot;
@@ -332,7 +355,10 @@ export function useGlobalBreathingRoom({
       if (!allowReconnect) return;
       clearReconnectTimer();
       const delay =
-        Math.min(MAX_RECONNECT_BACKOFF_MS, INITIAL_CONNECT_BACKOFF_MS * 2 ** attempt) +
+        Math.min(
+          MAX_RECONNECT_BACKOFF_MS,
+          INITIAL_CONNECT_BACKOFF_MS * 2 ** attempt,
+        ) +
         Math.random() * BACKOFF_JITTER_MS;
       attempt += 1;
       setConnectionState("reconnecting");
@@ -468,7 +494,7 @@ export function useGlobalBreathingRoom({
         }
       }
     },
-    [onSelectedRoomIdChange]
+    [onSelectedRoomIdChange],
   );
 
   useEffect(() => {

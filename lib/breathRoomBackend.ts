@@ -12,13 +12,17 @@
  */
 
 export const BREATH_ROOM_PRODUCTION_WS_URL = "wss://api.hellobreathbro.app";
-export const BREATH_ROOM_PRODUCTION_API_BASE_URL = "https://api.hellobreathbro.app";
+export const BREATH_ROOM_PRODUCTION_API_BASE_URL =
+  "https://api.hellobreathbro.app";
 
 /** Suggested value for EXPO_PUBLIC_BREATH_ROOM_WS_URL when testing against a local server. */
 export const BREATH_ROOM_DEV_WS_URL = "ws://localhost:8085";
 
 function firstNonEmptyEnvWs(): string | null {
-  const candidates = [process.env.EXPO_PUBLIC_BREATH_ROOM_WS_URL, process.env.EXPO_PUBLIC_WS_URL];
+  const candidates = [
+    process.env.EXPO_PUBLIC_BREATH_ROOM_WS_URL,
+    process.env.EXPO_PUBLIC_WS_URL,
+  ];
   for (const u of candidates) {
     if (typeof u !== "string") continue;
     const t = u.trim();
