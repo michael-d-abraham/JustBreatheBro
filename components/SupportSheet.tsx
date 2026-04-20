@@ -76,7 +76,6 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
           title="GET IN TOUCH"
           expanded={getInTouchExpanded}
           onToggle={() => setGetInTouchExpanded(!getInTouchExpanded)}
-          onTitlePress={handleSupportVideoPress}
           content={
             <BottomSheetRow
               title="📧 Email Support"
@@ -93,7 +92,6 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
           title="WE'D LOVE YOUR FEEDBACK"
           expanded={feedbackExpanded}
           onToggle={() => setFeedbackExpanded(!feedbackExpanded)}
-          onTitlePress={handleSupportVideoPress}
           content={
             <BottomSheetRow
               title="Send Feedback"

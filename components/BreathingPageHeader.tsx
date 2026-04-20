@@ -9,6 +9,9 @@ interface BreathingPageHeaderProps {
   onSupportPress: () => void;
   onCirclePress?: () => void;
   onInfoLibraryPress?: () => void;
+  /** When set, first menu row uses this label instead of "Love". */
+  globalBreathLabel?: string;
+  onGlobalBreathPress?: () => void;
 }
 
 export default function BreathingPageHeader({
@@ -16,6 +19,8 @@ export default function BreathingPageHeader({
   onSupportPress,
   onCirclePress,
   onInfoLibraryPress,
+  globalBreathLabel,
+  onGlobalBreathPress,
 }: BreathingPageHeaderProps) {
   /** Always light — header sits on scene wallpapers (index / calm / energize). */
   const headerContentColor = useWallpaperForeground();
@@ -56,14 +61,13 @@ export default function BreathingPageHeader({
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleMenuItemPress = (item: "Love" | "Benefits" | "Support") => {
+  const handleMenuItemPress = (item: "Benefits" | "Support") => {
     setIsDropdownOpen(false);
     if (item === "Support") {
       onSupportPress();
     } else if (item === "Benefits" && onInfoLibraryPress) {
       onInfoLibraryPress();
     }
-    // Love can be handled later if needed
   };
 
   return (
@@ -123,10 +127,15 @@ export default function BreathingPageHeader({
       {isDropdownOpen && (
         <View style={styles.dropdown}>
           <Pressable
-            onPress={() => handleMenuItemPress("Love")}
+            onPress={() => {
+              setIsDropdownOpen(false);
+              onGlobalBreathPress?.();
+            }}
             style={styles.dropdownItem}
           >
-            <Text style={styles.dropdownItemText}>Love</Text>
+            <Text style={styles.dropdownItemText}>
+              {globalBreathLabel ?? "Love"}
+            </Text>
           </Pressable>
           <Pressable
             onPress={() => handleMenuItemPress("Benefits")}

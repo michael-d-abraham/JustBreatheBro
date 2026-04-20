@@ -18,6 +18,37 @@ export function useBreathingAnimation() {
     strokeWidth.value = withTiming(3, { duration });
   };
 
+  const RADIUS_MIN = 66;
+  const RADIUS_MAX = 179;
+  const STROKE_MIN = 3;
+  const STROKE_MAX = 6;
+
+  /**
+   * Snap the ring to a position within the current phase without animation.
+   * `elapsedRatio` is fraction of the current phase elapsed [0, 1] (0 = phase start, 1 = phase end).
+   */
+  const seekToPhaseProgress = (
+    phase: "inhale" | "exhale" | "hold1" | "hold2",
+    elapsedRatio: number
+  ) => {
+    cancelAnimation(radius);
+    cancelAnimation(strokeWidth);
+    const t = Math.min(1, Math.max(0, elapsedRatio));
+    if (phase === "inhale") {
+      radius.value = RADIUS_MIN + (RADIUS_MAX - RADIUS_MIN) * t;
+      strokeWidth.value = STROKE_MIN + (STROKE_MAX - STROKE_MIN) * t;
+    } else if (phase === "exhale") {
+      radius.value = RADIUS_MAX - (RADIUS_MAX - RADIUS_MIN) * t;
+      strokeWidth.value = STROKE_MAX - (STROKE_MAX - STROKE_MIN) * t;
+    } else if (phase === "hold1") {
+      radius.value = RADIUS_MAX;
+      strokeWidth.value = STROKE_MAX;
+    } else {
+      radius.value = RADIUS_MIN;
+      strokeWidth.value = STROKE_MIN;
+    }
+  };
+
   const pause = () => {
     // Cancel any ongoing animations and freeze at current position
     cancelAnimation(radius);
@@ -51,6 +82,7 @@ export function useBreathingAnimation() {
     strokeWidth, 
     animateInhale, 
     animateExhale, 
+    seekToPhaseProgress,
     pause,
     resume,
     reset 
