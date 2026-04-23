@@ -24,24 +24,24 @@ export const BREATH_ROOM_EXTENDED_EXHALE = "extended-exhale";
 export const BREATH_ROOM_CATALOG = [
   {
     id: BREATH_ROOM_DEEP,
-    title: "Rest Room",
+    title: "Deep Rest",
     exerciseLine: "Coherent Breathing 5-0-5-0",
     subtext:
-      "A steady shared rhythm. Join with the intention to quiet your mind, release what's heavy, and come back to yourself but together.",
+      "A steady shared rhythm to quiet your mind and settle in.",
   },
   {
     id: BREATH_ROOM_BOX,
-    title: "Focus Room",
+    title: "Clear Focus",
     exerciseLine: "Box Breathing (4-4-4-4)",
     subtext:
-      "A structured rhythm shared to set an intention to clear distraction and to get back to the present.",
+      "A structured rhythm to clear distraction and return to the present.",
   },
   {
     id: BREATH_ROOM_EXTENDED_EXHALE,
-    title: "Unwind Room",
+    title: "Gentle Unwind",
     exerciseLine: "Extended exhale 4-0-6-0",
     subtext:
-      "Longer exhales guide the group into calm. Join with the intention to let go, soften your body, and settle into stillness.",
+      "Longer exhales to let go, soften your body, and unwind.",
   },
 ] as const;
 

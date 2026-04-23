@@ -27,46 +27,18 @@ export function useBackgroundSoundscape({ soundscape, soundEnabled }: UseBackgro
     ? SOUNDSCAPE_FILES[soundscape]
     : SOUNDSCAPE_FILES.dream; // Use dream as placeholder when off (won't be played)
   
-  const player = useAudioPlayer(audioSource);
+  const player = useAudioPlayer(audioSource, { keepAudioSessionActive: true });
   const previousSoundscapeRef = useRef<SoundscapeType | null>(null);
-  const loopIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Handle looping when sound finishes
+  // Prefer native looping (more reliable than polling timers).
   useEffect(() => {
-    if (!audioActive || !player) return;
-
-    const checkAndLoop = () => {
-      try {
-        // Check if playback is near the end or has finished
-        if (player.duration && player.currentTime > 0) {
-          // If we're at or past the end, restart from beginning
-          if (player.currentTime >= player.duration - 0.05) {
-            player.seekTo(0);
-            if (!player.playing) {
-              player.play();
-            }
-          }
-        }
-      } catch (error) {
-        // Ignore errors during checking
-      }
-    };
-
-    // Clear any existing interval
-    if (loopIntervalRef.current) {
-      clearInterval(loopIntervalRef.current);
+    if (!player) return;
+    try {
+      player.loop = true;
+    } catch {
+      // Ignore if loop is unsupported.
     }
-
-    // Set up interval to check playback status for looping
-    loopIntervalRef.current = setInterval(checkAndLoop, 50);
-
-    return () => {
-      if (loopIntervalRef.current) {
-        clearInterval(loopIntervalRef.current);
-        loopIntervalRef.current = null;
-      }
-    };
-  }, [player, audioActive]);
+  }, [player]);
 
   // Handle soundscape changes - stop current playback when switching
   useEffect(() => {

@@ -31,7 +31,7 @@ function hexWithAlpha(hex: string, alpha: number): string {
   return `#${clean}${a}`;
 }
 
-const CARD_SURFACE_ALPHA = 0.84;
+const CARD_SURFACE_ALPHA = 0.90;
 const CARD_BORDER_ALPHA = 0.55;
 
 const ROOM_STATS_POLL_MS = 8000;
@@ -71,12 +71,12 @@ export default function GlobalRoomPickerPage() {
   const floatingShadow = Platform.select({
     ios: {
       shadowColor: tokens.shadow,
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.16,
-      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 5 },
+      shadowOpacity: 0.22,
+      shadowRadius: 12,
     },
     android: {
-      elevation: 4,
+      elevation: 6,
     },
     default: {},
   });
@@ -133,14 +133,14 @@ export default function GlobalRoomPickerPage() {
       opacity: 0.85,
     },
     card: {
-      paddingVertical: 18,
-      paddingHorizontal: 20,
-      borderRadius: 14,
+      paddingVertical: 20,
+      paddingHorizontal: 22,
+      borderRadius: 24,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: cardBorder,
-      opacity: 0.9,
       backgroundColor: cardBackground,
       marginBottom: 12,
+      overflow: "hidden",
       ...floatingShadow,
     },
     cardRoomTitle: {
@@ -185,9 +185,9 @@ export default function GlobalRoomPickerPage() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.title}>Breathe Together</Text>
+          <Text style={styles.title}>One Breath</Text>
           <Text style={styles.subtitle}>
-            Join a shared rhythm. Set an intention, and breathe as one in quiet unison
+           Join together and breathe as one
           </Text>
 
           <View style={styles.options}>
@@ -206,7 +206,10 @@ export default function GlobalRoomPickerPage() {
                     params: { room: opt.id },
                   })
                 }
-                style={({ pressed }) => [styles.card, pressed && { opacity: 0.92 }]}
+                style={({ pressed }) => [
+                  styles.card,
+                  pressed && { opacity: 0.96, transform: [{ scale: 0.99 }] },
+                ]}
               >
                 <Text style={styles.cardRoomTitle}>{opt.title}</Text>
                 <Text style={styles.cardExercise}>

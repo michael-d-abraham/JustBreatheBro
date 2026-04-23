@@ -2,7 +2,7 @@
   "expo": {
     "name": "JustBreatheBro",
     "slug": "JustBreatheBro",
-    "version": "2.0.8",
+    "version": "3.0.0",
     "orientation": "portrait",
     "icon": "./assets/icons/AppIcon.png",
     "scheme": "breath",
@@ -12,18 +12,20 @@
       "icon": "./assets/icons/AppIcon.png",
       "bundleIdentifier": "com.michaelabraham.breathbro",
       "supportsTablet": true,
-      "buildNumber": "10"
+      "buildNumber": "15",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": ["audio"]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/adaptive-icon.png",
-        "backgroundColor": "#E6F4FE"
+        "backgroundColor": "#FFFFFF"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "permissions": [
-        "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
@@ -55,11 +57,18 @@
           "project": "react-native",
           "organization": "breath-bro"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2051397d-74a1-4e17-9e93-3332d37a91d1"
+      }
     }
   }
 }

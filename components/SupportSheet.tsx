@@ -1,10 +1,11 @@
-import React, { forwardRef, useState } from 'react';
-import { Linking, Text, View } from 'react-native';
-import BaseBottomSheet, { BaseBottomSheetHandle } from './BaseBottomSheet';
-import BottomSheetCollapsibleSection from './BottomSheetCollapsibleSection';
-import BottomSheetDivider from './BottomSheetDivider';
-import BottomSheetRow from './BottomSheetRow';
-import { useTheme } from './Theme';
+import * as ExpoLinking from "expo-linking";
+import React, { forwardRef, useState } from "react";
+import { Linking, Text, View } from "react-native";
+import BaseBottomSheet, { BaseBottomSheetHandle } from "./BaseBottomSheet";
+import BottomSheetCollapsibleSection from "./BottomSheetCollapsibleSection";
+import BottomSheetDivider from "./BottomSheetDivider";
+import BottomSheetRow from "./BottomSheetRow";
+import { useTheme } from "./Theme";
 
 export type SupportSheetHandle = BaseBottomSheetHandle;
 
@@ -21,18 +22,20 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
     const [feedbackExpanded, setFeedbackExpanded] = useState(false);
     const [legalExpanded, setLegalExpanded] = useState(false);
 
-    const SUPPORT_VIDEO_URL = 'https://www.youtube.com/watch?v=8WPaO819-_g';
+    const SUPPORT_VIDEO_URL = "https://www.youtube.com/watch?v=8WPaO819-_g";
 
     const handleSupportVideoPress = () => {
       Linking.openURL(SUPPORT_VIDEO_URL);
     };
 
     const handlePrivacyPolicyPress = () => {
-      Linking.openURL('https://michael-d-abraham.github.io/brethbro-privacy/privacy.html');
+      Linking.openURL(
+        "https://michael-d-abraham.github.io/brethbro-privacy/privacy.html",
+      );
     };
 
     const handleTermsPress = () => {
-      Linking.openURL('https://www.youtube.com/watch?v=8WPaO819-_g');
+      Linking.openURL("https://www.youtube.com/watch?v=8WPaO819-_g");
     };
 
     return (
@@ -50,37 +53,40 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
           onToggle={() => setAboutExpanded(!aboutExpanded)}
           content={
             <View>
-              <Text style={{ 
-                color: tokens.bottomSheetText, 
-                fontSize: 14, 
-                lineHeight: 22,
-                marginBottom: 8
-              }}>
+              <Text
+                style={{
+                  color: tokens.bottomSheetText,
+                  fontSize: 14,
+                  lineHeight: 22,
+                  marginBottom: 8,
+                }}
+              >
                 Breathing is cool. All the cool kids do it.
               </Text>
-              <Text style={{ 
-                color: tokens.bottomSheetSecondaryText, 
-                fontSize: 12,
-                opacity: 0.7,
-              }}>
-                Version 1.0.1
-              </Text>
+              <Text
+                style={{
+                  color: tokens.bottomSheetSecondaryText,
+                  fontSize: 12,
+                  opacity: 0.7,
+                }}
+              >
+                Version 2.0.8              </Text>
             </View>
           }
         />
 
         <BottomSheetDivider />
 
-        {/* Get In Touch Section */}
+        {/* Get in contact / site */}
         <BottomSheetCollapsibleSection
-          title="GET IN TOUCH"
+          title="SUPPORT"
           expanded={getInTouchExpanded}
           onToggle={() => setGetInTouchExpanded(!getInTouchExpanded)}
           content={
             <BottomSheetRow
-              title="📧 Email Support"
-              subtitle="hello@breathbro.app"
-              onPress={handleSupportVideoPress}
+              title="Get in contact and Support the developer"
+              subtitle="breathbro.app"
+              onPress={() => void ExpoLinking.openURL("https://breathbro.app")}
             />
           }
         />
@@ -123,9 +129,9 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
         />
       </BaseBottomSheet>
     );
-  }
+  },
 );
 
-SupportSheet.displayName = 'SupportSheet';
+SupportSheet.displayName = "SupportSheet";
 
 export default SupportSheet;

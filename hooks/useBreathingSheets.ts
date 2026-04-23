@@ -1,9 +1,9 @@
-import { ExerciseDetailSheetHandle } from '@/components/ExerciseDetailSheet';
-import { ExerciseSelectionSheetHandle } from '@/components/ExerciseSelectionSheet';
-import { SupportSheetHandle } from '@/components/SupportSheet';
-import { useBreathing } from '@/contexts/breathingContext';
-import { Exercise, getExercises } from '@/lib/storage';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { ExerciseDetailSheetHandle } from "@/components/ExerciseDetailSheet";
+import { ExerciseSelectionSheetHandle } from "@/components/ExerciseSelectionSheet";
+import { SupportSheetHandle } from "@/components/SupportSheet";
+import { useBreathing } from "@/contexts/breathingContext";
+import { Exercise, getExercises } from "@/lib/storage";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export function useBreathingSheets() {
   const { currentExercise, updateExercise } = useBreathing();
@@ -11,8 +11,9 @@ export function useBreathingSheets() {
   const [isSupportSheetOpen, setIsSupportSheetOpen] = useState(false);
   const [isSelectionSheetOpen, setIsSelectionSheetOpen] = useState(false);
   const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [selectedExerciseForInfo, setSelectedExerciseForInfo] = useState<Exercise | null>(null);
-  
+  const [selectedExerciseForInfo, setSelectedExerciseForInfo] =
+    useState<Exercise | null>(null);
+
   const sheetRef = useRef<ExerciseDetailSheetHandle>(null);
   const supportSheetRef = useRef<SupportSheetHandle>(null);
   const selectionSheetRef = useRef<ExerciseSelectionSheetHandle>(null);
@@ -27,23 +28,29 @@ export function useBreathingSheets() {
     setExercises(loadedExercises);
   };
 
-  const handleInfoPress = useCallback((exercise?: Exercise, defaultExercise?: Exercise) => {
-    const exerciseToShow = exercise || defaultExercise || currentExercise;
-    if (exerciseToShow) {
-      setSelectedExerciseForInfo(exerciseToShow);
-      setIsSheetOpen(true);
-      sheetRef.current?.open();
-    }
-  }, [currentExercise]);
+  const handleInfoPress = useCallback(
+    (exercise?: Exercise, defaultExercise?: Exercise) => {
+      const exerciseToShow = exercise || defaultExercise || currentExercise;
+      if (exerciseToShow) {
+        setSelectedExerciseForInfo(exerciseToShow);
+        setIsSheetOpen(true);
+        sheetRef.current?.open();
+      }
+    },
+    [currentExercise],
+  );
 
   const handleTechniquePress = useCallback(() => {
     setIsSelectionSheetOpen(true);
     selectionSheetRef.current?.open();
   }, []);
 
-  const handleSelectExercise = useCallback(async (exercise: Exercise) => {
-    await updateExercise(exercise);
-  }, [updateExercise]);
+  const handleSelectExercise = useCallback(
+    async (exercise: Exercise) => {
+      await updateExercise(exercise);
+    },
+    [updateExercise],
+  );
 
   const handleSheetChange = useCallback((index: number) => {
     setIsSheetOpen(index >= 0);
@@ -90,7 +97,14 @@ export function useBreathingSheets() {
     if (isSheetOpen) closeSheet();
     if (isSupportSheetOpen) closeSupportSheet();
     if (isSelectionSheetOpen) closeSelectionSheet();
-  }, [isSheetOpen, isSupportSheetOpen, isSelectionSheetOpen, closeSheet, closeSupportSheet, closeSelectionSheet]);
+  }, [
+    isSheetOpen,
+    isSupportSheetOpen,
+    isSelectionSheetOpen,
+    closeSheet,
+    closeSupportSheet,
+    closeSelectionSheet,
+  ]);
 
   return {
     // State
@@ -100,12 +114,12 @@ export function useBreathingSheets() {
     exercises,
     currentExercise,
     selectedExerciseForInfo,
-    
+
     // Refs
     sheetRef,
     supportSheetRef,
     selectionSheetRef,
-    
+
     // Handlers
     handleInfoPress,
     handleTechniquePress,
@@ -121,6 +135,5 @@ export function useBreathingSheets() {
     closeSupportSheet,
     closeSelectionSheet,
     closeAllSheets,
-    
   };
 }

@@ -38,8 +38,8 @@ export function useBreathingAudio({ soundEnabled, isRunning, soundType }: UseBre
     ? SOUND_FILES[soundType].exhale
     : SOUND_FILES.sine.exhale; // Use sine as placeholder when off (won't be played)
   
-  const inhalePlayer = useAudioPlayer(inhaleSource);
-  const exhalePlayer = useAudioPlayer(exhaleSource);
+  const inhalePlayer = useAudioPlayer(inhaleSource, { keepAudioSessionActive: true });
+  const exhalePlayer = useAudioPlayer(exhaleSource, { keepAudioSessionActive: true });
   
   // Helper to safely check if player is valid
   const isPlayerValid = (p: typeof inhalePlayer): boolean => {

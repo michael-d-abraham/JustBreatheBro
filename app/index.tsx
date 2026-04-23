@@ -142,7 +142,7 @@ export default function Index() {
               onSupportPress={sheets.handleSupportPress}
               onCirclePress={handleCirclePress}
               onInfoLibraryPress={handleInfoLibraryPress}
-              globalBreathLabel="Breathe Together"
+              globalBreathLabel="One Breath"
               onGlobalBreathPress={() => router.push("/global_room_picker")}
             />
           </View>

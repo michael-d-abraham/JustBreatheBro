@@ -2,15 +2,18 @@ import BackgroundSoundscapePlayer from "@/components/BackgroundSoundscapePlayer"
 import { ThemeProvider, useTheme } from "@/components/Theme";
 import { BreathingProvider } from "@/contexts/breathingContext";
 import { AppProvider, useApp } from "@/contexts/themeContext";
-import * as Sentry from '@sentry/react-native';
+import { setAudioModeAsync } from "expo-audio";
+import * as Sentry from "@sentry/react-native";
 import * as Application from "expo-application";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as Updates from "expo-updates";
+import { useEffect } from "react";
 
-const SENTRY_DSN = 'https://022da1988c600dd3fb4c6d45c522a14c@o4510551669604352.ingest.us.sentry.io/4510551671570432';
+const SENTRY_DSN =
+  "https://022da1988c600dd3fb4c6d45c522a14c@o4510551669604352.ingest.us.sentry.io/4510551671570432";
 
 let sentryInitialized = false;
 
@@ -44,7 +47,7 @@ function initSentryOnce() {
 
       // Strip query strings from URLs (defensive - prevents deep-link param leakage)
       if (event.request?.url) {
-        event.request.url = event.request.url.split('?')[0];
+        event.request.url = event.request.url.split("?")[0];
       }
 
       // Remove request bodies/headers if present (defensive)
@@ -62,8 +65,14 @@ function initSentryOnce() {
 
   // Set minimal tags with safe fallbacks (removed expoSessionId - not needed)
   Sentry.setTag("expoChannel", Updates.channel ?? "unknown");
-  Sentry.setTag("appVersion", Application.nativeApplicationVersion ?? "unknown");
-  Sentry.setTag("executionEnvironment", Constants.executionEnvironment ?? "unknown");
+  Sentry.setTag(
+    "appVersion",
+    Application.nativeApplicationVersion ?? "unknown",
+  );
+  Sentry.setTag(
+    "executionEnvironment",
+    Constants.executionEnvironment ?? "unknown",
+  );
 
   // Extras: minimal technical metadata only (removed linkingUri - can contain deep-link params)
   // deviceYearClass kept for performance debugging, but can be removed if not needed
@@ -75,26 +84,47 @@ function initSentryOnce() {
 
 initSentryOnce();
 
+/** Physical iOS devices honor the mute switch unless `playsInSilentMode` is set; the Simulator often does not. */
+function useConfigureAudioMode() {
+  useEffect(() => {
+    void (async () => {
+      try {
+        await setAudioModeAsync({
+          allowsRecording: false,
+          playsInSilentMode: true,
+          shouldPlayInBackground: true,
+          shouldRouteThroughEarpiece: false,
+          interruptionMode: "duckOthers",
+        });
+      } catch (e) {
+        if (__DEV__) {
+          console.warn("setAudioModeAsync failed:", e);
+        }
+      }
+    })();
+  }, []);
+}
+
 function RootContent() {
   const { mode } = useTheme();
   const { backgroundImage } = useApp();
-  
+
   return (
     <>
-      <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
-      <Stack 
+      <StatusBar style={mode === "dark" ? "light" : "dark"} />
+      <Stack
         screenOptions={{
           headerShown: false,
           contentStyle: {
-            backgroundColor: backgroundImage ? 'transparent' : 'transparent',
+            backgroundColor: backgroundImage ? "transparent" : "transparent",
           },
-          animation: 'none',
+          animation: "none",
         }}
       >
-        <Stack.Screen 
-          name="breathing" 
+        <Stack.Screen
+          name="breathing"
           options={{
-            animation: 'none',
+            animation: "none",
           }}
         />
       </Stack>
@@ -103,6 +133,7 @@ function RootContent() {
 }
 
 export default Sentry.wrap(function RootLayout() {
+  useConfigureAudioMode();
   return (
     <ThemeProvider>
       <AppProvider>
