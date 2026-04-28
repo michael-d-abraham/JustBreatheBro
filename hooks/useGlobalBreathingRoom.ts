@@ -16,7 +16,7 @@ export type BreathRoomPattern = {
 
 export type GlobalRoomPhase = "inhale" | "hold1" | "exhale" | "hold2";
 
-/** Canonical room ids — must match server (see normalizeRoomId / ROOM_PATTERNS). */
+/** match sever names rooms */
 export const BREATH_ROOM_DEEP = "deep";
 export const BREATH_ROOM_BOX = "box";
 export const BREATH_ROOM_EXTENDED_EXHALE = "extended-exhale";
@@ -26,8 +26,7 @@ export const BREATH_ROOM_CATALOG = [
     id: BREATH_ROOM_DEEP,
     title: "Deep Rest",
     exerciseLine: "Coherent Breathing 5-0-5-0",
-    subtext:
-      "A steady shared rhythm to quiet your mind and settle in.",
+    subtext: "A steady shared rhythm to quiet your mind and settle in.",
   },
   {
     id: BREATH_ROOM_BOX,
@@ -40,8 +39,7 @@ export const BREATH_ROOM_CATALOG = [
     id: BREATH_ROOM_EXTENDED_EXHALE,
     title: "Gentle Unwind",
     exerciseLine: "Extended exhale 4-0-6-0",
-    subtext:
-      "Longer exhales to let go, soften your body, and unwind.",
+    subtext: "Longer exhales to let go, soften your body, and unwind.",
   },
 ] as const;
 
@@ -71,9 +69,9 @@ export function getBreathRoomCatalogEntry(
   return CATALOG_BY_ID.get(roomId) ?? null;
 }
 
+// (:
 /**
  * GET /api/rooms — returns per-room connection counts (see server ROOM_STATS.md).
- * Always fills deep / box / extended-exhale (defaults 0 if missing in JSON).
  */
 export async function fetchBreathRoomStats(
   apiBase: string,
@@ -122,6 +120,8 @@ export type GlobalRoomPhaseStepPayload = {
   skipBreathCueAudio: boolean;
 };
 
+// (:
+// what the screen must provide to the hook
 type UseGlobalBreathingRoomOptions = {
   onPhaseStep: (payload: GlobalRoomPhaseStepPayload) => void;
   /** Initial room to join on open (default deep). */
@@ -142,6 +142,9 @@ const INITIAL_CONNECT_BACKOFF_MS = 2000;
 const MAX_RECONNECT_BACKOFF_MS = 45000;
 const BACKOFF_JITTER_MS = 500;
 
+// !
+// Core state machine outputs
+// countion + timing + prsence state that global_room.tsx reads
 export function useGlobalBreathingRoom({
   onPhaseStep,
   initialRoomId = BREATH_ROOM_DEEP,
@@ -186,7 +189,7 @@ export function useGlobalBreathingRoom({
   const handlePresenceRef = useRef<(payload: Record<string, unknown>) => void>(
     () => {},
   );
-  /** Last known room from server (phase may repeat omit roomId in some builds). */
+  /** send join message to server to join room */
   const lastServerRoomIdRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -206,6 +209,10 @@ export function useGlobalBreathingRoom({
       return;
     setOffsetMs(serverTimeMs - Date.now());
   }, []);
+
+  // !
+  // This is the core timing handler: trust only valid server phase data,
+  // sync local clock, then update state used by UI + breathing cues.
 
   const handlePhasePayload = useCallback(
     (payload: Record<string, unknown>) => {
@@ -242,6 +249,7 @@ export function useGlobalBreathingRoom({
       setPhaseDurationMs(Math.max(0, pDur));
       setPhaseEndsAtMs(pEnd);
 
+      // Ignore duplicates so one phase does not trigger twice.
       const roomPhaseKey = `${rId}:${pSeq}`;
       if (lastHandledRoomPhaseKeyRef.current === roomPhaseKey) return;
 
@@ -267,6 +275,9 @@ export function useGlobalBreathingRoom({
     [applyServerTime],
   );
 
+  // !
+  // handle messages from the server
+  // imcoming messages are snapshots, phase, and presence
   const handleSnapshot = useCallback(
     (payload: Record<string, unknown>) => {
       const pat = payload.pattern;
@@ -320,6 +331,7 @@ export function useGlobalBreathingRoom({
   handlePhasePayloadRef.current = handlePhasePayload;
   handlePresenceRef.current = handlePresence;
 
+// Websocket client: connect / join / parse / recconect 
   const wsUrl = getBreathRoomWsUrl();
 
   useEffect(() => {
@@ -351,6 +363,7 @@ export function useGlobalBreathingRoom({
       }
     };
 
+    // Reconnect with backoff so we do not hammer the server on outages.
     const scheduleReconnect = () => {
       if (!allowReconnect) return;
       clearReconnectTimer();
@@ -370,6 +383,7 @@ export function useGlobalBreathingRoom({
       }, delay);
     };
 
+    // Server starts sending room events only after this join message.
     const sendJoin = (ws: WebSocket, room: string) => {
       try {
         ws.send(JSON.stringify({ type: "join", room }));
@@ -378,6 +392,7 @@ export function useGlobalBreathingRoom({
       }
     };
 
+    // Open socket and wire up lifecycle handlers in one place.
     function connectNow() {
       if (!allowReconnect) return;
       clearReconnectTimer();
@@ -416,6 +431,7 @@ export function useGlobalBreathingRoom({
         sendJoin(s, selectedRoomRef.current);
       };
 
+      // `snapshot` = full state, `phase` = phase tick, `presence` = participant updates.
       s.onmessage = (ev) => {
         if (wsRef.current !== s) return;
         const raw = typeof ev.data === "string" ? ev.data : null;

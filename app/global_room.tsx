@@ -1,5 +1,8 @@
 import SettingsSheet, { SettingsSheetHandle } from "@/components/SettingsSheet";
-import { useBreathingAnimationTokens, useWallpaperForeground } from "@/components/Theme";
+import {
+  useBreathingAnimationTokens,
+  useWallpaperForeground,
+} from "@/components/Theme";
 import { useApp } from "@/contexts/themeContext";
 import { useBreathingAnimation } from "@/hooks/useBreathingAnimation";
 import { useBreathingAudio } from "@/hooks/useBreathingAudio";
@@ -20,13 +23,27 @@ import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { useFocusEffect } from "@react-navigation/native";
 import { BlurView } from "expo-blur";
-import { router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, {
+  useAnimatedProps,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Svg, { Circle } from "react-native-svg";
 
 /** Prefer stack back (index → picker → session); fallback if stack is empty. */
@@ -72,7 +89,7 @@ const BREATHING_PHASE_HAPTICS: Record<
 function hapticArgsForGlobalPhase(
   phase: GlobalRoomPhase,
   durationMs: number,
-  resumeMidPhase: boolean
+  resumeMidPhase: boolean,
 ): BeginBreathingPhaseHapticsArgs | null {
   const base =
     phase === "inhale"
@@ -111,7 +128,9 @@ function GlobalRoomInner({
 
   const playInhaleSoundRef = useRef<(() => Promise<void>) | null>(null);
   const playExhaleSoundRef = useRef<(() => Promise<void>) | null>(null);
-  const beginPhaseHapticsRef = useRef<((args: BeginBreathingPhaseHapticsArgs) => void) | null>(null);
+  const beginPhaseHapticsRef = useRef<
+    ((args: BeginBreathingPhaseHapticsArgs) => void) | null
+  >(null);
   const stopSoundRef = useRef<(() => void) | null>(null);
   const forceStopSoundRef = useRef<(() => void) | null>(null);
 
@@ -125,18 +144,22 @@ function GlobalRoomInner({
     reset,
   } = useBreathingAnimation();
 
-  const { beginPhase: beginPhaseHaptics, cancel: cancelHaptics } = useBreathingHaptics({
-    hapticsEnabled: settings.hapticsEnabled,
-  });
+  const { beginPhase: beginPhaseHaptics, cancel: cancelHaptics } =
+    useBreathingHaptics({
+      hapticsEnabled: settings.hapticsEnabled,
+    });
   beginPhaseHapticsRef.current = beginPhaseHaptics;
 
+  // This is the core timing handler: trust only valid server phase data,
   const onPhaseStep = useCallback(
     async (payload: GlobalRoomPhaseStepPayload) => {
-      const { phase, phaseDurationMs, remainingMs, skipBreathCueAudio } = payload;
+      const { phase, phaseDurationMs, remainingMs, skipBreathCueAudio } =
+        payload;
       cancelHaptics();
 
       const d = phaseDurationMs;
-      const elapsedRatio = d > 0 ? Math.min(1, Math.max(0, (d - remainingMs) / d)) : 1;
+      const elapsedRatio =
+        d > 0 ? Math.min(1, Math.max(0, (d - remainingMs) / d)) : 1;
       seekToPhaseProgress(phase, elapsedRatio);
 
       const animMs = Math.max(0, remainingMs);
@@ -170,7 +193,13 @@ function GlobalRoomInner({
         await playExhaleSoundRef.current?.();
       }
     },
-    [animateInhale, animateExhale, seekToPhaseProgress, pauseAnimation, cancelHaptics]
+    [
+      animateInhale,
+      animateExhale,
+      seekToPhaseProgress,
+      pauseAnimation,
+      cancelHaptics,
+    ],
   );
 
   const {
@@ -188,12 +217,16 @@ function GlobalRoomInner({
     onSelectedRoomIdChange,
   });
 
-  const { playInhaleSound, playExhaleSound, stopSound, forceStop: forceStopSound } =
-    useBreathingAudio({
-      soundEnabled: settings.soundEnabled,
-      isRunning: isConnected,
-      soundType: settings.soundType,
-    });
+  const {
+    playInhaleSound,
+    playExhaleSound,
+    stopSound,
+    forceStop: forceStopSound,
+  } = useBreathingAudio({
+    soundEnabled: settings.soundEnabled,
+    isRunning: isConnected,
+    soundType: settings.soundType,
+  });
 
   useEffect(() => {
     playInhaleSoundRef.current = playInhaleSound;
@@ -217,7 +250,7 @@ function GlobalRoomInner({
       return () => {
         StatusBar.setHidden(false, "fade");
       };
-    }, [])
+    }, []),
   );
 
   const handleLeave = () => {
@@ -268,15 +301,24 @@ function GlobalRoomInner({
 
   const roomCatalog = useMemo(
     () =>
-      getBreathRoomCatalogEntry(roomId) ?? getBreathRoomCatalogEntry(initialRoomId),
-    [roomId, initialRoomId]
+      getBreathRoomCatalogEntry(roomId) ??
+      getBreathRoomCatalogEntry(initialRoomId),
+    [roomId, initialRoomId],
   );
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
-        <SafeAreaView style={{ flex: 1, backgroundColor: backgroundImage ? "transparent" : "#FFFFFF" }}>
-          <Pressable style={{ flex: 1, justifyContent: "center", alignItems: "center" }} onPress={handleScreenTap}>
+        <SafeAreaView
+          style={{
+            flex: 1,
+            backgroundColor: backgroundImage ? "transparent" : "#FFFFFF",
+          }}
+        >
+          <Pressable
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+            onPress={handleScreenTap}
+          >
             <View style={{ alignItems: "center", position: "relative" }}>
               <Svg width={400} height={400}>
                 <Circle
@@ -357,11 +399,17 @@ function GlobalRoomInner({
                 backgroundColor: "rgba(0,0,0,0.35)",
               }}
             >
-              <Text style={{ color: "#fff", fontSize: 14, textAlign: "center" }}>{wsError}</Text>
+              <Text
+                style={{ color: "#fff", fontSize: 14, textAlign: "center" }}
+              >
+                {wsError}
+              </Text>
             </View>
           ) : null}
 
-          {(connectionState === "connecting" || connectionState === "reconnecting") && !isConnected ? (
+          {(connectionState === "connecting" ||
+            connectionState === "reconnecting") &&
+          !isConnected ? (
             <View
               style={[
                 StyleSheet.absoluteFill,
@@ -369,7 +417,9 @@ function GlobalRoomInner({
                   justifyContent: "center",
                   alignItems: "center",
                   paddingHorizontal: 32,
-                  backgroundColor: backgroundImage ? "rgba(0,0,0,0.35)" : "rgba(255,255,255,0.94)",
+                  backgroundColor: backgroundImage
+                    ? "rgba(0,0,0,0.35)"
+                    : "rgba(255,255,255,0.94)",
                 },
               ]}
               pointerEvents="auto"
@@ -383,7 +433,9 @@ function GlobalRoomInner({
                   marginBottom: 10,
                 }}
               >
-                {connectionState === "reconnecting" ? "Reconnecting…" : "Connecting…"}
+                {connectionState === "reconnecting"
+                  ? "Reconnecting…"
+                  : "Connecting…"}
               </Text>
               {wsError && connectionState === "reconnecting" ? (
                 <Text
@@ -409,7 +461,15 @@ function GlobalRoomInner({
                     backgroundColor: "rgba(120,120,140,0.35)",
                   }}
                 >
-                  <Text style={{ color: wallpaperFg, fontSize: 16, fontWeight: "600" }}>Try now</Text>
+                  <Text
+                    style={{
+                      color: wallpaperFg,
+                      fontSize: 16,
+                      fontWeight: "600",
+                    }}
+                  >
+                    Try now
+                  </Text>
                 </Pressable>
               ) : null}
             </View>
@@ -487,17 +547,16 @@ function GlobalRoomInner({
           </Animated.View>
 
           {connectionState === "disconnected" ? (
-            <View
-              style={StyleSheet.absoluteFill}
-              pointerEvents="box-none"
-            >
+            <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
               <View
                 style={{
                   flex: 1,
                   justifyContent: "center",
                   alignItems: "center",
                   paddingHorizontal: 32,
-                  backgroundColor: backgroundImage ? "rgba(0,0,0,0.25)" : "rgba(255,255,255,0.92)",
+                  backgroundColor: backgroundImage
+                    ? "rgba(0,0,0,0.25)"
+                    : "rgba(255,255,255,0.92)",
                 }}
               >
                 <Text
@@ -520,10 +579,20 @@ function GlobalRoomInner({
                     backgroundColor: "rgba(120,120,140,0.35)",
                   }}
                 >
-                  <Text style={{ color: wallpaperFg, fontSize: 17, fontWeight: "600" }}>Reconnect</Text>
+                  <Text
+                    style={{
+                      color: wallpaperFg,
+                      fontSize: 17,
+                      fontWeight: "600",
+                    }}
+                  >
+                    Reconnect
+                  </Text>
                 </Pressable>
                 <Pressable onPress={handleLeave} style={{ marginTop: 20 }}>
-                  <Text style={{ color: wallpaperFg, fontSize: 16, opacity: 0.85 }}>
+                  <Text
+                    style={{ color: wallpaperFg, fontSize: 16, opacity: 0.85 }}
+                  >
                     Choose another room
                   </Text>
                 </Pressable>
@@ -537,14 +606,20 @@ function GlobalRoomInner({
             </Pressable>
           )}
 
-          <SettingsSheet ref={settingsSheetRef} onChange={handleSheetChange} onDismiss={handleSheetDismiss} />
+          <SettingsSheet
+            ref={settingsSheetRef}
+            onChange={handleSheetChange}
+            onDismiss={handleSheetDismiss}
+          />
         </SafeAreaView>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
   );
 }
 
-function roomFromSearchParams(room: string | string[] | undefined): CanonicalBreathRoomId {
+function roomFromSearchParams(
+  room: string | string[] | undefined,
+): CanonicalBreathRoomId {
   const raw = Array.isArray(room) ? room[0] : room;
   if (typeof raw === "string" && isCanonicalBreathRoomId(raw)) return raw;
   return BREATH_ROOM_DEEP;
@@ -555,7 +630,8 @@ export default function GlobalRoomPage() {
   const resolvedFromRoute = roomFromSearchParams(roomParam);
 
   const [sessionKey, setSessionKey] = useState(0);
-  const [sessionRoomId, setSessionRoomId] = useState<CanonicalBreathRoomId>(resolvedFromRoute);
+  const [sessionRoomId, setSessionRoomId] =
+    useState<CanonicalBreathRoomId>(resolvedFromRoute);
 
   useEffect(() => {
     setSessionRoomId(resolvedFromRoute);
