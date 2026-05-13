@@ -41,6 +41,21 @@ This project means a lot to me. Thank you for taking the time to check it out.
 
 ---
 
+## Live WebSocket rooms
+
+Live sessions are powered by a lightweight Node WebSocket service hosted on Render.  
+When a room starts, a single authoritative breathing timer is broadcast to every participant, keeping the entire group synchronized in real time.
+
+- **WebSocket backend:** [github.com/michael-d-abraham/breatheAppWebSocketBackEnd](https://github.com/michael-d-abraham/breatheAppWebSocketBackEnd)
+
+<p align="center">
+  <img src="assets/readMe/IpadOneBreath.gif" alt="iPad preview" width="400" />
+</p>
+<p align="center">
+  <img src="assets/readMe/IphoneOneBreath.gif" alt="iPhone preview" width="400" />
+</p>
+---
+
 ## Information Archive (BreathBot)
 
 All content is generated and validated through **BreathBot** - a RAG-style workflow grounded in hand-picked sources - making all the in-app content stays credible, consistent, and evidence-aware.
