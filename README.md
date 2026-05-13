@@ -10,6 +10,8 @@ It pushed me to grow as a mindfulness practitioner, musician, artist, and engine
 
 I hand-played, recorded, and produced the meditation audio, and I also created the icons, symbols, and custom animations.
 
+And tied it all together using  software engineering to tie it all together 
+
 This project means a lot to me. Thank you for taking the time to check it out.
 
 
@@ -23,7 +25,9 @@ This project means a lot to me. Thank you for taking the time to check it out.
 
 ## Product preview
 
-<img src="assets/readMe/mainVid.gif" alt="Product preview" width="280" />
+<p align="center">
+  <img src="assets/readMe/mainVid.gif" alt="Product preview" width="400" />
+</p>
 
 ---
 
