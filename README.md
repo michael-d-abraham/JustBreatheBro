@@ -23,7 +23,7 @@ This project means a lot to me. Thank you for taking the time to check it out.
 
 ## Product preview
 
-![Product preview](assets/readMe/mainVid.gif)
+<img src="assets/readMe/mainVid.gif" alt="Product preview" width="280" />
 
 ---
 
