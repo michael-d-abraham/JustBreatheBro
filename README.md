@@ -8,7 +8,7 @@ JustBreatheBro is a personal project that deepened my mindfulness practice and s
 
 It pushed me to grow as a mindfulness practitioner, musician, artist, and engineer.
 
-I hand-played, recorded, and produced the meditation audio, and I also created the icons, symbols, and custom animations.
+I hand-played, recorded, and produced the meditation audio, and I also created the icons, symbols, and custom animations. Along with creating custom hyptics. 
 
 And tied it all together using  software engineering to tie it all together 
 
@@ -49,10 +49,8 @@ When a room starts, a single authoritative breathing timer is broadcast to every
 - **WebSocket backend:** [github.com/michael-d-abraham/breatheAppWebSocketBackEnd](https://github.com/michael-d-abraham/breatheAppWebSocketBackEnd)
 
 <p align="center">
-  <img src="assets/readMe/IpadOneBreath.gif" alt="iPad preview" width="400" />
-</p>
-<p align="center">
-  <img src="assets/readMe/IphoneOneBreath.gif" alt="iPhone preview" width="400" />
+  <img src="assets/readMe/IpadOneBreath.gif" alt="iPad preview" width="320" />
+  <img src="assets/readMe/IphoneOneBreath.gif" alt="iPhone preview" width="320" />
 </p>
 ---
 
