@@ -4,16 +4,11 @@ Mindfulness and breathing mobile app
 <img src="assets/readMe/readmeHero.png" alt="JustBreatheBro hero" width="700" />
 
 ## Thank you
-JustBreatheBro is a personal project that deepened my mindfulness practice and showed me how powerful breathwork can be.
+JustBreatheBro is a personal project that deepened my mindfulness practice and pushed me to grow as an engineer, musician, and artist.
 
-It pushed me to grow as a mindfulness practitioner, musician, artist, and engineer.
+I hand-played and produced the meditation audio, designed the icons and animations, created the custom haptics, and built the app from the ground up.
 
-I hand-played, recorded, and produced the meditation audio, and I also created the icons, symbols, and custom animations. Along with creating custom hyptics. 
-
-And tied it all together using  software engineering to tie it all together 
-
-This project means a lot to me. Thank you for taking the time to check it out.
-
+This project means a lot to me. Thanks for checking it out.
 
 ## Quick links
 
