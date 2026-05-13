@@ -1,6 +1,6 @@
 # JustBreatheBro
 
-A breathing and mediation app
+Is a mindfulness and breathing
 
 <video src="assets/icons/mainVid.mp4" autoplay loop muted playsinline width="100%"></video>
 
