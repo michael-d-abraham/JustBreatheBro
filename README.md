@@ -1,69 +1,91 @@
 # JustBreatheBro
 
-Is a mindfulness and breathing
+Simple breathing and mindfulness app built for focus, calm, and better daily recovery.
 
-<video src="assets/icons/mainVid.mp4" autoplay loop muted playsinline width="100%"></video>
+![JustBreatheBro hero](assets/readMe/readmeHero.png)
 
+## Quick links
 
-**[Download free on the App Store](https://apps.apple.com/us/app/justbreathebro/id6756590863)**  
-Google Play listing is not live yet.
-
----
-
-## Sessions & media
-
-- **Breathing:** Multiple exercises to choose from, each with benefits, methods, and instructions curated through **BreathBot**—a RAG-style pipeline that pulls from hand-picked academic sources so in-app copy stays grounded and accurate.  
-- **Presentation:** Custom artwork, custom animations, and haptics timed to the breath cycle.  
-- **Audio:** Handmade breathing cues and ambient soundscapes—written, recorded, and produced in-house (including live **flute** on the breathing tracks).  
+- **App Store:** [Download JustBreatheBro](https://apps.apple.com/us/app/justbreathebro/id6756590863)
+- **BreathBot (content pipeline):** [github.com/michael-d-abraham/AIBreathBot](https://github.com/michael-d-abraham/AIBreathBot)
+- **WebSocket backend (live sessions):** [github.com/michael-d-abraham/breatheAppWebSocketBackEnd](https://github.com/michael-d-abraham/breatheAppWebSocketBackEnd)
+- **Google Play:** not live yet
 
 ---
 
-## Information archive
+## What this app solves
 
-A curated library of **articles**, **videos**, and **books** to support a mindfulness practice—selected and refined for quality and usefulness, not algorithmic noise.
+Most breathing apps feel generic or overly gamified.  
+JustBreatheBro focuses on:
 
----
-
-## Breathe together (real time)
-
-**Shared breathing sessions** use a **WebSocket** connection to a small **Node** service hosted on **Render**, so multiple people can follow the **same unified breath** in sync—useful for a class, a team, or anyone who wants to breathe on the same cadence.
-
----
-
-## BreathBot (content tooling)
-
-The BreathBot repo holds the agentic RAG workflow that generates and checks exercise and archive-style content against your source corpus:
-
-**[github.com/michael-d-abraham/AIBreathBot](https://github.com/michael-d-abraham/AIBreathBot)**
+- short, useful sessions
+- custom audio, visuals, and haptics that stay in sync
+- evidence-aligned instructions and benefits
+- optional live group breathing on one shared rhythm
 
 ---
 
-## Product map
+## Product preview
 
-![Outline](assets/icons/wireframe.png)
-
----
-
-## Stack (this repo)
-
-| Area | Choice |
-|------|--------|
-| App | **React Native** via **Expo**, file-based routes under `app/` |
-| Persistence | **AsyncStorage** |
-| Live sessions | **WebSockets** → Node server on **Render** |
-| Errors / performance | **Sentry** |
-| Haptics | **expo-haptics** |
-| Motion | **Reanimated** |
-
-Session flow, timers, audio, and haptics are coordinated through layered hooks (for example `useBreathingCycle`, animation, audio, haptics); global look-and-feel lives in `contexts/`.
+<video width="100%" controls playsinline preload="metadata">
+  <source src="assets/readMe/mainVid.mp4" type="video/mp4" />
+  Your browser does not support embedded videos.
+</video>
+<p><a href="assets/readMe/mainVid.mp4">Open video directly</a></p>
 
 ---
 
-## Art & audio (outside the IDE)
+## Core features
 
-- **Visuals & icons:** drawn in **Procreate**  
-- **Music & sound design:** **Logic Pro**  
+- **Guided sessions:** multiple breathing styles with clear methods and benefits.
+- **Immersive experience:** custom animation + timed haptics + handcrafted audio cues.
+- **Ambient soundscapes:** background audio to support longer sessions.
+- **Information archive:** curated articles, videos, and books for mindfulness practice.
+- **Live breathing rooms:** real-time synchronized sessions over WebSockets.
 
 ---
 
-*JustBreatheBro — Michael Abraham*
+## Content quality (BreathBot)
+
+Exercise copy and archive content are generated and checked through **BreathBot**, a RAG-style workflow grounded in hand-picked sources so the in-app guidance stays useful and evidence-aware.
+
+---
+
+## Architecture and product map
+
+![System architecture diagram](assets/readMe/SystemArchitectureDiagram.png)
+
+![Wireframe](assets/readMe/wireframe.png)
+
+---
+
+## Tech stack
+
+- **App:** React Native + Expo (Expo Router)
+- **Storage:** AsyncStorage
+- **Realtime:** WebSockets (Node service on Render)
+- **Motion:** Reanimated
+- **Haptics:** expo-haptics
+- **Monitoring:** Sentry
+
+Session flow, timers, animation, audio, and haptics are orchestrated through layered hooks (for example `useBreathingCycle`, `useBreathingAnimation`, `useBreathingAudio`, and `useBreathingHaptics`), with global theming/state in `contexts/`.
+
+---
+
+## Repo cleanup opportunities
+
+- Add a short **Local setup** section (`npm install`, `npm start`, `npm test`, `npm run lint`).
+- Add a **Project structure** section for fast onboarding (`app/`, `hooks/`, `components/`, `contexts/`, `lib/`).
+- Keep README media in one folder (currently `assets/readMe/`) and continue using those exact paths.
+- Add release/version notes at the top when shipping major updates.
+
+---
+
+## Art and audio
+
+- **Visuals & icons:** Procreate
+- **Music & sound design:** Logic Pro
+
+---
+
+*JustBreatheBro - Michael Abraham*
