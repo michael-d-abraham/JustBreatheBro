@@ -49,8 +49,8 @@ When a room starts, a single authoritative breathing timer is broadcast to every
 - **WebSocket backend:** [github.com/michael-d-abraham/breatheAppWebSocketBackEnd](https://github.com/michael-d-abraham/breatheAppWebSocketBackEnd)
 
 <p align="center">
-  <img src="assets/readMe/IpadOneBreath.gif" alt="iPad preview" width="320" />
-  <img src="assets/readMe/IphoneOneBreath.gif" alt="iPhone preview" width="320" />
+  <img src="assets/readMe/IpadOneBreath.gif" alt="iPad preview" />
+  <img src="assets/readMe/IphoneOneBreath.gif" alt="iPhone preview />
 </p>
 ---
 
