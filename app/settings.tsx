@@ -7,7 +7,6 @@ import SettingsSection from "@/components/SettingsSection";
 import SoundHapticsPicker from "@/components/SoundHapticsPicker";
 import SoundPicker from "@/components/SoundPicker";
 import SoundscapePicker from "@/components/SoundscapePicker";
-import BottomSheetThemePicker from "@/components/BottomSheetThemePicker";
 import { useTheme } from "@/components/Theme";
 import ThemePicker from "@/components/ThemePicker";
 import { useAppSettings } from "@/contexts/appSettingsContext";
@@ -59,7 +58,7 @@ export default function SettingsScreen() {
           <SoundscapePicker />
           <View style={styles.animationThemeWrapper}>
             <Text style={styles.animationThemeTitle}>Animation Theme</Text>
-            <BottomSheetThemePicker />
+            <ThemePicker target="animation" variant="bottomSheet" />
           </View>
         </SettingsSection>
 

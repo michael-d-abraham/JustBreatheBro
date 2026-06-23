@@ -1,7 +1,7 @@
-import BottomSheetAppearancePicker from "@/components/BottomSheetAppearancePicker";
+import AppearancePicker from "@/components/AppearancePicker";
 import BottomSheetSoundHapticsPicker from "@/components/BottomSheetSoundHapticsPicker";
-import BottomSheetSoundscapePicker from "@/components/BottomSheetSoundscapePicker";
-import BottomSheetThemePicker from "@/components/BottomSheetThemePicker";
+import SoundscapePicker from "@/components/SoundscapePicker";
+import ThemePicker from "@/components/ThemePicker";
 import { useTheme } from "@/components/Theme";
 import { WALLPAPER_IMAGES } from "@/constants/wallpapers";
 import { useAppSettings } from "@/contexts/appSettingsContext";
@@ -169,7 +169,7 @@ export default function ScenesScreen() {
         {/* Soundscape Section */}
         <Text style={styles.sectionTitle}>SOUNDSCAPE</Text>
         <View style={styles.appearanceSection}>
-          <BottomSheetSoundscapePicker />
+          <SoundscapePicker variant="bottomSheet" />
         </View>
 
         <View style={styles.divider} />
@@ -220,7 +220,7 @@ export default function ScenesScreen() {
         {/* Animation Theme Section */}
         <Text style={styles.sectionTitle}>ANIMATION THEME</Text>
         <View style={styles.appearanceSection}>
-          <BottomSheetThemePicker />
+          <ThemePicker target="animation" variant="bottomSheet" />
         </View>
 
         <View style={styles.divider} />
@@ -228,7 +228,7 @@ export default function ScenesScreen() {
         {/* Appearance Mode Section */}
         <Text style={styles.sectionTitle}>APPEARANCE MODE</Text>
         <View style={styles.appearanceSectionSpaced}>
-          <BottomSheetAppearancePicker />
+          <AppearancePicker variant="bottomSheet" />
         </View>
 
         <View style={styles.divider} />
