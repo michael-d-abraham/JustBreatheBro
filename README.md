@@ -17,7 +17,6 @@ This project means a lot to me. Thanks for checking it out.
 - **BreathBot (content pipeline):** [github.com/michael-d-abraham/AIBreathBot](https://github.com/michael-d-abraham/AIBreathBot)
 - **WebSocket backend (live sessions):** [github.com/michael-d-abraham/breatheAppWebSocketBackEnd](https://github.com/michael-d-abraham/breatheAppWebSocketBackEnd)
 
-
 ## Product preview
 
 <p align="center">
@@ -36,51 +35,105 @@ This project means a lot to me. Thanks for checking it out.
 
 ---
 
-## Live WebSocket rooms
+## Tech stack
 
-Live sessions are powered by a lightweight Node WebSocket service hosted on Render.  
-When a room starts, a single authoritative breathing timer is broadcast to every participant, keeping the entire group synchronized in real time.
+| Layer | Technology |
+|---|---|
+| Framework | React Native `0.81` + Expo `~54` (Expo Router) |
+| Animation | `react-native-reanimated` + `react-native-svg` |
+| Audio | `expo-audio` |
+| Haptics | `expo-haptics` |
+| Storage | AsyncStorage |
+| Realtime | WebSockets (Node service on Render) |
+| Monitoring | Sentry |
 
+Session flow, timers, animation, audio, and haptics are orchestrated through layered hooks
+(`useBreathingCycle`, `useBreathingAnimation`, `useBreathingAudio`, `useBreathingHaptics`),
+with global settings state in `contexts/`.
+
+---
+
+## Getting started
+
+**Prerequisites:** Node.js, npm, Expo CLI (`npm install -g expo-cli`), and either Xcode (iOS) or Android Studio (Android).
+
+```bash
+# Install dependencies
+npm install
+
+# Start the Expo dev server
+npm start
+
+# Run on a specific platform
+npm run ios        # requires Xcode
+npm run android    # requires Android Studio
+npm run web
+```
+
+---
+
+## Scripts
+
+| Script | Command | Notes |
+|---|---|---|
+| `npm start` | `expo start` | Starts the Expo dev server |
+| `npm run ios` | `expo run:ios` | Build and run on iOS simulator / device |
+| `npm run android` | `expo run:android` | Build and run on Android emulator / device |
+| `npm run web` | `expo start --web` | Run in browser |
+| `npm run lint` | `expo lint` | ESLint via Expo config |
+| `npm test` | `jest` | Runs the Jest test suite |
+
+---
+
+## Project structure
+
+```
+app/          Expo Router routes (file-based Stack navigation)
+components/   Presentational + bottom-sheet components
+contexts/     App-wide state (settings, current exercise)
+hooks/        Core logic (cycle, animation, audio, haptics, soundscape, live room)
+lib/          Storage wrappers, archive CRUD, WebSocket config
+constants/    Wallpaper images, theme color tables
+utils/        Sentry analytics helpers
+assets/       Sounds, soundscapes, backgrounds, icons
+docs/         Architecture map, route audit, regression checklist, hook reviews
+```
+
+For the full map — folder contents, active routes, naming conventions, risky areas, and
+refactor protocol — see [`AGENTS.md`](./AGENTS.md) and [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md).
+
+---
+
+## Testing and regression
+
+```bash
+npm run lint   # must exit 0
+npm test       # 21 tests across 2 suites — all must pass
+```
+
+Before committing any change to session logic, audio, haptics, animation, navigation, or
+settings, run the full manual checklist in [`docs/REGRESSION_CHECKLIST.md`](./docs/REGRESSION_CHECKLIST.md).
+
+---
+
+## External services
+
+**Live rooms** are powered by a Node WebSocket service on Render. A single authoritative
+breathing timer broadcasts to all participants, keeping the group synchronized in real time.
 
 <p align="center">
   <img src="assets/readMe/IpadOneBreath.gif" alt="iPad preview" width="350" />
   <img src="assets/readMe/IphoneOneBreath.gif" alt="iPhone preview" width="220" />
 </p>
 
-- **WebSocket backend:** [github.com/michael-d-abraham/breatheAppWebSocketBackEnd](https://github.com/michael-d-abraham/breatheAppWebSocketBackEnd)
----
+- **Backend repo:** [github.com/michael-d-abraham/breatheAppWebSocketBackEnd](https://github.com/michael-d-abraham/breatheAppWebSocketBackEnd)
 
-## Information Archive (BreathBot)
-
-All content is generated and validated through **BreathBot** - a RAG-style workflow grounded in hand-picked sources - making all the in-app content stays credible, consistent, and evidence-aware.
-
-- **BreathBot (content pipeline):** [github.com/michael-d-abraham/AIBreathBot](https://github.com/michael-d-abraham/AIBreathBot)
+**Information Archive** content is generated and validated through **BreathBot** — a RAG-style
+workflow grounded in hand-picked sources.
 
 <img src="assets/readMe/breatheBotDiagram.png" alt="BreathBot workflow diagram" width="900" />
 
-<img src="assets/readMe/breatheBotExample.png" alt="BreathBot output example" width="900" />
-
----
-
-## Architecture and product map
-
-![System architecture diagram](assets/readMe/SystemArchitectureDiagram.png)
-
-![SystemWireframe](assets/readMe/wireframe.png)
-![AnimationWireframe](assets/readMe/wireframe2.png)
-
----
-
-## Tech stack
-
-- **App:** React Native + Expo (Expo Router)
-- **Storage:** AsyncStorage
-- **Realtime:** WebSockets (Node service on Render)
-- **Motion:** Reanimated
-- **Haptics:** expo-haptics
-- **Monitoring:** Sentry
-
-Session flow, timers, animation, audio, and haptics are orchestrated through layered hooks (for example `useBreathingCycle`, `useBreathingAnimation`, `useBreathingAudio`, and `useBreathingHaptics`), with global theming/state in `contexts/`.
+- **BreathBot repo:** [github.com/michael-d-abraham/AIBreathBot](https://github.com/michael-d-abraham/AIBreathBot)
 
 ---
 
@@ -91,4 +144,4 @@ Session flow, timers, animation, audio, and haptics are orchestrated through lay
 
 ---
 
-*JustBreatheBro - Michael Abraham*
+*JustBreatheBro — Michael Abraham*

@@ -1,67 +1,60 @@
-# Breath — Cursor Project Rules (.cursorrules)
+# Breath — Cursor Project Rules
 
-## 1) Prime directive
-- Make small, safe changes that match existing patterns in this repo.
-- Do NOT add dependencies or introduce new architecture patterns unless explicitly asked.
-- Do NOT invent APIs, file paths, or hook signatures. If you can’t find it in the repo, ask.
+**Read `AGENTS.md` first.** It has the full project map, folder structure, naming conventions,
+import conventions, risky areas, refactor protocol, and links to every relevant doc.
+This file contains only the guardrails that must be in front of you at all times.
 
-## 2) How you must work
-For any task beyond a tiny edit:
-1) Provide a short plan (3–6 bullets).
-2) List exact files you will modify.
-3) Implement minimal diffs only (no drive-by refactors).
-4) Provide verification steps (commands + in-app checks).
+---
 
-## 3) Source of truth (use these, don’t recreate them)
-### Context / app state
-- Theme + global settings: `contexts/themeContext.tsx`
-- Current exercise state: `contexts/breathingContext.tsx`
+## Prime directive
+- Make small, safe changes that match existing patterns.
+- Do NOT add dependencies or new architecture patterns unless explicitly asked.
+- Do NOT invent APIs, file paths, or hook signatures — search the repo first.
 
-### Breathing session system (layered hooks)
-- Cycle/state machine: `hooks/useBreathingCycle.ts`
-- Animation: `hooks/useBreathingAnimation.ts`
-- Audio cues: `hooks/useBreathingAudio.ts`
-- Haptics: `hooks/useBreathingHaptics.ts`
+## How to work
+1. Plan (3–6 bullets) → list exact files to modify → minimal diff only → verify.
+2. No drive-by refactors. Keep changes localized.
+3. New files only when clearly reusable; place alongside similar files.
 
-### Soundscape (ambient background)
-- Hook: `hooks/useBackgroundSoundscape.ts`
-- Player component: `components/BackgroundSoundscapePlayer.tsx`
-Rule: do not create competing global soundscape players.
+## Sources of truth — use these, do not recreate them
 
-### Bottom sheets
-- Base contract: `components/BaseBottomSheet.tsx`
-- Sheet UI building blocks: `components/BottomSheet*.tsx`
-- Sheet state/coordination: `hooks/useBreathingSheets.ts`
-Rule: reuse `BaseBottomSheet` and existing sheet patterns; don’t instantiate new modal systems in screens.
+| Concern | File |
+|---|---|
+| App settings + wallpaper | `contexts/appSettingsContext.tsx` |
+| Current exercise | `contexts/breathingContext.tsx` |
+| Visual tokens | `components/Theme.tsx` (`useTheme`) |
+| Phase state machine | `hooks/useBreathingCycle.ts` |
+| Ring animation | `hooks/useBreathingAnimation.ts` |
+| Audio cues | `hooks/useBreathingAudio.ts` |
+| Haptics | `hooks/useBreathingHaptics.ts` |
+| Ambient soundscape | `hooks/useBackgroundSoundscape.ts` |
+| Bottom sheet base | `components/BaseBottomSheet.tsx` |
+| Sheet coordination | `hooks/useBreathingSheets.ts` |
+| Storage keys | `lib/storage.ts` |
+| Wallpaper images | `constants/wallpapers.ts` |
 
-### Gestures / navigation behavior
-- Swipe behavior: `hooks/useSwipeNavigation.ts`
-Rule: preserve existing swipe behavior unless explicitly asked to change it.
+## Non-negotiable invariants — breathing app safety
 
-### Persistence / content
-- Storage: `lib/storage.ts`
-- Information archive: `lib/informationArchive.ts` + `lib/informationArchive.json`
+Any change to timers / audio / haptics / animation must preserve:
 
-## 4) Non-negotiable invariants (breathing app safety)
-If you touch timers/audio/haptics/animation:
-- No duplicate timers/intervals across re-renders.
-- Start / pause / resume / stop must be idempotent (safe if called multiple times).
-- On stop OR unmount OR navigation-away: stop timers, stop audio, stop haptics, and settle/reset animations as the current system expects.
-- Phase transitions must not double-trigger cues (audio/haptics) on re-render.
+1. **No duplicate timers/intervals** across re-renders.
+2. **Idempotent lifecycle** — start / pause / resume / stop safe to call multiple times.
+3. **Full teardown** on stop, unmount, and navigation-away: timers stopped, audio stopped,
+   haptics stopped, animation settled.
+4. **No double-triggered cues** on re-render.
+5. **Single soundscape player** — `BackgroundSoundscapePlayer` in `_layout.tsx` is the only
+   instance. Do not add competing players.
+6. **No new modal systems** in screens — use `BaseBottomSheet` and existing sheet patterns.
 
-If you change anything in `useBreathingCycle`:
-- Explain how you prevent drift, duplicate scheduling, and stuck states.
+If you change `useBreathingCycle`, explain how you prevent drift, duplicate scheduling, and
+stuck states.
 
-## 5) Code quality guardrails
-- Prefer editing existing code over creating new files.
-- New files only if clearly reusable and placed alongside similar code.
-- Keep changes localized; do not “cleanup” unrelated files.
-- When referencing assets, use the repo’s existing pattern (avoid dynamic `require()` if the codebase uses static requires).
+## Before committing
 
-## 6) Testing expectations
-- If you change core session logic (cycle/audio/haptics), add or update tests under `hooks/__tests__` when feasible.
-- If tests aren’t practical, provide a manual verification checklist tailored to the change.
+```bash
+npm run lint   # must exit 0
+npm test       # 21 tests — all must pass
+```
 
-## 7) Output format
-When delivering a change:
-- Plan → Files touched → Patch/diff-style edits (or clearly separated code blocks) → Verification steps.
+If you touched session logic, audio, haptics, animation, navigation, or settings — also run
+the manual checklist in `docs/REGRESSION_CHECKLIST.md`.
