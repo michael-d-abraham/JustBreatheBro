@@ -1,9 +1,9 @@
 # JustBreatheBro — Architecture Map
 
-> Status: descriptive snapshot of the codebase **as it exists today**. This document does not
-> propose code changes; it records current reality so cleanup work has a shared source of truth.
-> Where something looks unused, duplicated, or risky it is flagged explicitly and, where noted,
-> should be verified before acting.
+> Status: updated 2026-06-23 to reflect cleanup work. Many items flagged as risky or orphaned in
+> the original draft have been resolved. `AGENTS.md` is the canonical agent guide and is more
+> current than this file on naming and structure details. `docs/FINAL_CLEANUP_REVIEW.md` records
+> the full before/after delta of the cleanup.
 
 ---
 
@@ -34,34 +34,31 @@ Breath/
   app/                 Expo Router routes (file-based routing)
     _layout.tsx        Root layout: Sentry init, audio mode, providers, Stack
     index.tsx          Home screen (ACTIVE entry)
-    breathing.tsx      Solo breathing session screen (largest screen file)
-    settings.tsx       Full-screen settings (see duplication note)
+    breathing.tsx      Solo breathing session screen (~496 lines)
+    settings.tsx       Full-screen settings — confirmed orphan (no inbound navigation found)
     scenes.tsx         Wallpaper / scene picker (ACTIVE)
-    wallpaper.tsx      Alternate wallpaper carousel (orphan route, see section 3)
     informationarchive.tsx   Information archive browser
-    global_room.tsx    Live "Breathe Together" room session screen
+    global_room.tsx    Live "Breathe Together" room session screen (~495 lines)
     global_room_picker.tsx   Live room selection screen
-    breathsetup.tsx    Breath setup screen (orphan route, see section 3)
-    breath_bot_landing.tsx   BreathBot landing (orphan route, see section 3)
-    exercises.tsx      Exercise list screen (orphan route, see section 3)
     support.tsx        Legacy route -> Redirect to "/"
-    _tabs/             Underscore-prefixed dir; appears EXCLUDED from routing (see section 3)
-      _layout.tsx      Tab navigator referencing "learn"/"meditate" screens that do not exist
-      index.tsx        Duplicate of app/index.tsx
-      settings.tsx     Near-duplicate of app/settings.tsx
+    _deprecated/       Dormant routes — DO NOT edit, DO NOT lint
+      exercises.tsx    Exercise grid (no entry point; preserved for possible restoration)
+      breathsetup.tsx  Custom pattern builder (no entry point; preserved)
 
-  components/          Presentational + sheet components
-    Theme.tsx          Theme/token context (ThemeProvider, useTheme) + helpers
+  components/          Presentational + sheet components (all PascalCase)
+    Theme.tsx          Barrel re-export: ThemeProvider, useTheme, useWallpaperForeground + token types
+    ThemeProvider.tsx  ThemeProvider + useTheme implementation — visual tokens
     BaseBottomSheet.tsx     Shared bottom-sheet contract
-    BottomSheet*.tsx        Sheet building blocks + sheet-variant pickers
+    BottomSheet*.tsx        Sheet building blocks (rows, toggles, section titles, dividers)
     SettingsSheet.tsx, SupportSheet.tsx, ExerciseDetailSheet.tsx, ExerciseSelectionSheet.tsx
-    SoundPicker / SoundscapePicker / ThemePicker / AppearancePicker   "page" variant pickers
+    SoundPicker / SoundscapePicker / ThemePicker / AppearancePicker   Unified pickers (variant prop: 'page' | 'bottomSheet')
+    BottomSheetSoundHapticsPicker.tsx  Sheet-variant sound/haptics toggles (separate from SoundHapticsPicker)
     BackgroundSoundscapePlayer.tsx   Mounts the app-wide soundscape hook (renders null)
-    BreathingPage*.tsx, Scenes*.tsx, startbutton.tsx, theme_buttons.tsx, appearance_button.tsx, ...
+    BreathingPage*.tsx, GlobalRoom*.tsx, WallpaperCarousel.tsx, WallpaperPreview.tsx, ...
 
   contexts/
-    themeContext.tsx   App settings + wallpaper state (AppProvider, useApp) -- NOT theme tokens
-    breathingContext.tsx   Current selected exercise (BreathingProvider, useBreathing)
+    appSettingsContext.tsx  App settings + wallpaper state (AppProvider, useAppSettings) — NOT theme tokens
+    breathingContext.tsx    Current selected exercise (BreathingProvider, useBreathing)
 
   hooks/
     useBreathingCycle.ts      Phase state machine
@@ -70,9 +67,9 @@ Breath/
     useBreathingHaptics.ts    Phase-quantized haptic pulses
     useBreathingSheets.ts     Sheet open/close coordination for home/session
     useBackgroundSoundscape.ts  App-wide looping ambient audio
-    useGlobalBreathingRoom.ts  Live room WebSocket state machine
-    useSwipeNavigation.ts     Swipe gestures (currently unused, see section 10)
-    __tests__/                Jest tests for cycle + global room
+    useGlobalBreathingRoom.ts  Live room WebSocket state machine (~552 lines)
+    __tests__/                Jest tests (useBreathingCycle, useBreathingAudio, useBreathingHaptics,
+                              useGlobalBreathingRoom URL/config + behavior, lib/storage)
 
   lib/
     storage.ts                AsyncStorage wrappers + defaultExercises
@@ -97,29 +94,16 @@ Breath/
 Routing is file-based via Expo Router. The root navigator is a `Stack` defined in
 [app/_layout.tsx](../app/_layout.tsx) (`animation: "none"`, headers hidden).
 
-> Note on `app/_tabs/`: Expo Router ignores files and directories whose names begin with `_`
-> (except `_layout.tsx` inside an active segment). Because the directory itself is named `_tabs`,
-> the screens inside it appear to be **excluded from routing** and therefore inactive. The active
-> home screen is [app/index.tsx](../app/index.tsx), not [app/_tabs/index.tsx](../app/_tabs/index.tsx).
-> This should be verified empirically before any deletion.
-
 | Route | File | Reachable from | Status |
 |---|---|---|---|
 | `/` | [app/index.tsx](../app/index.tsx) | App launch; `router.push('/')` from several screens | Active (home) |
-| `/breathing` | [app/breathing.tsx](../app/breathing.tsx) | `index.tsx` start button (with `autoStart`), `exercises.tsx`, `breathsetup.tsx`, `_tabs/index.tsx` | Active |
-| `/scenes` | [app/scenes.tsx](../app/scenes.tsx) | `index.tsx` (circle press), `wallpaper.tsx` | Active |
+| `/breathing` | [app/breathing.tsx](../app/breathing.tsx) | `index.tsx` start button (with `autoStart` param) | Active |
+| `/scenes` | [app/scenes.tsx](../app/scenes.tsx) | `index.tsx` (circle press) | Active |
 | `/informationarchive` | [app/informationarchive.tsx](../app/informationarchive.tsx) | `index.tsx` | Active |
-| `/global_room_picker` | [app/global_room_picker.tsx](../app/global_room_picker.tsx) | `index.tsx` (global breath press), `global_room.tsx` (`router.replace`) | Active |
+| `/global_room_picker` | [app/global_room_picker.tsx](../app/global_room_picker.tsx) | `index.tsx` (global breath press); `global_room.tsx` (`router.replace`) | Active |
 | `/global_room` | [app/global_room.tsx](../app/global_room.tsx) | `global_room_picker.tsx` (`router.push` with `params.room`) | Active |
-| `/settings` | [app/settings.tsx](../app/settings.tsx) | No `router.push('/settings')` found; in-session settings use `SettingsSheet`, not this route | Likely orphan / verify |
-| `/wallpaper` | [app/wallpaper.tsx](../app/wallpaper.tsx) | No inbound `router.push('/wallpaper')` found; it pushes `/scenes` | Likely orphan / verify |
-| `/exercises` | [app/exercises.tsx](../app/exercises.tsx) | No inbound navigation found | Likely orphan / verify |
-| `/breathsetup` | [app/breathsetup.tsx](../app/breathsetup.tsx) | No inbound navigation found | Likely orphan / verify |
-| `/breath_bot_landing` | [app/breath_bot_landing.tsx](../app/breath_bot_landing.tsx) | No inbound navigation found | Likely orphan / verify |
+| `/settings` | [app/settings.tsx](../app/settings.tsx) | No `router.push('/settings')` found anywhere — in-session settings use `SettingsSheet` | **Confirmed orphan** — review pending |
 | `/support` | [app/support.tsx](../app/support.tsx) | Deep link `/support`; renders `<Redirect href="/" />` | Legacy stub (intentional) |
-| (n/a) | [app/_tabs/_layout.tsx](../app/_tabs/_layout.tsx) | References `learn`/`meditate` screen files that do not exist | Inactive (underscore dir) |
-| (n/a) | [app/_tabs/index.tsx](../app/_tabs/index.tsx) | Duplicate of `app/index.tsx` | Inactive (underscore dir) |
-| (n/a) | [app/_tabs/settings.tsx](../app/_tabs/settings.tsx) | Near-duplicate of `app/settings.tsx` | Inactive (underscore dir) |
 
 Route map of the active surfaces:
 
@@ -136,12 +120,8 @@ flowchart TD
   breathing -->|"exit"| home
   support["/support"] -->|"Redirect"| home
 
-  subgraph orphans [No inbound navigation found - verify]
+  subgraph orphans [Confirmed orphan - no inbound navigation]
     settingsRoute["/settings"]
-    wallpaperRoute["/wallpaper"]
-    exercisesRoute["/exercises"]
-    breathsetupRoute["/breathsetup"]
-    botLanding["/breath_bot_landing"]
   end
 ```
 
@@ -153,7 +133,7 @@ Entry point: home [app/index.tsx](../app/index.tsx) → `handleStartPress()` cal
 `updateExercise(displayExercise)` (from `useBreathing`) then
 `router.push({ pathname: "/breathing", params: { autoStart: "true" } })`.
 
-The session screen [app/breathing.tsx](../app/breathing.tsx) (~654 lines) is the orchestrator. It
+The session screen [app/breathing.tsx](../app/breathing.tsx) (~496 lines) is the orchestrator. It
 composes four layered hooks plus context state. The cycle hook is the clock; the screen forwards
 phase transitions to animation, audio, and haptics.
 
@@ -201,16 +181,16 @@ stop/cancel.
 
 ## 5. Settings flow
 
-App-wide settings and wallpaper live in [contexts/themeContext.tsx](../contexts/themeContext.tsx)
-(`AppProvider`, `useApp`). Despite the file name, this is the **app settings** context, not the
-visual token theme.
+App-wide settings and wallpaper live in [contexts/appSettingsContext.tsx](../contexts/appSettingsContext.tsx)
+(`AppProvider`, `useAppSettings`). This is the **app settings** context, not the visual token theme.
 
 `AppSettings` shape: `soundEnabled`, `hapticsEnabled`, `animationsEnabled`, `backgroundType`,
 `soundType` (`SoundType`), `soundscape` (`SoundscapeType`), `animationTheme` (`ThemeName`).
 Exposed setters include `updateSettings`, `toggleSound`, `toggleHaptics`, `toggleAnimations`,
 `setSoundType`, `setSoundscape`, `setAnimationTheme`, plus `backgroundImage` / `setBackgroundImage`.
 Background image defaults to `DEFAULT_ZENSCAPE_BACKGROUND_FILENAME` resolved through
-`ZENSCAPE_IMAGE_MAP` (static `require`s).
+`ZENSCAPE_IMAGE_MAP` from [constants/wallpapers.ts](../constants/wallpapers.ts) (single source of
+truth — do not redefine inline).
 
 Visual tokens are a separate concern in [components/Theme.tsx](../components/Theme.tsx)
 (`ThemeProvider`, `useTheme`): palette tokens, bottom-sheet tokens (`PlatformColor`-based), and the
@@ -220,23 +200,21 @@ breathing animation theme (`grounded | calm | uplifting`). Helpers include
 Persistence runs through [lib/storage.ts](../lib/storage.ts) — `backgroundImage` and
 `animationTheme` are saved/loaded; the remaining toggles are in-memory state in the provider.
 
-Settings UI exists in three places that overlap:
+Settings UI exists in two places:
 
 - **In-session sheet** — [components/SettingsSheet.tsx](../components/SettingsSheet.tsx), opened from
   [app/breathing.tsx](../app/breathing.tsx) and [app/global_room.tsx](../app/global_room.tsx). Uses
-  the `BottomSheet*` picker variants (`BottomSheetSoundPicker`, `BottomSheetSoundscapePicker`,
-  `BottomSheetThemePicker`).
-- **Full screen** — [app/settings.tsx](../app/settings.tsx). Uses the "page" picker variants
-  (`SoundPicker`, `SoundscapePicker`, `ThemePicker`, `AppearancePicker`, `SoundHapticsPicker`).
-- **Duplicate** — [app/_tabs/settings.tsx](../app/_tabs/settings.tsx) is nearly identical to
-  `app/settings.tsx` (differs only in `@/` vs relative imports) and sits in the inactive `_tabs` dir.
+  `SoundPicker`, `SoundscapePicker`, and `ThemePicker` with `variant="bottomSheet"`.
+- **Full screen (orphan)** — [app/settings.tsx](../app/settings.tsx). Uses `SoundPicker`,
+  `SoundscapePicker`, `ThemePicker`, `AppearancePicker`, `SoundHapticsPicker` with default (`page`)
+  variant. No inbound navigation found — confirmed orphan, resolution pending.
 
 ```mermaid
 flowchart LR
-  appProvider["themeContext: AppProvider/useApp"] --> sheet["SettingsSheet (in-session)"]
-  appProvider --> screen["app/settings.tsx (full screen)"]
+  appProvider["appSettingsContext: AppProvider/useAppSettings"] --> sheet["SettingsSheet (in-session)"]
+  appProvider --> screen["app/settings.tsx (orphan)"]
   appProvider --> storage["lib/storage.ts (AsyncStorage)"]
-  themeProvider["Theme.tsx: ThemeProvider/useTheme"] --> sheet
+  themeProvider["ThemeProvider.tsx: ThemeProvider/useTheme"] --> sheet
   themeProvider --> screen
   storage -->|"backgroundImage, animationTheme"| appProvider
 ```
@@ -251,7 +229,7 @@ Selection screen [app/global_room_picker.tsx](../app/global_room_picker.tsx) lis
 `fetchBreathRoomStats(apiBase)` → `GET /api/rooms`. Tapping a room navigates
 `router.push({ pathname: "/global_room", params: { room: opt.id } })`.
 
-Session screen [app/global_room.tsx](../app/global_room.tsx) (~600 lines) consumes
+Session screen [app/global_room.tsx](../app/global_room.tsx) (~495 lines) consumes
 `useGlobalBreathingRoom({ onPhaseStep, initialRoomId, onSelectedRoomIdChange })`. The hook is a
 WebSocket-driven state machine:
 
@@ -305,7 +283,7 @@ is the seed data; `Exercise` carries `inhale/hold1/exhale/hold2` plus copy field
 `searchResources`, `initializeArchive`, `resetArchiveToDefaults`, `clearArchive`. `InformationResource`
 includes an `AI_description` field intended for agent/LLM consumption.
 
-Consumers: `breathingContext` loads/saves the current exercise; `themeContext` loads/saves
+Consumers: `breathingContext` loads/saves the current exercise; `appSettingsContext` loads/saves
 background image + animation theme; `useBreathingSheets` loads the exercise list; the archive screen
 reads resources.
 
@@ -321,8 +299,7 @@ reads resources.
 | `useBreathingHaptics` | [hooks/useBreathingHaptics.ts](../hooks/useBreathingHaptics.ts) | Phase-quantized pulses | `generationRef` guards stale timers; idempotent `cancel` |
 | `useBreathingSheets` | [hooks/useBreathingSheets.ts](../hooks/useBreathingSheets.ts) | Coordinates detail/selection/support sheets on home + session | Owns refs + open/close state, loads exercises |
 | `useBackgroundSoundscape` | [hooks/useBackgroundSoundscape.ts](../hooks/useBackgroundSoundscape.ts) | App-wide looping ambient audio | Mounted once via `BackgroundSoundscapePlayer` in `_layout.tsx`; native loop |
-| `useGlobalBreathingRoom` | [hooks/useGlobalBreathingRoom.ts](../hooks/useGlobalBreathingRoom.ts) | Live room WebSocket state machine | ~482 lines; has tests; reconnect/backoff/dedupe |
-| `useSwipeNavigation` | [hooks/useSwipeNavigation.ts](../hooks/useSwipeNavigation.ts) | Swipe gesture factory | No importers found; targets `/calm` and `/energize` routes that do not exist |
+| `useGlobalBreathingRoom` | [hooks/useGlobalBreathingRoom.ts](../hooks/useGlobalBreathingRoom.ts) | Live room WebSocket state machine | ~552 lines; URL/config + join/leave/reconnect/cleanup tested; real-network timing untested |
 
 Single-instance rule: the ambient soundscape is mounted exactly once in
 [app/_layout.tsx](../app/_layout.tsx) via
@@ -359,58 +336,52 @@ Single-instance rule: the ambient soundscape is mounted exactly once in
 2. **Live room timing** — [hooks/useGlobalBreathingRoom.ts](../hooks/useGlobalBreathingRoom.ts) is
    large and timing-sensitive (reconnect backoff, phase dedupe, `skipBreathCueAudio`). Server is the
    clock; client must not introduce its own drift.
-3. **Large files** — `breathing.tsx` (~654), `global_room.tsx` (~600), `useGlobalBreathingRoom.ts`
-   (~482), `wallpaper.tsx` (~369). High cognitive load and merge risk.
-4. **Navigation duplication / inactive code** — `app/_tabs/` appears excluded from routing (the
-   underscore-prefixed directory), yet contains `index.tsx` (duplicate home) and `settings.tsx`
-   (near-duplicate of `app/settings.tsx`), and `_tabs/_layout.tsx` references nonexistent
-   `learn`/`meditate` screens. Confirm inactivity before changing.
-5. **Unused gesture hook** — [hooks/useSwipeNavigation.ts](../hooks/useSwipeNavigation.ts) has no
-   importers and points to nonexistent routes `/calm`, `/energize`.
-6. **Orphan routes** — `settings.tsx`, `wallpaper.tsx`, `exercises.tsx`, `breathsetup.tsx`,
-   `breath_bot_landing.tsx` have no inbound navigation found (deep links not ruled out).
-7. **Duplicated picker components** — page vs sheet variants share large blocks of near-identical
-   code (`SoundPicker` / `BottomSheetSoundPicker`, etc.).
-8. **Duplicated data** — `WALLPAPER_IMAGES` is defined independently in
-   [app/scenes.tsx](../app/scenes.tsx) and [app/wallpaper.tsx](../app/wallpaper.tsx).
-9. **Confusing naming** — `contexts/themeContext.tsx` exports `useApp`/`AppProvider` (app settings,
-   not theme), while `components/Theme.tsx` is the actual token theme context. Snake_case component
-   files (`startbutton.tsx`, `theme_buttons.tsx`, `appearance_button.tsx`) break the PascalCase
-   convention used elsewhere.
-10. **Thin test coverage** — only `useBreathingCycle` and `useGlobalBreathingRoom` have tests
-    (`hooks/__tests__`); audio, haptics, sheets, and storage are untested.
-11. **Tooling drift** — [package.json](../package.json) `reset-project` script references
-    `scripts/reset-project.js`, but no `scripts/` directory exists. A stray `dummy.ipynb` is present.
-12. **Source-of-truth sprawl** — `README.md` (marketing), `project.md` (legacy brainstorm), and
-    `.cursorrules` (partial AI guide) overlap. This document is intended to become the canonical map.
+3. **Large files** — `breathing.tsx` (~496), `global_room.tsx` (~495), `useGlobalBreathingRoom.ts`
+   (~552). High cognitive load and merge risk.
+4. **`app/_tabs/` — deleted.** The tab navigator and its duplicate screens have been removed.
+   Navigation is Stack-only via `app/_layout.tsx`.
+5. **`hooks/useSwipeNavigation.ts` — deleted.** It was unused and referenced non-existent routes.
+6. **Remaining orphan route** — `app/settings.tsx` has no inbound `router.push('/settings')`.
+   Resolution is pending (see §3 table and `docs/ROUTE_AUDIT.md`).
+7. **Picker duplication — largely resolved.** `SoundPicker`, `SoundscapePicker`, `ThemePicker`,
+   `AppearancePicker` each accept `variant: 'page' | 'bottomSheet'`. The remaining duplicate is
+   `SoundHapticsPicker` vs `BottomSheetSoundHapticsPicker` — not yet unified.
+8. **`WALLPAPER_IMAGES` duplication — resolved.** Single source in
+   [constants/wallpapers.ts](../constants/wallpapers.ts); `wallpaper.tsx` is deleted.
+9. **Naming — largely resolved.** `contexts/appSettingsContext.tsx` exports `useAppSettings` /
+   `AppProvider`. All component files are PascalCase. `Theme.tsx` is the barrel re-exporter;
+   `ThemeProvider.tsx` holds the implementation.
+10. **Test coverage — expanded.** 76 tests across 6 suites: cycle, audio, haptics, storage,
+    live-room URL/config, and live-room join/leave/reconnect/cleanup. Still untested:
+    `useBackgroundSoundscape`, `useBreathingSheets`.
+11. **Tooling — fixed.** `reset-project` script removed; `dummy.ipynb` deleted.
+12. **Source-of-truth** — `AGENTS.md` is the canonical agent guide. This file is a supporting
+    architecture reference; `docs/FINAL_CLEANUP_REVIEW.md` records the cleanup delta.
 
 ---
 
 ## 11. Suggested cleanup order
 
-Each step should reduce total complexity (fewer files / fewer duplicate concepts / clearer
-ownership) and be verifiable with `npm run lint`, `npm test`, and a manual core-flow check
-(start session → pause/resume → exit; change settings; join/leave room).
+Each step should reduce total complexity and be verifiable with `npm run lint`, `npm test`,
+`npx tsc --noEmit`, and a manual core-flow check (start session → pause/resume → exit;
+change settings; join/leave room).
 
-1. **Confirm + resolve navigation reality** — verify whether `app/_tabs/` is routed; pick one home
-   model and remove the dead duplicate (`_tabs/index.tsx`, `_tabs/settings.tsx`, `_tabs/_layout.tsx`).
-2. **Remove dead code** — `useSwipeNavigation` (if still unimported) and any other unreferenced
-   exports; decide on orphan routes (`settings`/`wallpaper`/`exercises`/`breathsetup`/
-   `breath_bot_landing`): wire up, delete, or quarantine with a note here.
-3. **Unify duplicated data** — single `WALLPAPER_IMAGES` source consumed by both `scenes.tsx` and
-   `wallpaper.tsx`.
-4. **Deduplicate pickers** — collapse page vs sheet picker pairs into one component with a variant,
-   starting with Sound, then Soundscape, Theme, Appearance.
-5. **Consolidate settings UI** — extract shared settings sections used by both `SettingsSheet` and
-   the full-screen settings route.
-6. **Clarify naming** — rename `themeContext`/`useApp` toward an app-settings name and bring
-   snake_case component files to PascalCase (rename + re-export shims first).
-7. **Break up god files** — extract presentational pieces from `breathing.tsx` and `global_room.tsx`
-   along existing hook boundaries; trim `useGlobalBreathingRoom.ts`.
-8. **Fix tooling** — restore or remove the `reset-project` script; remove stray files (`dummy.ipynb`).
-9. **Expand tests** — add coverage for audio, haptics, sheets, and storage round-trips.
-10. **Establish the AI source of truth** — promote this file (plus a concise `AGENTS.md`) to
-    canonical; mark `project.md` non-authoritative; trim `.cursorrules` to guardrails that point here.
+**Completed (as of 2026-06-23):**
+- Removed `_tabs/`, `wallpaper.tsx`, `exercises.tsx`, `breathsetup.tsx`, `breath_bot_landing.tsx`,
+  `useSwipeNavigation.ts`, `dummy.ipynb`, and the broken `reset-project` script.
+- Renamed `themeContext.tsx` → `appSettingsContext.tsx`; brought all component files to PascalCase.
+- Consolidated `WALLPAPER_IMAGES` into `constants/wallpapers.ts`.
+- Unified pickers behind `variant` prop (Sound, Soundscape, Theme, Appearance).
+- Expanded tests: 76 tests / 6 suites (audio, haptics, storage, live-room behavior).
+- Fixed 3 `TS2367` type errors in `useBreathingCycle.ts`; `tsc --noEmit` now exits 0.
+- Extracted presentational pieces into `BreathingPage*` and `GlobalRoom*` components.
+
+**Remaining:**
+1. **Resolve `app/settings.tsx` orphan** — wire up an entry point, merge unique sections into
+   `SettingsSheet`, or delete after comparison. See `docs/ROUTE_AUDIT.md`.
+2. **Unify `SoundHapticsPicker` / `BottomSheetSoundHapticsPicker`** — last remaining picker duplicate.
+3. **Rename `AppearanceButton`** — it is a generic toggle button, not appearance-specific.
+4. **Expand tests** — `useBackgroundSoundscape`, `useBreathingSheets` still untested.
 
 ---
 

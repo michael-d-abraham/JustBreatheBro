@@ -1,5 +1,5 @@
 import AppearancePicker from "@/components/AppearancePicker";
-import BottomSheetSoundHapticsPicker from "@/components/BottomSheetSoundHapticsPicker";
+import SoundHapticsPicker from "@/components/SoundHapticsPicker";
 import SoundscapePicker from "@/components/SoundscapePicker";
 import ThemePicker from "@/components/ThemePicker";
 import { useTheme } from "@/components/Theme";
@@ -149,6 +149,14 @@ export default function ScenesScreen() {
 
         <View style={styles.divider} />
 
+        {/* Color Theme Section */}
+        <Text style={styles.sectionTitle}>COLOR THEME</Text>
+        <View style={styles.appearanceSection}>
+          <ThemePicker variant="bottomSheet" />
+        </View>
+
+        <View style={styles.divider} />
+
         {/* Appearance Mode Section */}
         <Text style={styles.sectionTitle}>APPEARANCE MODE</Text>
         <View style={styles.appearanceSectionSpaced}>
@@ -160,7 +168,7 @@ export default function ScenesScreen() {
         {/* Sound & Haptics Section */}
         <Text style={styles.sectionTitle}>SOUND & HAPTICS</Text>
         <View style={{ marginTop: 4, alignSelf: "stretch" }}>
-          <BottomSheetSoundHapticsPicker />
+          <SoundHapticsPicker variant="bottomSheet" />
         </View>
       </ScrollView>
     </SafeAreaView>

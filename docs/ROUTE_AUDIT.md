@@ -43,7 +43,7 @@ The entire `_tabs/` directory has been removed. See [docs/NAVIGATION_DECISION.md
 | Active | `/global_room_picker` | `app/global_room_picker.tsx` | Choose a live "Breathe Together" room; shows participant counts | `app/index.tsx` global breath press; `router.replace` from `global_room.tsx` on error | **Keep** |
 | Active | `/global_room` | `app/global_room.tsx` | Live synchronized breathing session over WebSocket | `app/global_room_picker.tsx` room card press | **Keep** |
 | Legacy | `/support` | `app/support.tsx` | Redirect stub — renders `<Redirect href="/" />` | External deep link `/support`; no internal navigation | **Keep** — intentional; prevents missing-route crash for old deep links |
-| Orphan | `/settings` | `app/settings.tsx` | Full-screen settings page (sound, soundscape, theme, appearance) | **No inbound `router.push` or `<Link>` found anywhere in the codebase** | **Review** — see notes |
+| Deleted | `/settings` | ~~`app/settings.tsx`~~ | Full-screen settings page (sound, soundscape, theme, appearance) | **No inbound `router.push` or `<Link>` found anywhere in the codebase** | **Deleted** — Color Theme picker moved to `scenes.tsx`; all other sections already covered elsewhere |
 | Deleted | `/wallpaper` | ~~`app/wallpaper.tsx`~~ | Older wallpaper carousel (swipe to pick, left/right arrows, dot indicator) | **No inbound navigation found;** `wallpaper.tsx` itself pushed to `/scenes` | **Deleted** — superseded by `scenes.tsx` |
 | Deprecated | `/exercises` | `app/_deprecated/exercises.tsx` | Grid of all exercises; tap to select and start | **No inbound navigation found** | **Deprecated** — moved to `_deprecated/` for potential future restoration |
 | Deprecated | `/breathsetup` | `app/_deprecated/breathsetup.tsx` | Custom breathing pattern (slider per phase); saves + navigates to `/breathing` | **No inbound navigation found** | **Deprecated** — moved to `_deprecated/` for potential future restoration |
@@ -55,18 +55,29 @@ The entire `_tabs/` directory has been removed. See [docs/NAVIGATION_DECISION.md
 
 ## Detailed notes per flagged route
 
-### `/settings` — `app/settings.tsx` — Orphan, Review
+### `/settings` — ~~`app/settings.tsx`~~ — **Deleted**
 
-The file is fully implemented (sound, soundscape, theme, appearance, haptics pickers). Import paths
-use `../` relative style rather than `@/`. Nothing in source code navigates to this route.
+**Status:** Deleted 2026-06-23 after comparison against active settings surfaces.
 
-In-session settings are handled by `SettingsSheet` (a bottom sheet opened from `breathing.tsx` and
-`global_room.tsx`). It is not clear whether `app/settings.tsx` was intended as a secondary full-screen
-fallback, was replaced by `SettingsSheet`, or is meant to be linked from somewhere not yet wired.
+`app/settings.tsx` had five sections. Five were already covered by `SettingsSheet` and/or
+`scenes.tsx`. The one unique section — the Color Theme picker (`ThemePicker` with `target="app"`,
+which sets the visual palette: Grounded / Calm / Uplifting) — was unreachable in the app. It has
+been moved into `scenes.tsx` (inserted between Animation Theme and Appearance Mode), where all
+other visual customization already lives.
 
-**Recommended decision:** decide whether to wire it up (e.g. from `BreathingPageHeader` or home
-screen) or delete it. If deleted, confirm `SettingsSheet` covers all settings options. Do not
-delete before that comparison is done.
+**Coverage before deletion:**
+
+| Section | Covered by |
+|---|---|
+| Inhale/Exhale Tone | `SettingsSheet` |
+| Soundscape | `SettingsSheet` + `scenes.tsx` |
+| Animation Theme | `SettingsSheet` + `scenes.tsx` |
+| Color Theme (visual palette) | Moved to `scenes.tsx` |
+| Appearance Mode | `scenes.tsx` |
+| Sound & Haptics toggles | `scenes.tsx` |
+
+**Deletion rationale:** All settings are now accessible from `scenes.tsx` and/or `SettingsSheet`.
+No setting is lost.
 
 ---
 
@@ -172,17 +183,18 @@ Comparison of the two home screens:
 | ✅ Deleted | `app/_tabs/settings.tsx` | Low — duplicate, unreachable | **Completed** |
 | ✅ Deprecated | `app/exercises.tsx` → `app/_deprecated/exercises.tsx` | Zero — moved to dormant `_deprecated/` folder | **Completed** |
 | ✅ Deprecated | `app/breathsetup.tsx` → `app/_deprecated/breathsetup.tsx` | Zero — moved to dormant `_deprecated/` folder | **Completed** |
-| Review pending | `app/settings.tsx` | Medium — compare against SettingsSheet before removing | **No action taken** |
+| ✅ Deleted | `app/settings.tsx` | Low — Color Theme moved to scenes.tsx; no setting lost | **Completed** |
 | Keep | `app/support.tsx` | n/a — intentional legacy redirect | **No action needed** |
 | Keep | All 6 active routes | n/a | **No action needed** |
 
 ### Changes made
 
-- **Deleted (4 files):** `wallpaper.tsx`, `breath_bot_landing.tsx`, `_tabs/_layout.tsx`, `_tabs/index.tsx`, `_tabs/settings.tsx`
+- **Deleted (5 files):** `wallpaper.tsx`, `breath_bot_landing.tsx`, `_tabs/_layout.tsx`, `_tabs/index.tsx`, `_tabs/settings.tsx`, `settings.tsx`
 - **Deprecated (2 files):** Moved `exercises.tsx` and `breathsetup.tsx` to `app/_deprecated/` for potential future restoration
 - **Updated config:** Added `app/_deprecated/**` to `eslint.config.js` ignores to prevent linting errors on dormant files with broken relative imports
 - **Verification:** Lint and tests pass after cleanup
 
 ### Remaining work
 
-- **`app/settings.tsx`** — still orphaned but not touched in this cleanup. Requires comparison against `SettingsSheet` to determine if it should be wired up, deprecated, or deleted.
+- No unresolved orphan routes remain. All active routes are reachable; `_deprecated/` files are
+  intentionally dormant. See `docs/FINAL_CLEANUP_REVIEW.md` for remaining non-routing cleanup tasks.

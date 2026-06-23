@@ -3,8 +3,9 @@
 > **Read this file first.** It is the fastest path to understanding this repo well enough to make
 > safe changes. For deeper detail, follow the links in [§11 — Docs to read first](#11-docs-to-read-first).
 >
-> **Accuracy note:** `docs/ARCHITECTURE.md` was written before the 2026-06-23 cleanup. Where this
-> file and the architecture doc disagree, this file is more current.
+> **Accuracy note:** `docs/ARCHITECTURE.md` was written before the 2026-06-23 cleanup and still
+> contains stale entries (old orphan routes, renamed context, deleted files). Where the two docs
+> disagree, this file is more current. `docs/FINAL_CLEANUP_REVIEW.md` records the full delta.
 
 ---
 
@@ -42,7 +43,7 @@ The app is distributed via Expo / EAS (OTA updates enabled). It targets iOS with
 | Build / OTA | EAS Build + `expo-updates` |
 | Tests | Jest + `ts-jest` |
 | Lint | `expo lint` (ESLint) |
-| TypeScript | enabled; `npx tsc --noEmit` has **3 known pre-existing errors** in `useBreathingCycle.ts` (dead `else if` branches — does not affect runtime) |
+| TypeScript | enabled; `npx tsc --noEmit` exits **0** (all pre-existing errors resolved) |
 
 **Active compiler flags:** New Architecture (`newArchEnabled: true`) and React Compiler
 (`experiments.reactCompiler: true`) are both enabled in `app.json`. Be conservative with manual
@@ -57,19 +58,19 @@ Breath/
   app/                     Expo Router routes (file-based)
     _layout.tsx            Root layout — Sentry init, audio mode, providers, Stack
     index.tsx              Home screen (only entry point at launch)
-    breathing.tsx          Solo breathing session screen (~654 lines)
+    breathing.tsx          Solo breathing session screen (~496 lines)
     scenes.tsx             Scenes: wallpaper + soundscape + theme + appearance
     informationarchive.tsx Information archive browser
     global_room_picker.tsx Live room selection (fetches participant counts)
-    global_room.tsx        Live "Breathe Together" session (~600 lines)
+    global_room.tsx        Live "Breathe Together" session (~495 lines)
     support.tsx            Legacy deep-link stub → <Redirect href="/" />
     _deprecated/           Dormant routes — DO NOT edit, DO NOT lint
       exercises.tsx        Exercise grid (no entry point; preserved for possible restoration)
       breathsetup.tsx      Custom pattern builder (no entry point; preserved)
 
   components/              Presentational + sheet components (all PascalCase)
-    Theme.tsx              ThemeProvider + useTheme — visual tokens only
-    ThemeProvider.tsx      Re-exports ThemeProvider (thin shim)
+    Theme.tsx              Barrel re-export: ThemeProvider, useTheme, useWallpaperForeground + token types
+    ThemeProvider.tsx      ThemeProvider + useTheme implementation — visual tokens
     BaseBottomSheet.tsx    Shared bottom-sheet contract — always use this base
     BottomSheet*.tsx       Sheet building blocks (rows, toggles, section titles, dividers…)
     BackgroundSoundscapePlayer.tsx  Mounts useBackgroundSoundscape (renders null)
@@ -79,8 +80,7 @@ Breath/
     WallpaperPreview.tsx   Single wallpaper tile (image + label + selection state)
     SettingsSheet.tsx      In-session settings bottom sheet
     ExerciseDetailSheet.tsx / ExerciseSelectionSheet.tsx
-    SoundPicker / SoundscapePicker / ThemePicker / AppearancePicker  Full-page pickers
-    BottomSheetSoundHapticsPicker.tsx  Sheet-variant picker
+    SoundPicker / SoundscapePicker / ThemePicker / AppearancePicker / SoundHapticsPicker  Unified pickers (variant prop: 'page' | 'bottomSheet')
     animationTheme.ts / bottomSheetTheme.ts / themeTokens.ts  Token helpers
 
   contexts/
@@ -94,9 +94,9 @@ Breath/
     useBreathingHaptics.ts     Phase-quantized haptic pulses
     useBreathingSheets.ts      Sheet open/close coordination + exercise list loader
     useBackgroundSoundscape.ts App-wide looping ambient audio
-    useGlobalBreathingRoom.ts  Live room WebSocket state machine (~550 lines)
-    useSwipeNavigation.ts      DEAD CODE — unused, 3 TypeScript errors, safe to delete
-    __tests__/                 Jest tests (useBreathingCycle, useGlobalBreathingRoom)
+    useGlobalBreathingRoom.ts  Live room WebSocket state machine (~552 lines)
+    __tests__/                 Jest tests (useBreathingCycle, useBreathingAudio, useBreathingHaptics,
+                               useGlobalBreathingRoom URL/config, useGlobalBreathingRoom behavior)
 
   lib/
     storage.ts                AsyncStorage wrappers + defaultExercises seed data
@@ -152,7 +152,9 @@ soundscape players in any other screen or component.
 The server is the authoritative clock — the client must not introduce its own phase timer. The
 hook owns: connect/reconnect with exponential backoff, phase-step deduplication (by
 `roomId:phaseSeq`), `skipBreathCueAudio` suppression on first step after connect/switch, and a
-stale-socket guard. Tests cover URL/config; the state machine is not yet fully tested — be careful.
+stale-socket guard. Tests cover URL/config (`.test.ts`) and join/leave/reconnect/cleanup
+behavior via a mock-WebSocket suite (`.behavior.test.ts`). Real network timing is not mocked — manual
+smoke test is still required after any timing change.
 
 ### 4d. Bottom sheet system
 
@@ -193,13 +195,10 @@ adding get/set wrappers here. Do not change existing key strings (would break ex
 
 ```bash
 npm run lint        # must exit 0
-npm test            # 21 tests in 2 suites — all must pass
+npm test            # 76 tests in 6 suites — all must pass
+npx tsc --noEmit    # must exit 0
 git status          # verify no unintended staged files
 ```
-
-**Known pre-existing TypeScript errors** (do not introduce new ones):
-- `hooks/useBreathingCycle.ts` — 3 `TS2367` errors (unreachable `else if` comparisons; runtime
-  unaffected). These pre-date the cleanup effort.
 
 ### Manual smoke test (30 seconds, required before committing session/audio/navigation changes)
 
@@ -223,10 +222,13 @@ navigation, or settings.
 | File | Covers |
 |---|---|
 | `hooks/__tests__/useBreathingCycle.test.ts` | Phase state machine, timing, pause/resume |
-| `hooks/__tests__/useGlobalBreathingRoom.test.ts` | URL/config resolution (state machine not yet covered) |
+| `hooks/__tests__/useBreathingAudio.test.ts` | Audio cue playback |
+| `hooks/__tests__/useBreathingHaptics.test.ts` | Haptic pulse scheduling |
+| `hooks/__tests__/useGlobalBreathingRoom.test.ts` | URL/config resolution |
+| `hooks/__tests__/useGlobalBreathingRoom.behavior.test.ts` | Join/leave/reconnect/cleanup (mock WebSocket) |
+| `lib/__tests__/storage.test.ts` | AsyncStorage round-trips |
 
-Coverage gaps (intentional — tracked for future work): `useBreathingAudio`, `useBreathingHaptics`,
-`useBackgroundSoundscape`, `lib/storage.ts`, `useBreathingSheets`.
+Coverage gaps (tracked for future work): `useBackgroundSoundscape`, `useBreathingSheets`.
 
 ---
 
@@ -265,8 +267,8 @@ import BaseBottomSheet from "@/components/BaseBottomSheet";
 import { useAppSettings } from "../contexts/appSettingsContext";
 ```
 
-**Exception:** `app/_deprecated/` files use relative imports because they were moved without
-updating paths — leave them as-is.
+**Note:** `app/_deprecated/` files now use `@/` alias imports (updated during cleanup). Do not
+edit those files, but their imports no longer need special treatment when reading them.
 
 **Import ordering** (follow existing files):
 1. Third-party packages (`react`, `expo-*`, `@expo/*`, `@gorhom/*`, etc.)
@@ -279,15 +281,16 @@ Lint (`expo lint`) enforces no unused imports; the linter is the source of truth
 
 ## 9. Known risky areas
 
-1. **`app/breathing.tsx` (~654 lines)** — the orchestrator for solo sessions. High cognitive load;
+1. **`app/breathing.tsx` (~496 lines)** — the orchestrator for solo sessions. High cognitive load;
    high merge risk. Any change must preserve all lifecycle invariants in §4a.
 
-2. **`hooks/useGlobalBreathingRoom.ts` (~550 lines)** — socket management, backoff, clock sync,
-   phase dedupe, presence, and catalog helpers all in one file. The state machine has thin test
-   coverage. The in-place `switchRoom` path is currently dead (room changes happen via remount).
+2. **`hooks/useGlobalBreathingRoom.ts` (~552 lines)** — socket management, backoff, clock sync,
+   phase dedupe, presence, and catalog helpers all in one file. Join/leave/reconnect/cleanup are
+   covered by the mock-WebSocket test suite; real-network timing is not. The in-place `switchRoom`
+   path is currently dead (room changes happen via remount).
    See `docs/GLOBAL_ROOM_HOOK_REVIEW.md` for the full analysis.
 
-3. **`app/global_room.tsx` (~600 lines)** — consumes the above hook; drives animation, audio, and
+3. **`app/global_room.tsx` (~495 lines)** — consumes the above hook; drives animation, audio, and
    haptics from server-broadcast timing. Changing timing logic here can cause drift against the
    server clock.
 
@@ -300,12 +303,13 @@ Lint (`expo lint`) enforces no unused imports; the linter is the source of truth
    compare its coverage against `SettingsSheet` to confirm nothing would be lost. Do not delete
    until that comparison is done.
 
-6. **`hooks/useSwipeNavigation.ts` — dead code** — unused, 2 TypeScript errors (routes `/calm`
-   and `/energize` do not exist), 1 type annotation bug. Safe to delete with zero regression risk.
+6. **`app/settings.tsx` — deleted.** The Color Theme picker (its only unique section) was moved to
+   `scenes.tsx`. All other sections were already covered by `SettingsSheet` and/or `scenes.tsx`.
+   See `docs/ROUTE_AUDIT.md` for the full coverage comparison.
 
 7. **`app/_deprecated/breathsetup.tsx`** — a fully working custom breathing pattern builder with
    no entry point. If you add a "Create Custom" button to `ExerciseSelectionSheet`, wire to this.
-   The snake_case import (`../components/startbutton`) should be fixed before restoring it.
+   The `@/` alias imports are already correct.
 
 8. **`StyleSheet.create` inside components** — several components call `StyleSheet.create` inside
    the render function (because they depend on theme tokens that change). This is intentional in
@@ -338,7 +342,7 @@ Follow this protocol for any refactor beyond a trivial edit:
 
 **After coding:**
 1. Run `npm run lint` — fix all errors.
-2. Run `npm test` — all 21 tests must pass.
+2. Run `npm test` — all 76 tests must pass.
 3. Run the manual smoke test (§6).
 4. If you touched session logic, audio, haptics, animation, navigation, or settings — run the
    full checklist in `docs/REGRESSION_CHECKLIST.md`.

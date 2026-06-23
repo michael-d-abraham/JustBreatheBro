@@ -108,7 +108,7 @@ refactor protocol — see [`AGENTS.md`](./AGENTS.md) and [`docs/ARCHITECTURE.md`
 
 ```bash
 npm run lint   # must exit 0
-npm test       # 21 tests across 2 suites — all must pass
+npm test       # 76 tests across 6 suites — all must pass
 ```
 
 Before committing any change to session logic, audio, haptics, animation, navigation, or
