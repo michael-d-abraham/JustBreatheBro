@@ -3,14 +3,12 @@ import BottomSheetSoundHapticsPicker from "@/components/BottomSheetSoundHapticsP
 import SoundscapePicker from "@/components/SoundscapePicker";
 import ThemePicker from "@/components/ThemePicker";
 import { useTheme } from "@/components/Theme";
-import { WALLPAPER_IMAGES } from "@/constants/wallpapers";
+import WallpaperCarousel from "@/components/WallpaperCarousel";
 import { useAppSettings } from "@/contexts/appSettingsContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import {
-  Dimensions,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -18,8 +16,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 /** Slight see-through over root wallpaper (aligned with BaseBottomSheet). */
 const SCENES_BACKGROUND_ALPHA = 0.96;
@@ -93,44 +89,6 @@ export default function ScenesScreen() {
       backgroundColor: tokens.bottomSheetSeparator,
       marginVertical: 20,
     },
-    scenesGallery: {
-      flexDirection: "row",
-      gap: 16,
-      marginTop: 12,
-    },
-    sceneCard: {
-      width: (SCREEN_WIDTH - 72) / 2.5,
-      aspectRatio: 0.56,
-      borderRadius: 20,
-      overflow: "hidden",
-      borderWidth: 3,
-      borderColor: "transparent",
-    },
-    sceneCardSelected: {
-      borderColor: tokens.bottomSheetText,
-    },
-    sceneImage: {
-      width: "100%",
-      height: "100%",
-    },
-    sceneCheckmark: {
-      position: "absolute",
-      top: 8,
-      left: 8,
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      backgroundColor: tokens.bottomSheetText,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    sceneLabel: {
-      color: tokens.bottomSheetText,
-      fontSize: 15,
-      fontWeight: "500",
-      textAlign: "center",
-      marginTop: 8,
-    },
     appearanceSection: {
       marginTop: 12,
       alignSelf: "stretch",
@@ -176,44 +134,10 @@ export default function ScenesScreen() {
 
         {/* Scenes Gallery */}
         <Text style={styles.sectionTitle}>SCENES</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.scenesGallery}
-        >
-          {WALLPAPER_IMAGES.map((wallpaper) => {
-            const isSelected = backgroundImage === wallpaper.filename;
-            return (
-              <Pressable
-                key={wallpaper.filename}
-                onPress={() => handleScenePress(wallpaper.filename)}
-              >
-                <View
-                  style={[
-                    styles.sceneCard,
-                    isSelected && styles.sceneCardSelected,
-                  ]}
-                >
-                  <Image
-                    source={wallpaper.source}
-                    style={styles.sceneImage}
-                    resizeMode="cover"
-                  />
-                  {isSelected && (
-                    <View style={styles.sceneCheckmark}>
-                      <Ionicons
-                        name="checkmark"
-                        size={18}
-                        color={tokens.bottomSheetBg}
-                      />
-                    </View>
-                  )}
-                </View>
-                <Text style={styles.sceneLabel}>{wallpaper.name}</Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+        <WallpaperCarousel
+          selectedFilename={backgroundImage}
+          onSelect={handleScenePress}
+        />
 
         <View style={styles.divider} />
 
