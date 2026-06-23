@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { SoundType, useApp } from '../contexts/themeContext';
+import { SoundType, useAppSettings } from '../contexts/appSettingsContext';
 import CircularOptionButton from './CircularOptionButton';
 import { useTheme } from './Theme';
 
@@ -83,7 +83,7 @@ const SOUND_OPTIONS: SoundOption[] = [
 ];
 
 export default function SoundPicker() {
-  const { settings, setSoundType } = useApp();
+  const { settings, setSoundType } = useAppSettings();
 
   return (
     <>

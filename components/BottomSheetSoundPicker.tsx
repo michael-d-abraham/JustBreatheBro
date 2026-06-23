@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { SoundType, useApp } from '../contexts/themeContext';
+import { SoundType, useAppSettings } from '../contexts/appSettingsContext';
 import BottomSheetCircularButton from './BottomSheetCircularButton';
 import { useTheme } from './Theme';
 
@@ -81,7 +81,7 @@ const SOUND_OPTIONS: SoundOption[] = [
 ];
 
 export default function BottomSheetSoundPicker() {
-  const { settings, setSoundType } = useApp();
+  const { settings, setSoundType } = useAppSettings();
 
   return (
     <>

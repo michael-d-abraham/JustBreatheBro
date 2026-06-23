@@ -7,11 +7,11 @@ import CustomSlider from "../components/Slider";
 import StartButton from "../components/startbutton";
 import { useTheme } from "../components/Theme";
 import { useBreathing } from "../contexts/breathingContext";
-import { useApp } from "../contexts/themeContext";
+import { useAppSettings } from "../contexts/appSettingsContext";
 
 export default function BreathingSetup() {
   const { tokens } = useTheme();
-  const { backgroundImage } = useApp();
+  const { backgroundImage } = useAppSettings();
   const { updateExercise } = useBreathing();
   
   const [inhale, setInhale] = useState(4);

@@ -1,10 +1,10 @@
 import React from 'react';
 import { View } from 'react-native';
-import { useApp } from '../contexts/themeContext';
+import { useAppSettings } from '../contexts/appSettingsContext';
 import BottomSheetToggleButton from './BottomSheetToggleButton';
 
 export default function BottomSheetSoundHapticsPicker() {
-  const { settings, toggleSound, toggleHaptics } = useApp();
+  const { settings, toggleSound, toggleHaptics } = useAppSettings();
 
   return (
     <View

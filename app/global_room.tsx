@@ -3,7 +3,7 @@ import {
   useBreathingAnimationTokens,
   useWallpaperForeground,
 } from "@/components/Theme";
-import { useApp } from "@/contexts/themeContext";
+import { useAppSettings } from "@/contexts/appSettingsContext";
 import { useBreathingAnimation } from "@/hooks/useBreathingAnimation";
 import { useBreathingAudio } from "@/hooks/useBreathingAudio";
 import {
@@ -118,7 +118,7 @@ function GlobalRoomInner({
 }) {
   const breathingAnim = useBreathingAnimationTokens();
   const wallpaperFg = useWallpaperForeground();
-  const { settings, backgroundImage } = useApp();
+  const { settings, backgroundImage } = useAppSettings();
   const insets = useSafeAreaInsets();
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);

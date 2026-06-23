@@ -4,7 +4,7 @@ import ExerciseSelectionSheet from "@/components/ExerciseSelectionSheet";
 import SupportSheet from "@/components/SupportSheet";
 import { useWallpaperForeground } from "@/components/Theme";
 import { useBreathing } from "@/contexts/breathingContext";
-import { useApp } from "@/contexts/themeContext";
+import { useAppSettings } from "@/contexts/appSettingsContext";
 import { useBreathingSheets } from "@/hooks/useBreathingSheets";
 import { defaultExercises } from "@/lib/storage";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
@@ -44,7 +44,7 @@ export default function Index() {
     router.push("/informationarchive");
   };
 
-  const { backgroundImage } = useApp();
+  const { backgroundImage } = useAppSettings();
 
   const styles = StyleSheet.create({
     container: {

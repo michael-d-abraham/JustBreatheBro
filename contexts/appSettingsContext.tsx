@@ -162,10 +162,10 @@ const ThemedWrapper = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useApp = () => {
+export const useAppSettings = () => {
   const context = useContext(AppContext);
   if (!context) {
-    throw new Error('useApp must be used within AppProvider');
+    throw new Error('useAppSettings must be used within AppProvider');
   }
   return context;
 };

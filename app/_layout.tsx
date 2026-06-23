@@ -1,7 +1,7 @@
 import BackgroundSoundscapePlayer from "@/components/BackgroundSoundscapePlayer";
 import { ThemeProvider, useTheme } from "@/components/Theme";
 import { BreathingProvider } from "@/contexts/breathingContext";
-import { AppProvider, useApp } from "@/contexts/themeContext";
+import { AppProvider, useAppSettings } from "@/contexts/appSettingsContext";
 import { setAudioModeAsync } from "expo-audio";
 import * as Sentry from "@sentry/react-native";
 import * as Application from "expo-application";
@@ -107,7 +107,7 @@ function useConfigureAudioMode() {
 
 function RootContent() {
   const { mode } = useTheme();
-  const { backgroundImage } = useApp();
+  const { backgroundImage } = useAppSettings();
 
   return (
     <>

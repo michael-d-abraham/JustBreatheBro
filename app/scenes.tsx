@@ -3,7 +3,7 @@ import BottomSheetSoundHapticsPicker from "@/components/BottomSheetSoundHapticsP
 import BottomSheetSoundscapePicker from "@/components/BottomSheetSoundscapePicker";
 import BottomSheetThemePicker from "@/components/BottomSheetThemePicker";
 import { useTheme } from "@/components/Theme";
-import { DEFAULT_ZENSCAPE_BACKGROUND_FILENAME, useApp } from "@/contexts/themeContext";
+import { DEFAULT_ZENSCAPE_BACKGROUND_FILENAME, useAppSettings } from "@/contexts/appSettingsContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
@@ -53,7 +53,7 @@ const WALLPAPER_IMAGES = [
 
 export default function ScenesScreen() {
   const { tokens } = useTheme();
-  const { backgroundImage, setBackgroundImage } = useApp();
+  const { backgroundImage, setBackgroundImage } = useAppSettings();
   const router = useRouter();
 
   const containerBackgroundColor = useMemo(() => {

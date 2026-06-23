@@ -254,11 +254,11 @@ export function getBreathingTokensForTheme(themeName: ThemeName): BreathingAnima
 }
 
 export function useBreathingAnimationTokens(): BreathingAnimationTokens {
-  // Import from themeContext to get animation settings
-  // Keep this as a runtime require to avoid circular imports (themeContext imports Theme.tsx).
+  // Import from appSettingsContext to get animation settings
+  // Keep this as a runtime require to avoid circular imports (appSettingsContext imports Theme.tsx).
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { useApp } = require('../contexts/themeContext');
-  const { settings } = useApp();
+  const { useAppSettings } = require('../contexts/appSettingsContext');
+  const { settings } = useAppSettings();
   
   const themeName: ThemeName = settings.animationTheme || 'calm';
   

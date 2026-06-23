@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { LayoutChangeEvent, useWindowDimensions, View } from "react-native";
-import { SoundscapeType, useApp } from "../contexts/themeContext";
+import { SoundscapeType, useAppSettings } from "../contexts/appSettingsContext";
 import { SCENES_PICKER_TILE_SIZE } from "./ScenesHorizontalPicker";
 import ScenesPreviewTile from "./ScenesPreviewTile";
 import SoundscapePreviewGraphic from "./SoundscapePreviewGraphic";
@@ -23,7 +23,7 @@ const SOUNDSCAPE_ROW_GAP = 6;
 const GRAPHIC_RATIO = 100 / 110;
 
 export default function BottomSheetSoundscapePicker() {
-  const { settings, setSoundscape } = useApp();
+  const { settings, setSoundscape } = useAppSettings();
   const { width: windowWidth } = useWindowDimensions();
   const [rowWidth, setRowWidth] = useState(0);
 

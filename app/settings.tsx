@@ -10,11 +10,11 @@ import SoundscapePicker from "../components/SoundscapePicker";
 import BottomSheetThemePicker from "../components/BottomSheetThemePicker";
 import { useTheme } from "../components/Theme";
 import ThemePicker from "../components/ThemePicker";
-import { useApp } from "../contexts/themeContext";
+import { useAppSettings } from "../contexts/appSettingsContext";
 
 export default function SettingsScreen() {
   const { tokens } = useTheme();
-  const { backgroundImage } = useApp();
+  const { backgroundImage } = useAppSettings();
 
   const styles = StyleSheet.create({
     container: {

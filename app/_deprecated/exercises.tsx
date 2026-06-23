@@ -10,12 +10,12 @@ import ExerciseContainer from '../components/ExerciseContainer';
 import ExerciseDetailSheet, { ExerciseDetailSheetHandle } from '../components/ExerciseDetailSheet';
 import { useTheme } from '../components/Theme';
 import { useBreathing } from '../contexts/breathingContext';
-import { useApp } from '../contexts/themeContext';
+import { useAppSettings } from '../contexts/appSettingsContext';
 import { Exercise, forceUpdateToDefaults, getExercises } from '../lib/storage';
 
 export default function ExercisesPage() {
   const { tokens } = useTheme();
-  const { backgroundImage } = useApp();
+  const { backgroundImage } = useAppSettings();
   const { updateExercise } = useBreathing();
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);

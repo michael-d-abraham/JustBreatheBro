@@ -2,7 +2,7 @@ import ExerciseDetailSheet, { ExerciseDetailSheetHandle } from '@/components/Exe
 import SettingsSheet, { SettingsSheetHandle } from '@/components/SettingsSheet';
 import { useBreathingAnimationTokens, useWallpaperForeground } from "@/components/Theme";
 import { useBreathing } from "@/contexts/breathingContext";
-import { useApp } from "@/contexts/themeContext";
+import { useAppSettings } from "@/contexts/appSettingsContext";
 import { useBreathingAnimation } from "@/hooks/useBreathingAnimation";
 import { useBreathingAudio } from "@/hooks/useBreathingAudio";
 import { BreathingPhase, useBreathingCycle } from "@/hooks/useBreathingCycle";
@@ -63,7 +63,7 @@ export default function BreathingPage() {
   const breathingAnim = useBreathingAnimationTokens();
   const wallpaperFg = useWallpaperForeground();
   const { currentExercise } = useBreathing();
-  const { settings, backgroundImage } = useApp();
+  const { settings, backgroundImage } = useAppSettings();
   const { autoStart } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   

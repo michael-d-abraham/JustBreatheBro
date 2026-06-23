@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "@/components/BackButton";
 import { useTheme, useWallpaperForeground } from "@/components/Theme";
-import { useApp } from "@/contexts/themeContext";
+import { useAppSettings } from "@/contexts/appSettingsContext";
 import { getResources, InformationResource, ResourceType } from "@/lib/informationArchive";
 
 /** 6-digit hex + alpha (0–1) for translucent surfaces over wallpaper */
@@ -47,7 +47,7 @@ export default function InformationArchiveScreen() {
   const { tokens } = useTheme();
   /** Header over scene wallpaper — match index header (always light). */
   const headerLightColor = useWallpaperForeground();
-  const { backgroundImage } = useApp();
+  const { backgroundImage } = useAppSettings();
   const [resources, setResources] = useState<InformationResource[]>([]);
   const [loading, setLoading] = useState(true);
 

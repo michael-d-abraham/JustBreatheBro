@@ -1,9 +1,9 @@
 import React from 'react';
-import { useApp } from '../contexts/themeContext';
+import { useAppSettings } from '../contexts/appSettingsContext';
 import ToggleButton from './ToggleButton';
 
 export default function SoundHapticsPicker() {
-  const { settings, toggleSound, toggleHaptics } = useApp();
+  const { settings, toggleSound, toggleHaptics } = useAppSettings();
 
   return (
     <>

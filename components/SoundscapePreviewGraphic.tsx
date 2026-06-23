@@ -1,7 +1,7 @@
 import React from "react";
 import Svg, { Circle, Path } from "react-native-svg";
 import { SOUNDSCAPE_PALETTES } from "../constants/featureColors";
-import { SoundscapeType } from "../contexts/themeContext";
+import { SoundscapeType } from "../contexts/appSettingsContext";
 import { useTheme } from "./Theme";
 
 interface SoundscapePreviewGraphicProps {

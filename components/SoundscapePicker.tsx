@@ -1,7 +1,7 @@
 import React from "react";
 import Svg, { Path } from "react-native-svg";
 import { SOUNDSCAPE_COLORS } from "../constants/featureColors";
-import { SoundscapeType, useApp } from "../contexts/themeContext";
+import { SoundscapeType, useAppSettings } from "../contexts/appSettingsContext";
 import CircularOptionButton from "./CircularOptionButton";
 import { useTheme } from "./Theme";
 
@@ -35,7 +35,7 @@ const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
 ];
 
 export default function SoundscapePicker() {
-  const { settings, setSoundscape } = useApp();
+  const { settings, setSoundscape } = useAppSettings();
 
   return (
     <>
