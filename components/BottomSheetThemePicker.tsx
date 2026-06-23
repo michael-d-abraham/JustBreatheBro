@@ -1,5 +1,5 @@
 import React from "react";
-import { useAppSettings } from "../contexts/appSettingsContext";
+import { useAppSettings } from "@/contexts/appSettingsContext";
 import BreathingThemeGraphic from "./BreathingThemeGraphic";
 import ScenesHorizontalPicker from "./ScenesHorizontalPicker";
 import ScenesPreviewTile from "./ScenesPreviewTile";

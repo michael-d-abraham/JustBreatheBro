@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { LayoutChangeEvent, useWindowDimensions, View } from "react-native";
-import { SoundscapeType, useAppSettings } from "../contexts/appSettingsContext";
+import { SoundscapeType, useAppSettings } from "@/contexts/appSettingsContext";
 import { SCENES_PICKER_TILE_SIZE } from "./ScenesHorizontalPicker";
 import ScenesPreviewTile from "./ScenesPreviewTile";
 import SoundscapePreviewGraphic from "./SoundscapePreviewGraphic";

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { Exercise } from '../lib/storage';
+import { Exercise } from '@/lib/storage';
 import BottomSheetCollapsibleSection from './BottomSheetCollapsibleSection';
 import BottomSheetDivider from './BottomSheetDivider';
 import { useTheme } from './Theme';

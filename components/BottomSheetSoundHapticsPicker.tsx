@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { useAppSettings } from '../contexts/appSettingsContext';
+import { useAppSettings } from '@/contexts/appSettingsContext';
 import BottomSheetToggleButton from './BottomSheetToggleButton';
 
 export default function BottomSheetSoundHapticsPicker() {

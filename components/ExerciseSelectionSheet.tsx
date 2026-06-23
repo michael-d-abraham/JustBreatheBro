@@ -1,5 +1,5 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { Exercise } from '../lib/storage';
+import { Exercise } from '@/lib/storage';
 import BaseBottomSheet, { BaseBottomSheetHandle } from './BaseBottomSheet';
 import BottomSheetExerciseCard from './BottomSheetExerciseCard';
 

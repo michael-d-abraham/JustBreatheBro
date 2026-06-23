@@ -7,7 +7,7 @@
  * 3. Elapsed time never goes negative / NaN
  */
 
-import { BreathingPhase } from '../useBreathingCycle';
+import { BreathingPhase } from '@/hooks/useBreathingCycle';
 
 describe('Breathing Cycle Logic', () => {
   const defaultExercise = {

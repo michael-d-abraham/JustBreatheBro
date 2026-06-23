@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { SoundType, useAppSettings } from '../contexts/appSettingsContext';
+import { SoundType, useAppSettings } from '@/contexts/appSettingsContext';
 import BottomSheetCircularButton from './BottomSheetCircularButton';
 import { useTheme } from './Theme';
 

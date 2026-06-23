@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAppSettings } from '../contexts/appSettingsContext';
+import { useAppSettings } from '@/contexts/appSettingsContext';
 import ToggleButton from './ToggleButton';
 
 export default function SoundHapticsPicker() {

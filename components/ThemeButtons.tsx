@@ -2,13 +2,13 @@ import React from 'react';
 import { Pressable, Text } from 'react-native';
 import { useTheme } from './Theme';
 
-interface ThemeButtonProps {
+interface ThemeButtonsProps {
   children: React.ReactNode;
   isSelected: boolean;
   onPress: () => void;
 }
 
-export default function ThemeButton({ children, isSelected, onPress }: ThemeButtonProps) {
+export default function ThemeButtons({ children, isSelected, onPress }: ThemeButtonsProps) {
   const { tokens } = useTheme();
   
   return (

@@ -5,13 +5,13 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import BackButton from '../components/BackButton';
-import ExerciseContainer from '../components/ExerciseContainer';
-import ExerciseDetailSheet, { ExerciseDetailSheetHandle } from '../components/ExerciseDetailSheet';
-import { useTheme } from '../components/Theme';
-import { useBreathing } from '../contexts/breathingContext';
-import { useAppSettings } from '../contexts/appSettingsContext';
-import { Exercise, forceUpdateToDefaults, getExercises } from '../lib/storage';
+import BackButton from '@/components/BackButton';
+import ExerciseContainer from '@/components/ExerciseContainer';
+import ExerciseDetailSheet, { ExerciseDetailSheetHandle } from '@/components/ExerciseDetailSheet';
+import { useTheme } from '@/components/Theme';
+import { useBreathing } from '@/contexts/breathingContext';
+import { useAppSettings } from '@/contexts/appSettingsContext';
+import { Exercise, forceUpdateToDefaults, getExercises } from '@/lib/storage';
 
 export default function ExercisesPage() {
   const { tokens } = useTheme();

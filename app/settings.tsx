@@ -1,16 +1,16 @@
 import { router, Stack } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AppearancePicker from "../components/AppearancePicker";
-import BackButton from "../components/BackButton";
-import SettingsSection from "../components/SettingsSection";
-import SoundHapticsPicker from "../components/SoundHapticsPicker";
-import SoundPicker from "../components/SoundPicker";
-import SoundscapePicker from "../components/SoundscapePicker";
-import BottomSheetThemePicker from "../components/BottomSheetThemePicker";
-import { useTheme } from "../components/Theme";
-import ThemePicker from "../components/ThemePicker";
-import { useAppSettings } from "../contexts/appSettingsContext";
+import AppearancePicker from "@/components/AppearancePicker";
+import BackButton from "@/components/BackButton";
+import SettingsSection from "@/components/SettingsSection";
+import SoundHapticsPicker from "@/components/SoundHapticsPicker";
+import SoundPicker from "@/components/SoundPicker";
+import SoundscapePicker from "@/components/SoundscapePicker";
+import BottomSheetThemePicker from "@/components/BottomSheetThemePicker";
+import { useTheme } from "@/components/Theme";
+import ThemePicker from "@/components/ThemePicker";
+import { useAppSettings } from "@/contexts/appSettingsContext";
 
 export default function SettingsScreen() {
   const { tokens } = useTheme();

@@ -3,7 +3,8 @@ import BottomSheetSoundHapticsPicker from "@/components/BottomSheetSoundHapticsP
 import BottomSheetSoundscapePicker from "@/components/BottomSheetSoundscapePicker";
 import BottomSheetThemePicker from "@/components/BottomSheetThemePicker";
 import { useTheme } from "@/components/Theme";
-import { DEFAULT_ZENSCAPE_BACKGROUND_FILENAME, useAppSettings } from "@/contexts/appSettingsContext";
+import { WALLPAPER_IMAGES } from "@/constants/wallpapers";
+import { useAppSettings } from "@/contexts/appSettingsContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
@@ -31,25 +32,6 @@ function hexWithAlpha(hex: string, alpha: number): string {
     .padStart(2, "0");
   return `#${clean}${a}`;
 }
-
-// All wallpaper images from zenscapes folder
-const WALLPAPER_IMAGES = [
-  {
-    source: require("../assets/images/BackGrounds/zenscapes/53f9385211ee5c576f8fa058326f479b.jpg"),
-    filename: DEFAULT_ZENSCAPE_BACKGROUND_FILENAME,
-    name: "Jasper Lake",
-  },
-  {
-    source: require("../assets/images/BackGrounds/zenscapes/a173ab0f7d9a7427676a776831bc8154.jpg"),
-    filename: "a173ab0f7d9a7427676a776831bc8154.jpg",
-    name: "Denali",
-  },
-  {
-    source: require("../assets/images/BackGrounds/zenscapes/bda498c860d011ed38fe8877fe894261.jpg"),
-    filename: "bda498c860d011ed38fe8877fe894261.jpg",
-    name: "Yosemite",
-  },
-];
 
 export default function ScenesScreen() {
   const { tokens } = useTheme();

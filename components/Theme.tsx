@@ -5,7 +5,7 @@ import React, {
   useState
 } from "react";
 import { PlatformColor, useColorScheme } from 'react-native';
-import { THEME_PREVIEW_COLORS } from '../constants/featureColors';
+import { THEME_PREVIEW_COLORS } from '@/constants/featureColors';
 
 // ============================================================================
 // SYSTEM 1: uiScheme - Bottom sheets / menus

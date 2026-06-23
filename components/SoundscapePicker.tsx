@@ -1,7 +1,7 @@
 import React from "react";
 import Svg, { Path } from "react-native-svg";
-import { SOUNDSCAPE_COLORS } from "../constants/featureColors";
-import { SoundscapeType, useAppSettings } from "../contexts/appSettingsContext";
+import { SOUNDSCAPE_COLORS } from "@/constants/featureColors";
+import { SoundscapeType, useAppSettings } from "@/contexts/appSettingsContext";
 import CircularOptionButton from "./CircularOptionButton";
 import { useTheme } from "./Theme";
 

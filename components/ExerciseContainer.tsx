@@ -1,5 +1,5 @@
 import { Pressable, Text, View } from 'react-native';
-import { Exercise } from '../lib/storage';
+import { Exercise } from '@/lib/storage';
 import { useTheme } from './Theme';
 
 interface ExerciseContainerProps {

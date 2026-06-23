@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { SoundType, useAppSettings } from '../contexts/appSettingsContext';
+import { SoundType, useAppSettings } from '@/contexts/appSettingsContext';
 import CircularOptionButton from './CircularOptionButton';
 import { useTheme } from './Theme';
 
