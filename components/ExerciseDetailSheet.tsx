@@ -1,6 +1,6 @@
 import React, { forwardRef, useState } from 'react';
 import { Text, View } from 'react-native';
-import { Exercise } from '../lib/storage';
+import { Exercise } from '@/lib/storage';
 import BaseBottomSheet, { BaseBottomSheetHandle } from './BaseBottomSheet';
 import BottomSheetCollapsibleSection from './BottomSheetCollapsibleSection';
 import BottomSheetDivider from './BottomSheetDivider';

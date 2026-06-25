@@ -1,4 +1,4 @@
-import { useApp } from "@/contexts/themeContext";
+import { useAppSettings } from "@/contexts/appSettingsContext";
 import { useBackgroundSoundscape } from "@/hooks/useBackgroundSoundscape";
 
 /**
@@ -6,7 +6,7 @@ import { useBackgroundSoundscape } from "@/hooks/useBackgroundSoundscape";
  * Plays continuously in a loop and switches when soundscape changes in settings
  */
 export default function BackgroundSoundscapePlayer() {
-  const { settings } = useApp();
+  const { settings } = useAppSettings();
   useBackgroundSoundscape({
     soundscape: settings.soundscape,
     soundEnabled: settings.soundEnabled,

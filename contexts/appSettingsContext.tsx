@@ -1,21 +1,8 @@
 import { useTheme as useBaseTheme, ThemeName } from '@/components/Theme';
+import { DEFAULT_ZENSCAPE_BACKGROUND_FILENAME, isKnownZenscapeFilename, ZENSCAPE_IMAGE_MAP } from '@/constants/wallpapers';
 import { getBackgroundImage, getAnimationTheme, saveAnimationTheme, saveBackgroundImage } from '@/lib/storage';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { ImageBackground, View } from 'react-native';
-
-/** Default zenscape on first install and when stored value is missing or unknown. */
-export const DEFAULT_ZENSCAPE_BACKGROUND_FILENAME =
-  '53f9385211ee5c576f8fa058326f479b.jpg';
-
-const ZENSCAPE_IMAGE_MAP: Record<string, number> = {
-  [DEFAULT_ZENSCAPE_BACKGROUND_FILENAME]: require('../assets/images/BackGrounds/zenscapes/53f9385211ee5c576f8fa058326f479b.jpg'),
-  'a173ab0f7d9a7427676a776831bc8154.jpg': require('../assets/images/BackGrounds/zenscapes/a173ab0f7d9a7427676a776831bc8154.jpg'),
-  'bda498c860d011ed38fe8877fe894261.jpg': require('../assets/images/BackGrounds/zenscapes/bda498c860d011ed38fe8877fe894261.jpg'),
-};
-
-function isKnownZenscapeFilename(name: string | null | undefined): name is string {
-  return typeof name === 'string' && name in ZENSCAPE_IMAGE_MAP;
-}
 
 export type SoundType = 'synth' | 'guzheng' | 'sine' | 'off';
 export type SoundscapeType = 'dream' | 'fuzzy' | 'keys' | 'off';
@@ -162,10 +149,10 @@ const ThemedWrapper = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useApp = () => {
+export const useAppSettings = () => {
   const context = useContext(AppContext);
   if (!context) {
-    throw new Error('useApp must be used within AppProvider');
+    throw new Error('useAppSettings must be used within AppProvider');
   }
   return context;
 };

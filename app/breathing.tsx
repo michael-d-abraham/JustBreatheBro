@@ -1,27 +1,19 @@
-import ExerciseDetailSheet, { ExerciseDetailSheetHandle } from '@/components/ExerciseDetailSheet';
-import SettingsSheet, { SettingsSheetHandle } from '@/components/SettingsSheet';
-import { useBreathingAnimationTokens, useWallpaperForeground } from "@/components/Theme";
+import BreathingSessionLayout from '@/components/BreathingSessionLayout';
+import { ExerciseDetailSheetHandle } from '@/components/ExerciseDetailSheet';
+import { SettingsSheetHandle } from '@/components/SettingsSheet';
 import { useBreathing } from "@/contexts/breathingContext";
-import { useApp } from "@/contexts/themeContext";
+import { useAppSettings } from "@/contexts/appSettingsContext";
 import { useBreathingAnimation } from "@/hooks/useBreathingAnimation";
 import { useBreathingAudio } from "@/hooks/useBreathingAudio";
 import { BreathingPhase, useBreathingCycle } from "@/hooks/useBreathingCycle";
 import { BeginBreathingPhaseHapticsArgs, useBreathingHaptics } from "@/hooks/useBreathingHaptics";
 import { trackBreathingEntered, trackBreathingExited, trackBreathingStarted } from "@/utils/sentryTracking";
-import { Ionicons } from '@expo/vector-icons';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useFocusEffect } from "@react-navigation/native";
-import { BlurView } from 'expo-blur';
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { AppState, AppStateStatus, Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { useAnimatedProps, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Circle } from "react-native-svg";
-
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+import { AppState, AppStateStatus, StatusBar } from "react-native";
+import { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 
 const BREATHING_PHASE_HAPTICS: Record<
   "inhale" | "hold" | "exhale",
@@ -60,12 +52,9 @@ function hapticArgsForBreathingPhase(
 }
 
 export default function BreathingPage() {
-  const breathingAnim = useBreathingAnimationTokens();
-  const wallpaperFg = useWallpaperForeground();
   const { currentExercise } = useBreathing();
-  const { settings, backgroundImage } = useApp();
+  const { settings, backgroundImage } = useAppSettings();
   const { autoStart } = useLocalSearchParams();
-  const insets = useSafeAreaInsets();
   
   // ==========================================================================
   // State/setup
@@ -209,11 +198,6 @@ export default function BreathingPage() {
   // ==========================================================================
   // Derived animated values
   // ==========================================================================
-  const animatedProps = useAnimatedProps(() => ({
-    r: radius.value,
-    strokeWidth: strokeWidth.value,
-  }));
-
   const uiAnimatedStyle = useAnimatedStyle(() => ({
     opacity: uiOpacity.value,
   }));
@@ -476,214 +460,37 @@ export default function BreathingPage() {
   // Main render
   // ==========================================================================
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <BottomSheetModalProvider>
-        <SafeAreaView style={{ flex: 1, backgroundColor: backgroundImage ? 'transparent' : '#FFFFFF' }}>
-          
-          {/* Main Content Area - Tap to toggle UI */}
-          <Pressable 
-            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-            onPress={handleScreenTap}
-          >
-            {/* Breathing Animation */}
-            <View style={{ alignItems: 'center', position: 'relative' }}>
-              <Svg width={400} height={400}>
-                {/* Outer circle */}
-                <Circle cx={200} cy={200} r={180} stroke={breathingAnim.guideOuterStroke} strokeWidth={1} fill="none" opacity={0.6} />
-                {/* Middle circle */}
-                <Circle cx={200} cy={200} r={65} stroke={breathingAnim.guideInnerStroke} strokeWidth={1} fill="none" opacity={0.6} />
-                {/* Inner animated circle */}
-                <AnimatedCircle 
-                  cx={200} 
-                  cy={200} 
-                  animatedProps={animatedProps} 
-                  stroke={breathingAnim.mainStroke} 
-                  fill={breathingAnim.mainFill} 
-                  strokeLinecap="round"
-                  opacity={0.8}
-                />
-              </Svg>
-              
-              {/* Phase text overlay */}
-              <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ 
-                  color: wallpaperFg, 
-                  fontSize: 32, 
-                  fontWeight: '300',
-                  letterSpacing: 2,
-                  textTransform: 'uppercase'
-                }}>
-                  {phase === 'inhale' ? 'Inhale' : 
-                   phase === 'hold1' ? 'Hold' : 
-                   phase === 'exhale' ? 'Exhale' : 
-                   phase === 'hold2' ? 'Hold' : ''}
-                </Text>
-              </View>
-              
-              {/* Inner circle tap area - only the small inner circle is tappable */}
-              <Pressable 
-                onPress={() => {
-                  handlePlayPause();
-                  // Also show UI when pausing/resuming for better UX
-                  if (!isUIVisible) {
-                    // Clear existing timeout
-                    if (uiHideTimeoutRef.current) {
-                      clearTimeout(uiHideTimeoutRef.current);
-                    }
-                    setIsUIVisible(true);
-                  }
-                }}
-                style={{
-                  position: 'absolute',
-                  width: 140, // Slightly larger than minimum inner circle (radius 66 = diameter 132) for easier tapping
-                  height: 140,
-                  borderRadius: 70,
-                  top: '50%',
-                  left: '50%',
-                  marginTop: -70, // Center the pressable (half of height)
-                  marginLeft: -70, // Center the pressable (half of width)
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              />
-            </View>
-          </Pressable>
-
-          {/* Header - Back Arrow (Left) and Info Icon (Right) - Overlay, only visible when UI is shown */}
-          <Animated.View style={[
-            { 
-              position: 'absolute',
-              top: insets.top,
-              left: 0,
-              right: 0,
-              flexDirection: 'row', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              paddingHorizontal: 24,
-              paddingTop: 12,
-              paddingBottom: 8,
-              pointerEvents: isUIVisible ? 'auto' : 'none',
-            },
-            uiAnimatedStyle
-          ]}>
-            {/* Back Arrow */}
-            <Pressable onPress={handleStopAndExit}>
-              <Text style={{ color: wallpaperFg, fontSize: 28 }}>←</Text>
-            </Pressable>
-            
-            {/* Info Icon */}
-            <Pressable onPress={handleInfoPress} style={{ 
-              width: 28,
-              height: 28,
-              borderRadius: 14,
-              borderWidth: 2,
-              borderColor: wallpaperFg,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-              <Text style={{ color: wallpaperFg, fontSize: 16, fontWeight: '600' }}>i</Text>
-            </Pressable>
-          </Animated.View>
-
-          {/* Bottom Control Buttons Row - Overlay, only visible when UI is shown */}
-          <Animated.View style={[
-            { 
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 40,
-              paddingBottom: 50,
-              paddingHorizontal: 24,
-              pointerEvents: isUIVisible ? 'auto' : 'none',
-            },
-            uiAnimatedStyle
-          ]}>
-            {/* Settings Button - Left */}
-            <Pressable
-              onPress={handleSettingsPress}
-              style={{
-                width: 80,
-                height: 80,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Ionicons 
-                name="options" 
-                size={38} 
-                color={wallpaperFg} 
-              />
-            </Pressable>
-            
-            {/* Play/Pause Button - Middle */}
-            <Pressable
-              onPress={handlePlayPause}
-              style={{
-                width: 70,
-                height: 70,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              {isRunning ? (
-                <Ionicons 
-                  name="pause" 
-                  size={38} 
-                  color={wallpaperFg} 
-                />
-              ) : (
-                <Ionicons 
-                  name="play" 
-                  size={38} 
-                  color={wallpaperFg} 
-                />
-              )}
-            </Pressable>
-            
-            {/* Stop Button - Right */}
-            <Pressable
-              onPress={handleStopAndExit}
-              style={{
-                width: 70,
-                height: 70,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Ionicons 
-                name="stop" 
-                size={38} 
-                color={wallpaperFg} 
-              />
-            </Pressable>
-          </Animated.View>
-
-          {/* Blurred backdrop (tap to dismiss) */}
-          {isSheetOpen && (
-            <Pressable onPress={closeSheet} style={StyleSheet.absoluteFill}>
-              <BlurView intensity={20} style={StyleSheet.absoluteFill} />
-            </Pressable>
-          )}
-
-          {/* Bottom Sheet Modals */}
-          <ExerciseDetailSheet 
-            ref={sheetRef} 
-            exercise={currentExercise}
-            onChange={handleSheetChange}
-            onDismiss={handleSheetDismiss}
-          />
-          
-          <SettingsSheet 
-            ref={settingsSheetRef}
-            onChange={handleSheetChange}
-            onDismiss={handleSheetDismiss}
-          />
-    </SafeAreaView>
-      </BottomSheetModalProvider>
-    </GestureHandlerRootView>
+    <BreathingSessionLayout
+      backgroundImage={backgroundImage}
+      currentExercise={currentExercise}
+      phase={phase}
+      radius={radius}
+      strokeWidth={strokeWidth}
+      isRunning={isRunning}
+      isUIVisible={isUIVisible}
+      isSheetOpen={isSheetOpen}
+      uiAnimatedStyle={uiAnimatedStyle}
+      sheetRef={sheetRef}
+      settingsSheetRef={settingsSheetRef}
+      onScreenTap={handleScreenTap}
+      onRingInnerPress={() => {
+        handlePlayPause();
+        // Also show UI when pausing/resuming for better UX
+        if (!isUIVisible) {
+          // Clear existing timeout
+          if (uiHideTimeoutRef.current) {
+            clearTimeout(uiHideTimeoutRef.current);
+          }
+          setIsUIVisible(true);
+        }
+      }}
+      onStopAndExit={handleStopAndExit}
+      onInfoPress={handleInfoPress}
+      onSettingsPress={handleSettingsPress}
+      onPlayPause={handlePlayPause}
+      onCloseSheet={closeSheet}
+      onSheetChange={handleSheetChange}
+      onSheetDismiss={handleSheetDismiss}
+    />
   );
 }

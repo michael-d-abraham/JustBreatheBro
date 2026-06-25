@@ -1,9 +1,9 @@
 import React, { forwardRef } from 'react';
 import BaseBottomSheet, { BaseBottomSheetHandle } from './BaseBottomSheet';
-import BottomSheetSettingsSection from './BottomSheetSettingsSection';
-import BottomSheetSoundPicker from './BottomSheetSoundPicker';
-import BottomSheetSoundscapePicker from './BottomSheetSoundscapePicker';
-import BottomSheetThemePicker from './BottomSheetThemePicker';
+import SettingsSection from './SettingsSection';
+import SoundPicker from './SoundPicker';
+import SoundscapePicker from './SoundscapePicker';
+import ThemePicker from './ThemePicker';
 
 export type SettingsSheetHandle = BaseBottomSheetHandle;
 
@@ -21,17 +21,17 @@ const SettingsSheet = forwardRef<SettingsSheetHandle, SettingsSheetProps>(
         onChange={onChange}
         onDismiss={onDismiss}
       >
-        <BottomSheetSettingsSection title="Inhale / Exhale Tone">
-          <BottomSheetSoundPicker />
-        </BottomSheetSettingsSection>
+        <SettingsSection variant="bottomSheet" title="Inhale / Exhale Tone">
+          <SoundPicker variant="bottomSheet" />
+        </SettingsSection>
 
-        <BottomSheetSettingsSection title="Soundscape">
-          <BottomSheetSoundscapePicker />
-        </BottomSheetSettingsSection>
+        <SettingsSection variant="bottomSheet" title="Soundscape">
+          <SoundscapePicker variant="bottomSheet" />
+        </SettingsSection>
 
-        <BottomSheetSettingsSection title="Animation Theme">
-          <BottomSheetThemePicker />
-        </BottomSheetSettingsSection>
+        <SettingsSection variant="bottomSheet" title="Animation Theme">
+          <ThemePicker target="animation" variant="bottomSheet" />
+        </SettingsSection>
       </BaseBottomSheet>
     );
   }

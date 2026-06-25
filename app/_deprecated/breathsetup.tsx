@@ -2,16 +2,16 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import BackButton from "../components/BackButton";
-import CustomSlider from "../components/Slider";
-import StartButton from "../components/startbutton";
-import { useTheme } from "../components/Theme";
-import { useBreathing } from "../contexts/breathingContext";
-import { useApp } from "../contexts/themeContext";
+import BackButton from "@/components/BackButton";
+import CustomSlider from "@/components/Slider";
+import StartButton from "@/components/StartButton";
+import { useTheme } from "@/components/Theme";
+import { useBreathing } from "@/contexts/breathingContext";
+import { useAppSettings } from "@/contexts/appSettingsContext";
 
 export default function BreathingSetup() {
   const { tokens } = useTheme();
-  const { backgroundImage } = useApp();
+  const { backgroundImage } = useAppSettings();
   const { updateExercise } = useBreathing();
   
   const [inhale, setInhale] = useState(4);

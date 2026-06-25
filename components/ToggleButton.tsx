@@ -1,4 +1,4 @@
-import AppearanceButton from './appearance_button';
+import AppearanceButton from './AppearanceButton';
 
 interface ToggleButtonProps {
   isEnabled: boolean;

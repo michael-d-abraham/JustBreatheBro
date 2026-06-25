@@ -1,5 +1,5 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { Exercise, getCurrentExercise, saveCurrentExercise } from '../lib/storage';
+import { Exercise, getCurrentExercise, saveCurrentExercise } from '@/lib/storage';
 
 interface BreathingContextType {
   currentExercise: Exercise | null;

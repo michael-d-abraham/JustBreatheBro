@@ -1,15 +1,14 @@
-import BottomSheetAppearancePicker from "@/components/BottomSheetAppearancePicker";
-import BottomSheetSoundHapticsPicker from "@/components/BottomSheetSoundHapticsPicker";
-import BottomSheetSoundscapePicker from "@/components/BottomSheetSoundscapePicker";
-import BottomSheetThemePicker from "@/components/BottomSheetThemePicker";
+import AppearancePicker from "@/components/AppearancePicker";
+import SoundHapticsPicker from "@/components/SoundHapticsPicker";
+import SoundscapePicker from "@/components/SoundscapePicker";
+import ThemePicker from "@/components/ThemePicker";
 import { useTheme } from "@/components/Theme";
-import { DEFAULT_ZENSCAPE_BACKGROUND_FILENAME, useApp } from "@/contexts/themeContext";
+import WallpaperCarousel from "@/components/WallpaperCarousel";
+import { useAppSettings } from "@/contexts/appSettingsContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import {
-  Dimensions,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -17,8 +16,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 /** Slight see-through over root wallpaper (aligned with BaseBottomSheet). */
 const SCENES_BACKGROUND_ALPHA = 0.96;
@@ -32,28 +29,9 @@ function hexWithAlpha(hex: string, alpha: number): string {
   return `#${clean}${a}`;
 }
 
-// All wallpaper images from zenscapes folder
-const WALLPAPER_IMAGES = [
-  {
-    source: require("../assets/images/BackGrounds/zenscapes/53f9385211ee5c576f8fa058326f479b.jpg"),
-    filename: DEFAULT_ZENSCAPE_BACKGROUND_FILENAME,
-    name: "Jasper Lake",
-  },
-  {
-    source: require("../assets/images/BackGrounds/zenscapes/a173ab0f7d9a7427676a776831bc8154.jpg"),
-    filename: "a173ab0f7d9a7427676a776831bc8154.jpg",
-    name: "Denali",
-  },
-  {
-    source: require("../assets/images/BackGrounds/zenscapes/bda498c860d011ed38fe8877fe894261.jpg"),
-    filename: "bda498c860d011ed38fe8877fe894261.jpg",
-    name: "Yosemite",
-  },
-];
-
 export default function ScenesScreen() {
   const { tokens } = useTheme();
-  const { backgroundImage, setBackgroundImage } = useApp();
+  const { backgroundImage, setBackgroundImage } = useAppSettings();
   const router = useRouter();
 
   const containerBackgroundColor = useMemo(() => {
@@ -111,44 +89,6 @@ export default function ScenesScreen() {
       backgroundColor: tokens.bottomSheetSeparator,
       marginVertical: 20,
     },
-    scenesGallery: {
-      flexDirection: "row",
-      gap: 16,
-      marginTop: 12,
-    },
-    sceneCard: {
-      width: (SCREEN_WIDTH - 72) / 2.5,
-      aspectRatio: 0.56,
-      borderRadius: 20,
-      overflow: "hidden",
-      borderWidth: 3,
-      borderColor: "transparent",
-    },
-    sceneCardSelected: {
-      borderColor: tokens.bottomSheetText,
-    },
-    sceneImage: {
-      width: "100%",
-      height: "100%",
-    },
-    sceneCheckmark: {
-      position: "absolute",
-      top: 8,
-      left: 8,
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      backgroundColor: tokens.bottomSheetText,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    sceneLabel: {
-      color: tokens.bottomSheetText,
-      fontSize: 15,
-      fontWeight: "500",
-      textAlign: "center",
-      marginTop: 8,
-    },
     appearanceSection: {
       marginTop: 12,
       alignSelf: "stretch",
@@ -187,58 +127,32 @@ export default function ScenesScreen() {
         {/* Soundscape Section */}
         <Text style={styles.sectionTitle}>SOUNDSCAPE</Text>
         <View style={styles.appearanceSection}>
-          <BottomSheetSoundscapePicker />
+          <SoundscapePicker variant="bottomSheet" />
         </View>
 
         <View style={styles.divider} />
 
         {/* Scenes Gallery */}
         <Text style={styles.sectionTitle}>SCENES</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.scenesGallery}
-        >
-          {WALLPAPER_IMAGES.map((wallpaper) => {
-            const isSelected = backgroundImage === wallpaper.filename;
-            return (
-              <Pressable
-                key={wallpaper.filename}
-                onPress={() => handleScenePress(wallpaper.filename)}
-              >
-                <View
-                  style={[
-                    styles.sceneCard,
-                    isSelected && styles.sceneCardSelected,
-                  ]}
-                >
-                  <Image
-                    source={wallpaper.source}
-                    style={styles.sceneImage}
-                    resizeMode="cover"
-                  />
-                  {isSelected && (
-                    <View style={styles.sceneCheckmark}>
-                      <Ionicons
-                        name="checkmark"
-                        size={18}
-                        color={tokens.bottomSheetBg}
-                      />
-                    </View>
-                  )}
-                </View>
-                <Text style={styles.sceneLabel}>{wallpaper.name}</Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+        <WallpaperCarousel
+          selectedFilename={backgroundImage}
+          onSelect={handleScenePress}
+        />
 
         <View style={styles.divider} />
 
         {/* Animation Theme Section */}
         <Text style={styles.sectionTitle}>ANIMATION THEME</Text>
         <View style={styles.appearanceSection}>
-          <BottomSheetThemePicker />
+          <ThemePicker target="animation" variant="bottomSheet" />
+        </View>
+
+        <View style={styles.divider} />
+
+        {/* Color Theme Section */}
+        <Text style={styles.sectionTitle}>COLOR THEME</Text>
+        <View style={styles.appearanceSection}>
+          <ThemePicker variant="bottomSheet" />
         </View>
 
         <View style={styles.divider} />
@@ -246,7 +160,7 @@ export default function ScenesScreen() {
         {/* Appearance Mode Section */}
         <Text style={styles.sectionTitle}>APPEARANCE MODE</Text>
         <View style={styles.appearanceSectionSpaced}>
-          <BottomSheetAppearancePicker />
+          <AppearancePicker variant="bottomSheet" />
         </View>
 
         <View style={styles.divider} />
@@ -254,7 +168,7 @@ export default function ScenesScreen() {
         {/* Sound & Haptics Section */}
         <Text style={styles.sectionTitle}>SOUND & HAPTICS</Text>
         <View style={{ marginTop: 4, alignSelf: "stretch" }}>
-          <BottomSheetSoundHapticsPicker />
+          <SoundHapticsPicker variant="bottomSheet" />
         </View>
       </ScrollView>
     </SafeAreaView>

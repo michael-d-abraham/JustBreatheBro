@@ -1,4 +1,4 @@
-import { SoundType } from "@/contexts/themeContext";
+import { SoundType } from "@/contexts/appSettingsContext";
 import { useAudioPlayer } from "expo-audio";
 import { useEffect } from "react";
 

@@ -34,6 +34,12 @@ export function useBreathingCycle({ exercise, onPhaseChange, onCycleStart }: Use
   const remainingTimeRef = useRef<number>(0);
   const currentPhaseRef = useRef<BreathingPhase>('idle');
 
+  // runCycle is re-entrant (loop-back + resume re-enter mid-cycle), so this ref can
+  // legitimately already hold any phase at the checks below. Read it through this
+  // accessor so control-flow narrowing from the assignments doesn't make the
+  // comparisons look unreachable (TS2367). Runtime value is identical to the ref.
+  const readPhase = (): BreathingPhase => currentPhaseRef.current;
+
   // Timer countdown
   useEffect(() => {
     if (!isRunning || isPaused || timeLeft <= 0) return;
@@ -90,7 +96,7 @@ export function useBreathingCycle({ exercise, onPhaseChange, onCycleStart }: Use
     }
     
     // Inhale phase - only set if starting fresh
-    if (currentPhaseRef.current !== 'inhale') {
+    if (readPhase() !== 'inhale') {
       setPhase('inhale');
       currentPhaseRef.current = 'inhale';
       setTimeLeft(inhale);
@@ -101,7 +107,7 @@ export function useBreathingCycle({ exercise, onPhaseChange, onCycleStart }: Use
     if (!isRunningRef.current) return;
 
     // Hold 1 phase - only set if we're transitioning to it
-    if (currentPhaseRef.current !== 'hold1') {
+    if (readPhase() !== 'hold1') {
       setPhase('hold1');
       currentPhaseRef.current = 'hold1';
       setTimeLeft(hold1);
@@ -112,7 +118,7 @@ export function useBreathingCycle({ exercise, onPhaseChange, onCycleStart }: Use
     if (!isRunningRef.current) return;
 
     // Exhale phase
-    if (currentPhaseRef.current !== 'exhale') {
+    if (readPhase() !== 'exhale') {
       setPhase('exhale');
       currentPhaseRef.current = 'exhale';
       setTimeLeft(exhale);
@@ -123,7 +129,7 @@ export function useBreathingCycle({ exercise, onPhaseChange, onCycleStart }: Use
     if (!isRunningRef.current) return;
 
     // Hold 2 phase
-    if (currentPhaseRef.current !== 'hold2') {
+    if (readPhase() !== 'hold2') {
       setPhase('hold2');
       currentPhaseRef.current = 'hold2';
       setTimeLeft(hold2);

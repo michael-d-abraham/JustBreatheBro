@@ -1,194 +1,276 @@
 /**
- * Unit tests for breathing cycle logic
- * 
- * These tests validate the core behavior of the breathing cycle:
- * 1. Phase timing sequence is correct (inhale/hold/exhale/hold)
- * 2. Pause/resume doesn't reset unexpectedly
- * 3. Elapsed time never goes negative / NaN
+ * Behavioral tests for useBreathingCycle.
+ *
+ * The hook is rendered with react-test-renderer and driven by Jest fake timers.
+ * Jest's modern fake timers also mock Date.now(), which the hook's sleep() reads,
+ * so advancing timers advances the clock the state machine measures against.
+ * jest.advanceTimersByTimeAsync fires the 10ms sleep() interval ticks AND flushes
+ * the `await sleep()` microtask chain in runCycle, stepping the machine phase by phase.
+ *
+ * Covers: phase transitions, pause, resume, stop, and idempotent start.
  */
 
-import { BreathingPhase } from '../useBreathingCycle';
+/// <reference path="./react-test-renderer.d.ts" />
+import { act, createElement } from "react";
+import TestRenderer from "react-test-renderer";
+import { BreathingPhase, useBreathingCycle } from "@/hooks/useBreathingCycle";
 
-describe('Breathing Cycle Logic', () => {
-  const defaultExercise = {
-    inhale: 2,
-    hold1: 1,
-    exhale: 2,
-    hold2: 1,
+// Tell React 19 this is an act() environment so state updates flush correctly
+// and the "not configured to support act(...)" warning is suppressed.
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT =
+  true;
+
+function renderHook<T>(useHook: () => T) {
+  const result: { current: T } = { current: undefined as unknown as T };
+
+  function Harness() {
+    result.current = useHook();
+    return null;
+  }
+
+  let renderer: ReturnType<typeof TestRenderer.create>;
+  act(() => {
+    renderer = TestRenderer.create(createElement(Harness));
+  });
+
+  return {
+    result,
+    unmount: () =>
+      act(() => {
+        renderer.unmount();
+      }),
   };
+}
 
-  describe('Phase timing sequence validation', () => {
-    it('should have correct phase order: inhale -> hold1 -> exhale -> hold2', () => {
-      const expectedOrder: BreathingPhase[] = ['inhale', 'hold1', 'exhale', 'hold2'];
-      
-      // Verify the expected order is correct
-      expect(expectedOrder[0]).toBe('inhale');
-      expect(expectedOrder[1]).toBe('hold1');
-      expect(expectedOrder[2]).toBe('exhale');
-      expect(expectedOrder[3]).toBe('hold2');
-      
-      // Verify no phase is repeated
-      const uniquePhases = new Set(expectedOrder);
-      expect(uniquePhases.size).toBe(expectedOrder.length);
+/** Advance fake timers by `ms`, flushing the hook's async sleep() chain. */
+async function advance(ms: number) {
+  await act(async () => {
+    await jest.advanceTimersByTimeAsync(ms);
+  });
+}
+
+describe("useBreathingCycle", () => {
+  // inhale 2s, hold1 1s, exhale 2s, hold2 1s.
+  const exercise = { inhale: 2, hold1: 1, exhale: 2, hold2: 1 };
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
+  });
+
+  describe("phase transitions", () => {
+    it("runs inhale -> hold1 -> exhale -> hold2 with correct durations", async () => {
+      const onPhaseChange = jest.fn<void, [BreathingPhase, number]>();
+      const { result, unmount } = renderHook(() =>
+        useBreathingCycle({ exercise, onPhaseChange })
+      );
+
+      act(() => {
+        result.current.start();
+      });
+
+      // Inhale fires synchronously on start.
+      expect(result.current.phase).toBe("inhale");
+      expect(onPhaseChange).toHaveBeenNthCalledWith(1, "inhale", 2000);
+
+      await advance(2000); // finish inhale -> hold1
+      expect(result.current.phase).toBe("hold1");
+      expect(onPhaseChange).toHaveBeenNthCalledWith(2, "hold1", 1000);
+
+      await advance(1000); // finish hold1 -> exhale
+      expect(result.current.phase).toBe("exhale");
+      expect(onPhaseChange).toHaveBeenNthCalledWith(3, "exhale", 2000);
+
+      await advance(2000); // finish exhale -> hold2
+      expect(result.current.phase).toBe("hold2");
+      expect(onPhaseChange).toHaveBeenNthCalledWith(4, "hold2", 1000);
+
+      unmount();
     });
 
-    it('should have valid phase durations', () => {
-      // All durations should be positive numbers
-      expect(defaultExercise.inhale).toBeGreaterThan(0);
-      expect(defaultExercise.hold1).toBeGreaterThan(0);
-      expect(defaultExercise.exhale).toBeGreaterThan(0);
-      expect(defaultExercise.hold2).toBeGreaterThan(0);
-      
-      // All durations should be finite numbers
-      expect(Number.isFinite(defaultExercise.inhale)).toBe(true);
-      expect(Number.isFinite(defaultExercise.hold1)).toBe(true);
-      expect(Number.isFinite(defaultExercise.exhale)).toBe(true);
-      expect(Number.isFinite(defaultExercise.hold2)).toBe(true);
+    it("loops back to inhale after a full cycle", async () => {
+      const onPhaseChange = jest.fn<void, [BreathingPhase, number]>();
+      const onCycleStart = jest.fn();
+      const { result, unmount } = renderHook(() =>
+        useBreathingCycle({ exercise, onPhaseChange, onCycleStart })
+      );
+
+      act(() => {
+        result.current.start();
+      });
+
+      // Advance through the entire first cycle (2 + 1 + 2 + 1 = 6s).
+      await advance(6000);
+
+      expect(result.current.phase).toBe("inhale");
+      // First call of cycle 1 + first call of cycle 2 = 5 phase changes total.
+      expect(onPhaseChange.mock.calls.map((c) => c[0])).toEqual([
+        "inhale",
+        "hold1",
+        "exhale",
+        "hold2",
+        "inhale",
+      ]);
+      // onCycleStart fires once per full cycle: start + loop-back = 2.
+      expect(onCycleStart).toHaveBeenCalledTimes(2);
+
+      unmount();
     });
   });
 
-  describe('Pause/resume logic validation', () => {
-    it('should maintain phase state during pause', () => {
-      // Simulate pause state: phase should not change
-      const phaseBeforePause: BreathingPhase = 'inhale';
-      const timeLeftBeforePause = 1;
-      
-      // During pause, these values should remain unchanged
-      const phaseDuringPause = phaseBeforePause;
-      const timeLeftDuringPause = timeLeftBeforePause;
-      
-      expect(phaseDuringPause).toBe(phaseBeforePause);
-      expect(timeLeftDuringPause).toBe(timeLeftBeforePause);
-    });
+  describe("pause", () => {
+    it("freezes phase and stops emitting transitions while paused", async () => {
+      const onPhaseChange = jest.fn<void, [BreathingPhase, number]>();
+      const { result, unmount } = renderHook(() =>
+        useBreathingCycle({ exercise, onPhaseChange })
+      );
 
-    it('should resume from same phase', () => {
-      // Simulate resume: should continue from paused phase
-      const pausedPhase: BreathingPhase = 'exhale';
-      const pausedTimeLeft = 1;
-      
-      // After resume, phase should be the same
-      const resumedPhase = pausedPhase;
-      const resumedTimeLeft = pausedTimeLeft;
-      
-      expect(resumedPhase).toBe(pausedPhase);
-      expect(resumedTimeLeft).toBeLessThanOrEqual(pausedTimeLeft);
+      act(() => {
+        result.current.start();
+      });
+
+      await advance(1000); // 1s into the 2s inhale
+      expect(result.current.phase).toBe("inhale");
+
+      act(() => {
+        result.current.pause();
+      });
+      expect(result.current.isPaused).toBe(true);
+      expect(result.current.isRunning).toBe(false);
+
+      const callsAtPause = onPhaseChange.mock.calls.length;
+
+      // Even far beyond the full cycle length, nothing advances while paused.
+      await advance(5000);
+
+      expect(result.current.phase).toBe("inhale");
+      expect(onPhaseChange.mock.calls.length).toBe(callsAtPause);
+
+      unmount();
     });
   });
 
-  describe('Elapsed time validation', () => {
-    it('should never calculate negative elapsed time', () => {
-      const startTime = 1000;
-      const endTime = 2000;
-      const elapsed = endTime - startTime;
-      
-      expect(elapsed).toBeGreaterThanOrEqual(0);
-    });
+  describe("resume", () => {
+    it("continues the same phase without re-triggering its cue", async () => {
+      const onPhaseChange = jest.fn<void, [BreathingPhase, number]>();
+      const { result, unmount } = renderHook(() =>
+        useBreathingCycle({ exercise, onPhaseChange })
+      );
 
-    it('should never produce NaN for time calculations', () => {
-      const startTime = 1000;
-      const endTime = 2000;
-      const elapsed = endTime - startTime;
-      
-      expect(Number.isNaN(elapsed)).toBe(false);
-      expect(Number.isFinite(elapsed)).toBe(true);
-    });
-
-    it('should handle zero duration correctly', () => {
-      const duration = 0;
-      expect(duration).toBeGreaterThanOrEqual(0);
-      expect(Number.isNaN(duration)).toBe(false);
-    });
-
-    it('should validate timeLeft is never negative', () => {
-      // Simulate various timeLeft values
-      const timeLeftValues = [0, 1, 5, 10, 100];
-      
-      timeLeftValues.forEach(timeLeft => {
-        expect(timeLeft).toBeGreaterThanOrEqual(0);
-        expect(Number.isNaN(timeLeft)).toBe(false);
+      act(() => {
+        result.current.start();
       });
-    });
 
-    it('should validate timeLeft is never NaN', () => {
-      // Test edge cases that might produce NaN
-      const validTimeLeft = 5;
-      const zeroTimeLeft = 0;
-      
-      expect(Number.isNaN(validTimeLeft)).toBe(false);
-      expect(Number.isNaN(zeroTimeLeft)).toBe(false);
-      
-      // Ensure arithmetic operations don't produce NaN
-      const result1 = validTimeLeft - 2;
-      const result2 = validTimeLeft * 0;
-      const result3 = validTimeLeft / 1;
-      
-      expect(Number.isNaN(result1)).toBe(false);
-      expect(Number.isNaN(result2)).toBe(false);
-      expect(Number.isNaN(result3)).toBe(false);
+      await advance(1000); // 1s into the 2s inhale
+      act(() => {
+        result.current.pause();
+      });
+
+      const inhaleCallsBeforeResume = onPhaseChange.mock.calls.filter(
+        (c) => c[0] === "inhale"
+      ).length;
+      expect(inhaleCallsBeforeResume).toBe(1);
+
+      act(() => {
+        result.current.resume();
+      });
+      expect(result.current.isPaused).toBe(false);
+      expect(result.current.isRunning).toBe(true);
+      // Resume must not re-fire the inhale cue.
+      expect(
+        onPhaseChange.mock.calls.filter((c) => c[0] === "inhale").length
+      ).toBe(1);
+      // Still in the same phase right after resume.
+      expect(result.current.phase).toBe("inhale");
+
+      // Remaining ~1s of inhale, then it advances to hold1.
+      await advance(1000);
+      expect(result.current.phase).toBe("hold1");
+      // inhale was emitted exactly once across the whole pause/resume.
+      expect(
+        onPhaseChange.mock.calls.filter((c) => c[0] === "inhale").length
+      ).toBe(1);
+
+      unmount();
     });
   });
 
-  describe('Exercise configuration validation', () => {
-    it('should validate exercise has all required phases', () => {
-      const requiredPhases = ['inhale', 'hold1', 'exhale', 'hold2'] as const;
-      
-      requiredPhases.forEach(phase => {
-        expect(defaultExercise).toHaveProperty(phase);
-        expect(typeof defaultExercise[phase]).toBe('number');
+  describe("stop", () => {
+    it("resets to idle and emits no further transitions", async () => {
+      const onPhaseChange = jest.fn<void, [BreathingPhase, number]>();
+      const { result, unmount } = renderHook(() =>
+        useBreathingCycle({ exercise, onPhaseChange })
+      );
+
+      act(() => {
+        result.current.start();
       });
+      await advance(1000); // mid-inhale
+
+      act(() => {
+        result.current.stop();
+      });
+
+      expect(result.current.phase).toBe("idle");
+      expect(result.current.isRunning).toBe(false);
+      expect(result.current.isPaused).toBe(false);
+      expect(result.current.timeLeft).toBe(0);
+
+      const callsAtStop = onPhaseChange.mock.calls.length;
+      await advance(6000); // a full cycle's worth of time
+      expect(onPhaseChange.mock.calls.length).toBe(callsAtStop);
+      expect(result.current.phase).toBe("idle");
+
+      unmount();
     });
 
-    it('should handle edge case exercise values', () => {
-      const edgeCaseExercise = {
-        inhale: 0.5,
-        hold1: 0,
-        exhale: 1,
-        hold2: 0.1,
-      };
-      
-      // All should be numbers
-      expect(typeof edgeCaseExercise.inhale).toBe('number');
-      expect(typeof edgeCaseExercise.hold1).toBe('number');
-      expect(typeof edgeCaseExercise.exhale).toBe('number');
-      expect(typeof edgeCaseExercise.hold2).toBe('number');
-      
-      // None should be NaN
-      expect(Number.isNaN(edgeCaseExercise.inhale)).toBe(false);
-      expect(Number.isNaN(edgeCaseExercise.hold1)).toBe(false);
-      expect(Number.isNaN(edgeCaseExercise.exhale)).toBe(false);
-      expect(Number.isNaN(edgeCaseExercise.hold2)).toBe(false);
+    it("is idempotent when called repeatedly", async () => {
+      const { result, unmount } = renderHook(() =>
+        useBreathingCycle({ exercise })
+      );
+
+      act(() => {
+        result.current.start();
+      });
+      await advance(500);
+
+      expect(() => {
+        act(() => {
+          result.current.stop();
+          result.current.stop();
+        });
+      }).not.toThrow();
+
+      expect(result.current.phase).toBe("idle");
+      expect(result.current.isRunning).toBe(false);
+      expect(result.current.isPaused).toBe(false);
+
+      unmount();
     });
   });
 
-  describe('Phase transition validation', () => {
-    it('should have valid phase transitions', () => {
-      const validTransitions: Array<[BreathingPhase, BreathingPhase]> = [
-        ['idle', 'inhale'],
-        ['inhale', 'hold1'],
-        ['hold1', 'exhale'],
-        ['exhale', 'hold2'],
-        ['hold2', 'inhale'], // Loops back
-      ];
-      
-      validTransitions.forEach(([from, to]) => {
-        expect(typeof from).toBe('string');
-        expect(typeof to).toBe('string');
-        expect(from).not.toBe(to); // Should transition to different phase
-      });
-    });
+  describe("start", () => {
+    it("is idempotent within a cycle (does not start a second concurrent cycle)", async () => {
+      const onCycleStart = jest.fn();
+      const { result, unmount } = renderHook(() =>
+        useBreathingCycle({ exercise, onCycleStart })
+      );
 
-    it('should not allow invalid phase transitions', () => {
-      // These should not happen in normal flow
-      const invalidTransitions: Array<[BreathingPhase, BreathingPhase]> = [
-        ['exhale', 'inhale'], // Should go through hold2 first
-        ['hold1', 'exhale'], // This is actually valid, but testing structure
-      ];
-      
-      // Just verify the structure is testable
-      invalidTransitions.forEach(([from, to]) => {
-        expect(typeof from).toBe('string');
-        expect(typeof to).toBe('string');
+      act(() => {
+        result.current.start();
+        result.current.start();
       });
+
+      // Stay within the first cycle (< 6s) so the loop-back does not re-fire.
+      await advance(3000);
+
+      expect(onCycleStart).toHaveBeenCalledTimes(1);
+
+      unmount();
     });
   });
 });

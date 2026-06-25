@@ -1,5 +1,5 @@
 import { useTheme, useWallpaperForeground } from "@/components/Theme";
-import { useApp } from "@/contexts/themeContext";
+import { useAppSettings } from "@/contexts/appSettingsContext";
 import {
   BREATH_ROOM_CATALOG,
   CanonicalBreathRoomId,
@@ -39,7 +39,7 @@ const ROOM_STATS_POLL_MS = 8000;
 export default function GlobalRoomPickerPage() {
   const { tokens } = useTheme();
   const wallpaperFg = useWallpaperForeground();
-  const { backgroundImage } = useApp();
+  const { backgroundImage } = useAppSettings();
   const insets = useSafeAreaInsets();
   const apiBase = getBreathRoomApiBaseUrl();
 

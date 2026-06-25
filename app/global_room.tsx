@@ -1,9 +1,8 @@
+import GlobalRoomBreathingView from "@/components/GlobalRoomBreathingView";
+import GlobalRoomHeader from "@/components/GlobalRoomHeader";
 import SettingsSheet, { SettingsSheetHandle } from "@/components/SettingsSheet";
-import {
-  useBreathingAnimationTokens,
-  useWallpaperForeground,
-} from "@/components/Theme";
-import { useApp } from "@/contexts/themeContext";
+import { useWallpaperForeground } from "@/components/Theme";
+import { useAppSettings } from "@/contexts/appSettingsContext";
 import { useBreathingAnimation } from "@/hooks/useBreathingAnimation";
 import { useBreathingAudio } from "@/hooks/useBreathingAudio";
 import {
@@ -19,7 +18,6 @@ import {
   isCanonicalBreathRoomId,
   useGlobalBreathingRoom,
 } from "@/hooks/useGlobalBreathingRoom";
-import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { useFocusEffect } from "@react-navigation/native";
 import { BlurView } from "expo-blur";
@@ -34,8 +32,7 @@ import React, {
 } from "react";
 import { Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import Animated, {
-  useAnimatedProps,
+import {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -44,7 +41,6 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import Svg, { Circle } from "react-native-svg";
 
 /** Prefer stack back (index → picker → session); fallback if stack is empty. */
 function navigateBackToRoomPicker() {
@@ -54,16 +50,6 @@ function navigateBackToRoomPicker() {
     router.replace("/global_room_picker");
   }
 }
-
-const HEADER_WHITE_TEXT = {
-  color: "#FFFFFF",
-  textAlign: "center" as const,
-  textShadowColor: "rgba(0,0,0,0.45)",
-  textShadowOffset: { width: 0, height: 1 },
-  textShadowRadius: 4,
-};
-
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 const BREATHING_PHASE_HAPTICS: Record<
   "inhale" | "hold" | "exhale",
@@ -100,13 +86,6 @@ function hapticArgsForGlobalPhase(
   return { ...base, durationMs, resumeMidPhase };
 }
 
-function phaseLabel(phase: GlobalRoomPhase | null): string {
-  if (!phase) return "";
-  if (phase === "inhale") return "Inhale";
-  if (phase === "exhale") return "Exhale";
-  return "Hold";
-}
-
 function GlobalRoomInner({
   onReconnect,
   initialRoomId,
@@ -116,9 +95,8 @@ function GlobalRoomInner({
   initialRoomId: CanonicalBreathRoomId;
   onSelectedRoomIdChange: (room: CanonicalBreathRoomId) => void;
 }) {
-  const breathingAnim = useBreathingAnimationTokens();
   const wallpaperFg = useWallpaperForeground();
-  const { settings, backgroundImage } = useApp();
+  const { settings, backgroundImage } = useAppSettings();
   const insets = useSafeAreaInsets();
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -235,11 +213,6 @@ function GlobalRoomInner({
     forceStopSoundRef.current = forceStopSound;
   }, [playInhaleSound, playExhaleSound, stopSound, forceStopSound]);
 
-  const animatedProps = useAnimatedProps(() => ({
-    r: radius.value,
-    strokeWidth: strokeWidth.value,
-  }));
-
   const uiAnimatedStyle = useAnimatedStyle(() => ({
     opacity: uiOpacity.value,
   }));
@@ -297,8 +270,6 @@ function GlobalRoomInner({
     uiOpacity.value = withTiming(isUIVisible ? 1 : 0, { duration: 200 });
   }, [isUIVisible, uiOpacity]);
 
-  const displaySeconds = Math.max(0, Math.ceil(remainingMs / 1000));
-
   const roomCatalog = useMemo(
     () =>
       getBreathRoomCatalogEntry(roomId) ??
@@ -315,77 +286,13 @@ function GlobalRoomInner({
             backgroundColor: backgroundImage ? "transparent" : "#FFFFFF",
           }}
         >
-          <Pressable
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-            onPress={handleScreenTap}
-          >
-            <View style={{ alignItems: "center", position: "relative" }}>
-              <Svg width={400} height={400}>
-                <Circle
-                  cx={200}
-                  cy={200}
-                  r={180}
-                  stroke={breathingAnim.guideOuterStroke}
-                  strokeWidth={1}
-                  fill="none"
-                  opacity={0.6}
-                />
-                <Circle
-                  cx={200}
-                  cy={200}
-                  r={65}
-                  stroke={breathingAnim.guideInnerStroke}
-                  strokeWidth={1}
-                  fill="none"
-                  opacity={0.6}
-                />
-                <AnimatedCircle
-                  cx={200}
-                  cy={200}
-                  animatedProps={animatedProps}
-                  stroke={breathingAnim.mainStroke}
-                  fill={breathingAnim.mainFill}
-                  strokeLinecap="round"
-                  opacity={0.8}
-                />
-              </Svg>
-
-              <View
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Text
-                  style={{
-                    color: wallpaperFg,
-                    fontSize: 32,
-                    fontWeight: "300",
-                    letterSpacing: 2,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {phaseLabel(phase)}
-                </Text>
-                <Text
-                  style={{
-                    color: wallpaperFg,
-                    fontSize: 20,
-                    fontWeight: "500",
-                    marginTop: 12,
-                    opacity: 0.85,
-                  }}
-                >
-                  {displaySeconds}s
-                </Text>
-              </View>
-            </View>
-          </Pressable>
+          <GlobalRoomBreathingView
+            phase={phase}
+            radius={radius}
+            strokeWidth={strokeWidth}
+            remainingMs={remainingMs}
+            onScreenTap={handleScreenTap}
+          />
 
           {wsError && isConnected ? (
             <View
@@ -475,76 +382,16 @@ function GlobalRoomInner({
             </View>
           ) : null}
 
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              top: insets.top + 8,
-              left: 52,
-              right: 52,
-              alignItems: "center",
-            }}
-          >
-            {roomCatalog ? (
-              <>
-                <Text
-                  style={{
-                    ...HEADER_WHITE_TEXT,
-                    fontSize: 24,
-                    fontWeight: "800",
-                    letterSpacing: 0.3,
-                  }}
-                >
-                  {roomCatalog.title}
-                </Text>
-                <Text
-                  style={{
-                    ...HEADER_WHITE_TEXT,
-                    fontSize: 15,
-                    fontWeight: "600",
-                    marginTop: 10,
-                    opacity: 0.95,
-                  }}
-                >
-                  {participantCount} breathing
-                </Text>
-              </>
-            ) : null}
-          </View>
-
-          <Animated.View
-            style={[
-              {
-                position: "absolute",
-                top: insets.top,
-                left: 0,
-                right: 0,
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                paddingHorizontal: 16,
-                paddingTop: 12,
-                paddingBottom: 8,
-                pointerEvents: isUIVisible ? "auto" : "none",
-              },
-              uiAnimatedStyle,
-            ]}
-          >
-            <Pressable onPress={handleLeave} style={{ width: 44 }}>
-              <Text style={{ color: wallpaperFg, fontSize: 28 }}>←</Text>
-            </Pressable>
-            <Pressable
-              onPress={handleSettingsPress}
-              style={{
-                width: 44,
-                height: 44,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Ionicons name="options" size={34} color={wallpaperFg} />
-            </Pressable>
-          </Animated.View>
+          <GlobalRoomHeader
+            roomCatalog={roomCatalog}
+            participantCount={participantCount}
+            insets={insets}
+            isUIVisible={isUIVisible}
+            uiAnimatedStyle={uiAnimatedStyle}
+            wallpaperFg={wallpaperFg}
+            onLeave={handleLeave}
+            onSettingsPress={handleSettingsPress}
+          />
 
           {connectionState === "disconnected" ? (
             <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
