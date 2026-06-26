@@ -1,0 +1,54 @@
+# ── Copied from .gitignore (required — .easignore replaces .gitignore entirely) ──
+
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+.metro-health-check*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.DS_Store
+*.pem
+.env*.local
+.env.sentry-build-plugin
+*.tsbuildinfo
+app-example
+/ios
+/android
+.env.local
+
+# ── EAS-specific: tracked files not needed to build the app ──────────────────
+
+# README documentation media (9 GIFs/PNGs, ~12 MB — never required by any app code)
+assets/readMe/
+
+# Developer documentation
+docs/
+
+# Test suite (EAS Build does not run tests)
+hooks/__tests__/
+lib/__tests__/
+jest/
+jest.config.js
+
+# Native build artifact (config.gypi — not used by Expo/Metro)
+build/
+
+# IDE and AI tooling
+.cursor/
+.vscode/
+.cursorrules
+
+# Project documentation
+AGENTS.md
+README.md
+project.md

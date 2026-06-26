@@ -3,8 +3,8 @@ import { useAudioPlayer } from "expo-audio";
 import { useEffect, useRef } from "react";
 
 const SOUNDSCAPE_FILES: Record<Exclude<SoundscapeType, 'off'>, any> = {
-  dream: require('../assets/SoundScapes/DreamScape.wav'),
-  fuzzy: require('../assets/SoundScapes/Fuzzy.wav'),
+  dream: require('../assets/SoundScapes/DreamScape.m4a'),
+  fuzzy: require('../assets/SoundScapes/Fuzzy.m4a'),
   keys: require('../assets/SoundScapes/Keys.mp3'),
 };
 

@@ -130,8 +130,8 @@ describe("useBreathingAudio", () => {
       );
 
       const calls = mockedUseAudioPlayer.mock.calls;
-      expect(String(calls[0][0])).toContain("Guzheng/Inhale.wav");
-      expect(String(calls[1][0])).toContain("Guzheng/Exhale.wav");
+      expect(String(calls[0][0])).toContain("Guzheng/Inhale.m4a");
+      expect(String(calls[1][0])).toContain("Guzheng/Exhale.m4a");
 
       unmount();
     });
@@ -144,8 +144,8 @@ describe("useBreathingAudio", () => {
       });
 
       const calls = mockedUseAudioPlayer.mock.calls;
-      expect(String(calls[0][0])).toContain("Sine/Inhale.wav");
-      expect(String(calls[1][0])).toContain("Sine/Exhale.wav");
+      expect(String(calls[0][0])).toContain("Sine/Inhale.m4a");
+      expect(String(calls[1][0])).toContain("Sine/Exhale.m4a");
 
       unmount();
     });

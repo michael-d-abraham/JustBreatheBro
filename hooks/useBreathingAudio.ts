@@ -4,16 +4,16 @@ import { useEffect } from "react";
 
 const SOUND_FILES: Record<Exclude<SoundType, 'off'>, { inhale: any; exhale: any }> = {
   guzheng: {
-    inhale: require('../assets/sounds/Guzheng/Inhale.wav'),
-    exhale: require('../assets/sounds/Guzheng/Exhale.wav'),
+    inhale: require('../assets/sounds/Guzheng/Inhale.m4a'),
+    exhale: require('../assets/sounds/Guzheng/Exhale.m4a'),
   },
   sine: {
-    inhale: require('../assets/sounds/Sine/Inhale.wav'),
-    exhale: require('../assets/sounds/Sine/Exhale.wav'),
+    inhale: require('../assets/sounds/Sine/Inhale.m4a'),
+    exhale: require('../assets/sounds/Sine/Exhale.m4a'),
   },
   synth: {
-    inhale: require('../assets/sounds/synth/Inhale.wav'),
-    exhale: require('../assets/sounds/synth/Exhale - Synth.wav'),
+    inhale: require('../assets/sounds/synth/Inhale.m4a'),
+    exhale: require('../assets/sounds/synth/Exhale - Synth.m4a'),
   },
 };
 
