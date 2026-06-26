@@ -81,7 +81,7 @@ export default function ScenesScreen() {
       letterSpacing: 0.5,
       textTransform: "uppercase",
       opacity: 0.6,
-      marginTop: 24,
+      marginTop: 6,
       marginBottom: 12,
     },
     divider: {
@@ -141,16 +141,8 @@ export default function ScenesScreen() {
 
         <View style={styles.divider} />
 
-        {/* Animation Theme Section */}
-        <Text style={styles.sectionTitle}>ANIMATION THEME</Text>
-        <View style={styles.appearanceSection}>
-          <ThemePicker target="animation" variant="bottomSheet" />
-        </View>
-
-        <View style={styles.divider} />
-
-        {/* Color Theme Section */}
-        <Text style={styles.sectionTitle}>COLOR THEME</Text>
+        {/* Theme Section */}
+        <Text style={styles.sectionTitle}>THEME</Text>
         <View style={styles.appearanceSection}>
           <ThemePicker variant="bottomSheet" />
         </View>

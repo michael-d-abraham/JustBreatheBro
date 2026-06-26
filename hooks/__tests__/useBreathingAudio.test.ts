@@ -15,6 +15,15 @@ import TestRenderer from "react-test-renderer";
 import { SoundType } from "@/contexts/appSettingsContext";
 import { useBreathingAudio } from "@/hooks/useBreathingAudio";
 
+// Mock react-native so the AppState listener in useBreathingAudio is a no-op in tests.
+// isAppActiveRef starts true, so all existing play/pause/seek assertions are unaffected.
+jest.mock("react-native", () => ({
+  AppState: {
+    currentState: "active",
+    addEventListener: jest.fn(() => ({ remove: jest.fn() })),
+  },
+}));
+
 // Fake player created per source by the mock below.
 jest.mock("expo-audio", () => {
   const players = new Map<string, unknown>();

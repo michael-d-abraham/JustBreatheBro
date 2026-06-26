@@ -94,7 +94,7 @@ function useConfigureAudioMode() {
           playsInSilentMode: true,
           shouldPlayInBackground: true,
           shouldRouteThroughEarpiece: false,
-          interruptionMode: "duckOthers",
+          interruptionMode: "doNotMix",
         });
       } catch (e) {
         if (__DEV__) {
