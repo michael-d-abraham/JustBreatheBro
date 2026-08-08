@@ -9,7 +9,10 @@
     "ios:build": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "jest"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "check": "npm run lint && npm test",
+    "session:ios": "expo start --dev-client"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

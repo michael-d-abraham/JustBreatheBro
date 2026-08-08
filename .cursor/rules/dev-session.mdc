@@ -1,0 +1,149 @@
+---
+description: Dev session startup/shutdown protocol — trigger phrases, terminals, manual testing tiers
+alwaysApply: true
+---
+
+# Dev Session Protocol
+
+## Trigger phrases
+
+| Phrase | Action |
+|--------|--------|
+| **"Mr cursor start up a session"** (or "start up a session") | Run full session bootstrap below |
+| **"Mr cursor end session"** (or "end session") | Run session shutdown + update project docs/rules |
+
+When the user uses a start phrase, **do not ask permission** — run the bootstrap, then post the briefing.
+
+---
+
+## Session bootstrap (start)
+
+**Project root:** `/Users/michael/Dev/breath`
+
+### Step 0 — Branch context (informational)
+
+Home base is **`make_it_urs`** ("make it urs") — see `.cursor/rules/home-base-branch.mdc`.
+Note current branch in the briefing; feature branches are expected off home base.
+
+### Step 1 — Baseline gate (blocking)
+
+```bash
+npm run check
+```
+
+(`npm run check` = `npm run lint && npm test`). **Stop if this fails.** Fix before coding or starting sim.
+
+### Step 2 — Background terminals
+
+Start these in **separate background shells** (do not block on them):
+
+| Terminal | Command | When |
+|----------|---------|------|
+| **T1 — test watch** | `npm run test:watch` | Every session |
+| **T2 — Metro / sim** | `npm run session:ios` | Every session (daily loop) |
+| **T2b — native rebuild** | `npm run ios` | Only if dev client missing, native deps changed, or user asks |
+
+**Do not run `expo run:ios` and `expo start --dev-client` at the same time** unless Metro died and only needs restart.
+
+After `session:ios` starts, remind user to press **`i`** in Metro if the simulator does not auto-open.
+
+### Step 3 — Session briefing (post in chat)
+
+Always include:
+
+1. **Baseline result** — lint + test pass/fail counts
+2. **Today's chunk** — from user message or ask if not stated
+3. **Files in scope** — from `AGENTS.md` §9 risky areas + files being edited
+4. **Jest suites to watch** — map chunk → `hooks/__tests__/*` and `lib/__tests__/*`
+5. **Manual test tier** — A / B / C from `docs/DEV_SESSION.md`
+6. **Device required?** — yes if touching audio background, haptics, or silent switch
+
+---
+
+## Manual testing tiers
+
+Full detail in `docs/DEV_SESSION.md`. Summary:
+
+- **Tier A (30s sim smoke)** — every commit; home → start → pause → resume → exit
+- **Tier B (area-specific)** — when touching nav, settings, audio, global room, storage
+- **Tier C (full)** — `docs/REGRESSION_CHECKLIST.md` before App Store / big merges
+
+**Simulator is not enough for:** haptics, lock-screen audio pause/resume, silent switch.
+
+---
+
+## Audio / background expected behavior (do not regress)
+
+Implemented in `hooks/useBackgroundSoundscape.ts` + `hooks/useBreathingAudio.ts`:
+
+- **Soundscape:** pauses on `AppState` `background` / `inactive`; resumes on `active`
+- **Breathing cues:** no new inhale/exhale sounds when app not `active`
+- **Exit breathing session:** cues force-stop; soundscape continues on home (by design)
+
+When updating `docs/REGRESSION_CHECKLIST.md`, keep §3b aligned with this.
+
+---
+
+## Session shutdown (end)
+
+When user says **"Mr cursor end session"** (always run this full sequence at the very end):
+
+### 1. Verify
+
+```bash
+npm run check
+```
+
+Report pass/fail and test count.
+
+### 2. Capture session learnings
+
+Append a dated entry to `docs/SESSION_LOG.md` (what was done, verified, surprised us).
+
+Merge durable facts into `docs/PROJECT_KNOWLEDGE.md` — prefer updating existing bullets over adding duplicates.
+
+### 3. Knowledge-base scan (simplify, don't bloat)
+
+Read and reconcile these for **stale, duplicate, or contradictory** content:
+
+| File | Action |
+|------|--------|
+| `docs/PROJECT_KNOWLEDGE.md` | Merge new learnings; remove resolved "pending" items |
+| `AGENTS.md` | Fix test counts, deleted routes, outdated risky-area notes |
+| `.cursorrules` | Keep guardrails only; point to AGENTS / PROJECT_KNOWLEDGE for detail |
+| `docs/REGRESSION_CHECKLIST.md` | Align expected behavior with code (especially audio §3b) |
+| `docs/BASELINE_STATUS.md` | Do not update numbers — add banner if needed; it's a historical snapshot |
+| `docs/ARCHITECTURE.md` | Only touch if session changed architecture; note "see AGENTS.md §3" |
+| `README.md` | Test count + key doc links if changed |
+
+**Simplify rules:** one fact → one home. Delete duplicate paragraphs. Remove completed TODOs. Mark historical docs as historical instead of duplicating their content elsewhere.
+
+### 4. Route learnings to the right file
+
+| Learning type | Destination |
+|---------------|-------------|
+| Invariants / never-break rules | `.cursorrules` |
+| Structure, risky areas, testing commands | `AGENTS.md` |
+| Session-specific facts, quirks, prereqs | `docs/PROJECT_KNOWLEDGE.md` |
+| Expected user-visible behavior | `docs/REGRESSION_CHECKLIST.md` |
+| Workflow / triggers / tiers | `docs/DEV_SESSION.md` + this file |
+
+### 5. Chat summary
+
+Report: check status, docs touched, key learnings added, suggested next chunk.
+
+Do not commit unless the user explicitly asks.
+
+---
+
+## Cleanup chunk → test mapping
+
+| Chunk type | Automated | Manual |
+|------------|-----------|--------|
+| Docs only | check | Tier A |
+| Navigation / routes | check | A + B nav |
+| Hooks (cycle/audio/haptics) | check + relevant `__tests__` | A + B breathing + **device** |
+| Soundscape / AppState | check + audio tests | A + B audio + **device** |
+| Global room | check + global room tests | A + B global room |
+| Settings / pickers / scenes | check | A + B settings |
+| Storage / contexts | check + storage tests | A + B storage |

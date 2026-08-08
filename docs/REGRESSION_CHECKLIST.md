@@ -88,12 +88,16 @@
 
 ### 3b. Audio stops correctly
 
-- [ ] Lock the device screen during a session; unlock — breathing cues do not play in background
-  (unless explicitly supported), but soundscape should continue if configured.
-- [ ] Force-close the app; audio does not continue playing.
-- [ ] Switch to another app mid-session; breathing cues pause; soundscape behavior matches iOS
-  background audio rules (`playsInSilentMode: true`, `interruptionMode: duckOthers`).
-- [ ] Hardware mute switch: soundscape should still play (app uses `playsInSilentMode: true`).
+- [ ] Lock the device screen (or send app to background); ambient soundscape **pauses** while
+  backgrounded (`useBackgroundSoundscape` AppState handler).
+- [ ] Unlock / return to foreground; soundscape **resumes** from where it left off (if sound still
+  enabled and soundscape is not "Off").
+- [ ] Lock during a breathing session; **no new** inhale/exhale cues fire in background
+  (`useBreathingAudio` foreground guard). A cue already playing may finish briefly.
+- [ ] Force-close the app; no audio continues playing.
+- [ ] Switch to another app mid-session; same pause/resume behavior as lock screen.
+- [ ] Hardware mute switch: soundscape should still play when foreground (`playsInSilentMode: true`).
+- [ ] Exit breathing session to home; breathing cues stop; soundscape continues on home (by design).
 
 ---
 

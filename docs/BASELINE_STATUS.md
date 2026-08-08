@@ -1,8 +1,7 @@
 # JustBreatheBro — Baseline Status
 
-> Recorded: 2026-06-23. Run as part of the codebase cleanup initiative (see
-> [docs/ARCHITECTURE.md](ARCHITECTURE.md)). No code was changed to produce these results — this is
-> the exact state of the repo at cleanup start.
+> **Historical snapshot** recorded 2026-06-23 at cleanup start. **Do not update test counts here.**  
+> Current baseline: run `npm run check` — see `AGENTS.md` §6 and `docs/PROJECT_KNOWLEDGE.md`.
 
 ---
 
