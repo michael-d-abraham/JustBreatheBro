@@ -89,6 +89,8 @@ export default function BreathingPageHeader({
 
       {/* Flower — Top Left (e.g. scenes / appearance) */}
       <Pressable
+        testID="home.scenes-button"
+        accessibilityLabel="Scenes"
         onPress={onCirclePress || onSupportPress}
         style={{
           position: "absolute",

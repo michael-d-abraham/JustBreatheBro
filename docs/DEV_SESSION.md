@@ -67,7 +67,11 @@ Cursor will re-run `npm run check`, append to `docs/SESSION_LOG.md`, **scan and 
 
 ### Tier A — 30-second sim smoke (every commit)
 
-Run on **iOS Simulator** after each change:
+**Automated (nav path):** after Maestro CLI is installed and the sim app is built, run
+`npm run e2e:ios` (see `docs/MAESTRO.md`). That covers Start → pause → resume → exit and
+home → Scenes → close. Soundscape still needs a human listen.
+
+Run on **iOS Simulator** after each change (manual or via Maestro + soundscape check):
 
 - [ ] App launches → home shows wallpaper + technique name
 - [ ] Tap **Start** → ring animates, phase label visible, timer counts down

@@ -375,6 +375,7 @@ Read these in order before starting a task that touches the listed area:
 | **`docs/ARCHITECTURE.md`** | Touching any core system; note: some paths/names are pre-cleanup |
 | **`docs/PROJECT_KNOWLEDGE.md`** | Living facts from sessions — read for quirks, persistence, audio behavior, Maestro status |
 | **`docs/DEV_SESSION.md`** | Starting/ending a dev session; manual test tiers A/B/C; terminal commands |
+| **`docs/MAESTRO.md`** | Maestro E2E install, sim prereqs, `npm run e2e:ios` smoke flows |
 | **`docs/SESSION_LOG.md`** | Dated session entries (updated on "Mr cursor end session") |
 | **`docs/REGRESSION_CHECKLIST.md`** | Before any commit on session, audio, haptics, animation, navigation, settings |
 | **`docs/ROUTE_AUDIT.md`** | Before adding, moving, or deleting any route |

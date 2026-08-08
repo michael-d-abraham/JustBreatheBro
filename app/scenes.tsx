@@ -113,7 +113,12 @@ export default function ScenesScreen() {
     <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={handleClosePress} style={styles.closeButton}>
+        <Pressable
+          testID="scenes.close-button"
+          accessibilityLabel="Close scenes"
+          onPress={handleClosePress}
+          style={styles.closeButton}
+        >
           <Ionicons name="close" size={28} color={tokens.bottomSheetText} />
         </Pressable>
         <Text style={styles.headerTitle}>Scenes</Text>

@@ -40,7 +40,7 @@
 | Layer | Tool | Covers |
 |-------|------|--------|
 | Automated logic | Jest (**76 tests**, 6 suites) | Cycle, audio, haptics, storage, global room mock WS |
-| UI smoke (planned) | Maestro on iOS sim | Tier A navigation — **not implemented yet** |
+| UI smoke | Maestro on iOS sim | Tier A nav — `npm run e2e:ios` (see `docs/MAESTRO.md`) |
 | Truth for native feel | Physical iPhone | Haptics, lock-screen audio, silent switch |
 
 **Sim is enough for:** nav, sheets layout, breathing ring visuals, global room UI (with network).  
@@ -75,15 +75,15 @@ Regression checklist §3b reflects this (updated 2026-06-10).
 
 ---
 
-## Maestro E2E (next agent task)
+## Maestro E2E
 
-**Status:** Not started. No `.maestro/`, no `testID`s, Maestro CLI not installed.
+**Status:** Implemented (local iOS sim). Flows in `.maestro/flows/`; docs in `docs/MAESTRO.md`.
 
-**Blockers for reliable flows:** icon-only controls (pause/stop/scenes/close), UI auto-hides after ~3s on breathing screen — needs `testID`s on ~7 elements.
-
-**appId:** `com.michaelabraham.breathbro`
-
-Handoff spec was written in chat 2026-06-10; implement per that brief or add `docs/MAESTRO.md` when done.
+- **Scripts:** `npm run e2e:ios`, `npm run e2e:ios:breathing`
+- **appId:** `com.michaelabraham.breathbro`
+- **Prereq:** Maestro CLI on PATH (not an npm dep); sim app via `npm run ios` / `expo-dev-client`
+- **Gotcha:** Breathing chrome auto-hides — flows tap `breathing.screen-tap` before pause/back
+- **Out of scope v1:** sheets, audio/haptics asserts, live rooms, CI
 
 ---
 

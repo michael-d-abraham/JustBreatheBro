@@ -1,0 +1,23 @@
+# Tier A smoke: home → Start → pause → resume → exit → home
+appId: com.michaelabraham.breathbro
+---
+- launchApp
+- assertVisible: "Relax"
+- tapOn:
+    id: "home.start-button"
+- extendedWaitUntil:
+    visible: "Inhale"
+    timeout: 5000
+- tapOn:
+    id: "breathing.screen-tap"
+- tapOn:
+    id: "breathing.pause-button"
+- tapOn:
+    id: "breathing.pause-button"
+- tapOn:
+    id: "breathing.screen-tap"
+- tapOn:
+    id: "breathing.back-button"
+- extendedWaitUntil:
+    visible: "Relax"
+    timeout: 3000

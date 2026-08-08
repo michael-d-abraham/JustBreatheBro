@@ -160,7 +160,12 @@ export default function Index() {
           {/* Fixed Footer */}
           <View style={styles.footerContainer}>
             <View style={styles.startButtonContainer}>
-              <Pressable onPress={handleStartPress} style={styles.startButton}>
+              <Pressable
+                testID="home.start-button"
+                accessibilityLabel="Start"
+                onPress={handleStartPress}
+                style={styles.startButton}
+              >
                 <Text style={styles.startButtonText}>Start</Text>
               </Pressable>
             </View>
