@@ -1,31 +1,23 @@
-import React, { RefObject, useState } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import React from "react";
+import { Image, Pressable, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SupportSheetHandle } from "./SupportSheet";
 import { useWallpaperForeground } from "./Theme";
 
-interface BreathingPageHeaderProps {
-  supportSheetRef: RefObject<SupportSheetHandle | null>;
+type Props = {
+  onScenesPress: () => void;
   onSupportPress: () => void;
-  onCirclePress?: () => void;
-  onInfoLibraryPress?: () => void;
-  /** When set, first menu row uses this label instead of "Love". */
-  globalBreathLabel?: string;
-  onGlobalBreathPress?: () => void;
-}
+};
 
+/**
+ * Home header — scenes (tulip) left; ⋮ opens Support directly.
+ * One Breath / Benefits live on the home pager pages.
+ */
 export default function BreathingPageHeader({
-  supportSheetRef,
+  onScenesPress,
   onSupportPress,
-  onCirclePress,
-  onInfoLibraryPress,
-  globalBreathLabel,
-  onGlobalBreathPress,
-}: BreathingPageHeaderProps) {
-  /** Always light — header sits on scene wallpapers (index / calm / energize). */
+}: Props) {
   const headerContentColor = useWallpaperForeground();
   const insets = useSafeAreaInsets();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const styles = StyleSheet.create({
     leftHeaderIcon: {
@@ -38,60 +30,14 @@ export default function BreathingPageHeader({
       height: 28,
       tintColor: headerContentColor,
     },
-    dropdown: {
-      position: "absolute",
-      top: insets.top + 48,
-      right: 16,
-      minWidth: 120,
-      zIndex: 20,
-    },
-    dropdownItem: {
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-    },
-    dropdownItemLast: {},
-    dropdownItemText: {
-      color: headerContentColor,
-      fontSize: 16,
-      fontWeight: "500",
-    },
   });
-
-  const handleHeartPress = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
-
-  const handleMenuItemPress = (item: "Benefits" | "Support") => {
-    setIsDropdownOpen(false);
-    if (item === "Support") {
-      onSupportPress();
-    } else if (item === "Benefits" && onInfoLibraryPress) {
-      onInfoLibraryPress();
-    }
-  };
 
   return (
     <>
-      {/* Backdrop to close dropdown when tapping outside */}
-      {isDropdownOpen && (
-        <Pressable
-          onPress={() => setIsDropdownOpen(false)}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 15,
-          }}
-        />
-      )}
-
-      {/* Flower — Top Left (e.g. scenes / appearance) */}
       <Pressable
         testID="home.scenes-button"
         accessibilityLabel="Scenes"
-        onPress={onCirclePress || onSupportPress}
+        onPress={onScenesPress}
         style={{
           position: "absolute",
           top: insets.top + 8,
@@ -107,9 +53,9 @@ export default function BreathingPageHeader({
         />
       </Pressable>
 
-      {/* Menu (more) — Top Right */}
       <Pressable
-        onPress={handleHeartPress}
+        accessibilityLabel="Support"
+        onPress={onSupportPress}
         style={{
           position: "absolute",
           top: insets.top + 8,
@@ -124,35 +70,6 @@ export default function BreathingPageHeader({
           resizeMode="contain"
         />
       </Pressable>
-
-      {/* Dropdown Menu */}
-      {isDropdownOpen && (
-        <View style={styles.dropdown}>
-          <Pressable
-            onPress={() => {
-              setIsDropdownOpen(false);
-              onGlobalBreathPress?.();
-            }}
-            style={styles.dropdownItem}
-          >
-            <Text style={styles.dropdownItemText}>
-              {globalBreathLabel ?? "Love"}
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => handleMenuItemPress("Benefits")}
-            style={styles.dropdownItem}
-          >
-            <Text style={styles.dropdownItemText}>Benefits</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => handleMenuItemPress("Support")}
-            style={[styles.dropdownItem, styles.dropdownItemLast]}
-          >
-            <Text style={styles.dropdownItemText}>Support</Text>
-          </Pressable>
-        </View>
-      )}
     </>
   );
 }

@@ -1,0 +1,77 @@
+---
+description: Full-screen settings template (Scenes-style). Use when user asks for a settings template, settings screen, or settings-style page.
+globs: app/**/*.tsx,components/SettingsScreenLayout.tsx,components/SettingsInsetGrouped.tsx
+alwaysApply: false
+---
+
+# Settings screen template
+
+When the user asks for a **settings template**, **settings screen**, or a new
+full-screen settings-style page, follow this contract. Do **not** reinvent
+header/scroll/section chrome.
+
+## Source of truth
+
+| Piece | File |
+|---|---|
+| Layout + grouped primitives | `components/SettingsInsetGrouped.tsx` |
+| Full-screen wrapper | `components/SettingsScreenLayout.tsx` |
+| Bottom-sheet consumer | `components/SupportSheet.tsx` |
+| Reference consumer | `app/scenes.tsx` |
+| Color tokens | `.cursor/rules/bottom-sheet-tokens.mdc` |
+
+## Required structure (full-screen)
+
+```tsx
+import SettingsScreenLayout, {
+  SettingsScreenSection,
+} from "@/components/SettingsScreenLayout";
+
+export default function ExampleSettingsScreen() {
+  return (
+    <SettingsScreenLayout
+      title="Example"
+      onClose={() => router.back() /* or router.push("/") */}
+      closeTestID="example.close-button"
+      closeAccessibilityLabel="Done"
+    >
+      <SettingsScreenSection title="Section Name">
+        {/* pickers / rows / content */}
+      </SettingsScreenSection>
+    </SettingsScreenLayout>
+  );
+}
+```
+
+## Bottom sheet (Support pattern)
+
+```tsx
+<BaseBottomSheet ref={ref} headerless snapPoints={["90%"]}>
+  <SettingsInsetGroupedLayout
+    title="Support"
+    onDone={() => ref.current?.close()}
+    variant="bottomSheet"
+    doneTestID="support.done-button"
+  >
+    <SettingsGroupedSection title="Contact Us">
+      <SettingsGroupedRow title="..." icon={{ name, backgroundColor }} onPress={...} />
+    </SettingsGroupedSection>
+  </SettingsInsetGroupedLayout>
+</BaseBottomSheet>
+```
+
+## Rules
+
+1. **Full-screen routes** use `SettingsScreenLayout` — Done top-right, large title that collapses on scroll.
+2. **Bottom sheets** use `BaseBottomSheet` with `headerless` + `SettingsInsetGroupedLayout` `variant="bottomSheet"`.
+3. **Sections** use `SettingsScreenSection` / `SettingsGroupedSection` — uppercase label + white inset card.
+4. **Tappable links** use `SettingsGroupedRow` with icon badge + chevron.
+5. **Tokens:** `bottomSheetText`, `bottomSheetSecondaryText`, `bottomSheetSeparator`, `systemGroupedBg`, `systemSecondaryGroupedBg`. Never scene/accent tokens.
+6. Prefer existing pickers with `variant="bottomSheet"` over one-off controls.
+7. Carousels: set `overflowVisible` on the section wrapping horizontal scroll content.
+8. Add `testID` + `accessibilityLabel` on Done when Maestro-reachable.
+
+## Out of scope
+
+- In-session `SettingsSheet` (gorhom sheet, legacy header) — migrate later.
+- Breathing session chrome / home pager.

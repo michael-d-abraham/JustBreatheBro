@@ -18,6 +18,7 @@ type Tokens = PaletteTokens &
     separator: any;
     systemBg: any;
     systemGroupedBg: any;
+    systemSecondaryGroupedBg: any;
   };
 
 // ============================================================================
@@ -35,6 +36,7 @@ type ThemeContextValue = {
     separator: any;
     systemBg: any;
     systemGroupedBg: any;
+    systemSecondaryGroupedBg: any;
     // Dynamic colors for bottom sheets (follow app mode, independent of theme):
     bottomSheetBg: any;
     bottomSheetText: any;
@@ -71,6 +73,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       separator: PlatformColor('separator'),
       systemBg: PlatformColor('systemBackground'),
       systemGroupedBg: PlatformColor('systemGroupedBackground'),
+      systemSecondaryGroupedBg: PlatformColor('secondarySystemGroupedBackground'),
       // Bottom sheets: follow app mode so they match the rest of the app
       bottomSheetBg: base.surface,
       bottomSheetText: base.textPrimary,

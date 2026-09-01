@@ -383,6 +383,7 @@ Read these in order before starting a task that touches the listed area:
 | **`docs/BASELINE_STATUS.md`** | Understanding known pre-existing issues (TypeScript errors, broken script) |
 | **`docs/NAVIGATION_DECISION.md`** | Historical context on why `_tabs/` was deleted |
 | **`.cursor/rules/bottom-sheet-tokens.mdc`** | Before touching any bottom sheet component or styling |
+| **`.cursor/rules/settings-screen-template.mdc`** | Before adding a full-screen settings-style route (Scenes pattern) |
 
 ### Key source files to read before touching their area
 

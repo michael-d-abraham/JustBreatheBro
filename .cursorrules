@@ -34,6 +34,7 @@ branches. See `.cursor/rules/home-base-branch.mdc`.
 | Haptics | `hooks/useBreathingHaptics.ts` |
 | Ambient soundscape | `hooks/useBackgroundSoundscape.ts` |
 | Bottom sheet base | `components/BaseBottomSheet.tsx` |
+| Full-screen settings layout | `components/SettingsScreenLayout.tsx` + `components/SettingsInsetGrouped.tsx` (rule: `.cursor/rules/settings-screen-template.mdc`) |
 | Sheet coordination | `hooks/useBreathingSheets.ts` |
 | Storage keys | `lib/storage.ts` |
 | Wallpaper images | `constants/wallpapers.ts` |
