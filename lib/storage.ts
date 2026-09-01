@@ -75,6 +75,9 @@ const EXERCISES_KEY = 'breathing_exercises';
 const CURRENT_EXERCISE_KEY = 'current_exercise';
 const BACKGROUND_IMAGE_KEY = 'background_image';
 const ANIMATION_THEME_KEY = 'animation_theme';
+const APPLE_HEALTH_SYNC_ENABLED_KEY = 'apple_health_sync_enabled';
+const APPLE_HEALTH_CONNECTED_KEY = 'apple_health_connected';
+const APPLE_HEALTH_LAST_SESSION_ID_KEY = 'apple_health_last_session_id';
 
 // Get all exercises
 export const getExercises = async (): Promise<Exercise[]> => {
@@ -149,4 +152,46 @@ export const getAnimationTheme = async (): Promise<string | null> => {
 // Save animation theme
 export const saveAnimationTheme = async (theme: string): Promise<void> => {
   await AsyncStorage.setItem(ANIMATION_THEME_KEY, theme);
+};
+
+function parseStoredBoolean(stored: string | null): boolean {
+  return stored === "true";
+}
+
+export const getAppleHealthSyncEnabled = async (): Promise<boolean> => {
+  const stored = await AsyncStorage.getItem(APPLE_HEALTH_SYNC_ENABLED_KEY);
+  return parseStoredBoolean(stored);
+};
+
+export const saveAppleHealthSyncEnabled = async (
+  enabled: boolean,
+): Promise<void> => {
+  await AsyncStorage.setItem(
+    APPLE_HEALTH_SYNC_ENABLED_KEY,
+    enabled ? "true" : "false",
+  );
+};
+
+export const getAppleHealthConnected = async (): Promise<boolean> => {
+  const stored = await AsyncStorage.getItem(APPLE_HEALTH_CONNECTED_KEY);
+  return parseStoredBoolean(stored);
+};
+
+export const saveAppleHealthConnected = async (
+  connected: boolean,
+): Promise<void> => {
+  await AsyncStorage.setItem(
+    APPLE_HEALTH_CONNECTED_KEY,
+    connected ? "true" : "false",
+  );
+};
+
+export const getAppleHealthLastSessionId = async (): Promise<string | null> => {
+  return AsyncStorage.getItem(APPLE_HEALTH_LAST_SESSION_ID_KEY);
+};
+
+export const saveAppleHealthLastSessionId = async (
+  sessionId: string,
+): Promise<void> => {
+  await AsyncStorage.setItem(APPLE_HEALTH_LAST_SESSION_ID_KEY, sessionId);
 };

@@ -182,7 +182,8 @@ Sheet state/coordination goes through `useBreathingSheets`. Read
 ### 4e. Persistence
 
 `lib/storage.ts` is the only place AsyncStorage keys are defined. Keys: `breathing_exercises`,
-`current_exercise`, `background_image`, `animation_theme`. Do not add new keys without also
+`current_exercise`, `background_image`, `animation_theme`, `apple_health_sync_enabled`,
+`apple_health_connected`, `apple_health_last_session_id`. Do not add new keys without also
 adding get/set wrappers here. Do not change existing key strings (would break existing installs).
 
 ---

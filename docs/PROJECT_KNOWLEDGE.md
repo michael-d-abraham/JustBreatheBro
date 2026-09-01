@@ -70,6 +70,7 @@ Regression checklist §3b reflects this (updated 2026-06-10).
 | Wallpaper (zenscape filename) | Yes |
 | Animation theme | Yes |
 | Current exercise | Yes |
+| Apple Health connect + Save Mindful Minutes | Yes (`apple_health_connected`, `apple_health_sync_enabled`) |
 | Sound on/off, haptics, sound type, soundscape | **No** — in-memory in `appSettingsContext` until app restart |
 | Theme palette, appearance mode | **No** — in-memory in `Theme.tsx` |
 

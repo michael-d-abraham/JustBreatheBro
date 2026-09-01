@@ -30,12 +30,18 @@ import {
   Exercise,
   forceUpdateToDefaults,
   getAnimationTheme,
+  getAppleHealthConnected,
+  getAppleHealthLastSessionId,
+  getAppleHealthSyncEnabled,
   getBackgroundImage,
   getCurrentExercise,
   getExercises,
   initializeStorage,
   resetStorage,
   saveAnimationTheme,
+  saveAppleHealthConnected,
+  saveAppleHealthLastSessionId,
+  saveAppleHealthSyncEnabled,
   saveBackgroundImage,
   saveCurrentExercise,
   saveExercises,
@@ -217,6 +223,61 @@ describe("lib/storage", () => {
       await saveAnimationTheme("aurora");
       await saveAnimationTheme("ember");
       expect(await getAnimationTheme()).toBe("ember");
+    });
+  });
+
+  // ── Apple Health ───────────────────────────────────────────────────────────
+
+  describe("getAppleHealthSyncEnabled", () => {
+    it("returns false when the key has never been written", async () => {
+      expect(await getAppleHealthSyncEnabled()).toBe(false);
+    });
+
+    it("returns the stored boolean after saveAppleHealthSyncEnabled", async () => {
+      await saveAppleHealthSyncEnabled(true);
+      expect(await getAppleHealthSyncEnabled()).toBe(true);
+    });
+  });
+
+  describe("saveAppleHealthSyncEnabled", () => {
+    it("persists false explicitly", async () => {
+      await saveAppleHealthSyncEnabled(true);
+      await saveAppleHealthSyncEnabled(false);
+      expect(await getAppleHealthSyncEnabled()).toBe(false);
+    });
+
+    it("does not affect the connected key", async () => {
+      await saveAppleHealthConnected(true);
+      await saveAppleHealthSyncEnabled(false);
+      expect(await getAppleHealthConnected()).toBe(true);
+    });
+  });
+
+  describe("getAppleHealthConnected", () => {
+    it("returns false when the key has never been written", async () => {
+      expect(await getAppleHealthConnected()).toBe(false);
+    });
+
+    it("returns the stored boolean after saveAppleHealthConnected", async () => {
+      await saveAppleHealthConnected(true);
+      expect(await getAppleHealthConnected()).toBe(true);
+    });
+  });
+
+  describe("apple health last session id", () => {
+    it("returns null when the key has never been written", async () => {
+      expect(await getAppleHealthLastSessionId()).toBeNull();
+    });
+
+    it("round-trips a session id", async () => {
+      await saveAppleHealthLastSessionId("session-abc");
+      expect(await getAppleHealthLastSessionId()).toBe("session-abc");
+    });
+
+    it("overwrites a previously stored session id", async () => {
+      await saveAppleHealthLastSessionId("session-1");
+      await saveAppleHealthLastSessionId("session-2");
+      expect(await getAppleHealthLastSessionId()).toBe("session-2");
     });
   });
 
