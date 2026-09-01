@@ -54,7 +54,7 @@ export default function BreathingPageHeader({
       </Pressable>
 
       <Pressable
-        accessibilityLabel="Support"
+        accessibilityLabel="Settings"
         onPress={onSupportPress}
         style={{
           position: "absolute",

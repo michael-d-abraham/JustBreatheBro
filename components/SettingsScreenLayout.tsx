@@ -1,6 +1,6 @@
 import {
-  SettingsGroupedSection,
   SettingsInsetGroupedLayout,
+  SettingsSection,
 } from "@/components/SettingsInsetGrouped";
 import React from "react";
 import { View, type StyleProp, type ViewStyle } from "react-native";
@@ -27,7 +27,7 @@ export default function SettingsScreenLayout({
   onClose,
   children,
   closeTestID = "settings.close-button",
-  closeAccessibilityLabel = "Done",
+  closeAccessibilityLabel = "Close",
   contentContainerStyle,
 }: LayoutProps) {
   return (
@@ -50,6 +50,8 @@ type SectionProps = {
   contentStyle?: StyleProp<ViewStyle>;
   /** Use for carousels that extend past card bounds */
   overflowVisible?: boolean;
+  /** Section header only — no grouped white card */
+  bare?: boolean;
 };
 
 /** Uppercase section label + grouped card — use inside SettingsScreenLayout. */
@@ -58,17 +60,21 @@ export function SettingsScreenSection({
   children,
   contentStyle,
   overflowVisible = false,
+  bare = false,
 }: SectionProps) {
   return (
-    <SettingsGroupedSection
+    <SettingsSection
       title={title}
       contentStyle={contentStyle}
       overflowVisible={overflowVisible}
+      bare={bare}
     >
       {children}
-    </SettingsGroupedSection>
+    </SettingsSection>
   );
 }
+
+export { SettingsSection, SettingsRow } from "@/components/SettingsInsetGrouped";
 
 /** Spacer between grouped sections (legacy export — grouped spacing is built in). */
 export function SettingsScreenDivider() {

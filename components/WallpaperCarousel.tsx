@@ -1,39 +1,32 @@
-import WallpaperPreview from "@/components/WallpaperPreview";
+import SceneCard from "@/components/SceneCard";
+import { SettingsOptionCardRow } from "@/components/SettingsOptionCard";
 import { WALLPAPER_IMAGES } from "@/constants/wallpapers";
 import React from "react";
-import { ScrollView, StyleSheet } from "react-native";
 
 type Props = {
   selectedFilename: string | null;
   onSelect: (filename: string) => void;
 };
 
-const styles = StyleSheet.create({
-  scenesGallery: {
-    flexDirection: "row",
-    gap: 16,
-    marginTop: 12,
-  },
-});
-
+/**
+ * Horizontal scene picker — individual SceneCards, no grouped white container.
+ */
 export default function WallpaperCarousel({
   selectedFilename,
   onSelect,
 }: Props) {
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.scenesGallery}
-    >
+    <SettingsOptionCardRow>
       {WALLPAPER_IMAGES.map((wallpaper) => (
-        <WallpaperPreview
+        <SceneCard
           key={wallpaper.filename}
-          wallpaper={wallpaper}
-          isSelected={selectedFilename === wallpaper.filename}
+          name={wallpaper.name}
+          imageSource={wallpaper.source}
+          selected={selectedFilename === wallpaper.filename}
           onPress={() => onSelect(wallpaper.filename)}
+          testID={`scenes.scene-${wallpaper.filename}`}
         />
       ))}
-    </ScrollView>
+    </SettingsOptionCardRow>
   );
 }

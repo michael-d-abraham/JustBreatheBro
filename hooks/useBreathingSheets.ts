@@ -1,5 +1,6 @@
 import { ExerciseDetailSheetHandle } from "@/components/ExerciseDetailSheet";
 import { ExerciseSelectionSheetHandle } from "@/components/ExerciseSelectionSheet";
+import { ScenesSheetHandle } from "@/components/ScenesSheet";
 import { SupportSheetHandle } from "@/components/SupportSheet";
 import { useBreathing } from "@/contexts/breathingContext";
 import { Exercise, getExercises } from "@/lib/storage";
@@ -9,6 +10,7 @@ export function useBreathingSheets() {
   const { currentExercise, updateExercise } = useBreathing();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isSupportSheetOpen, setIsSupportSheetOpen] = useState(false);
+  const [isScenesSheetOpen, setIsScenesSheetOpen] = useState(false);
   const [isSelectionSheetOpen, setIsSelectionSheetOpen] = useState(false);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [selectedExerciseForInfo, setSelectedExerciseForInfo] =
@@ -16,6 +18,7 @@ export function useBreathingSheets() {
 
   const sheetRef = useRef<ExerciseDetailSheetHandle>(null);
   const supportSheetRef = useRef<SupportSheetHandle>(null);
+  const scenesSheetRef = useRef<ScenesSheetHandle>(null);
   const selectionSheetRef = useRef<ExerciseSelectionSheetHandle>(null);
 
   // Load exercises from storage
@@ -81,6 +84,23 @@ export function useBreathingSheets() {
     supportSheetRef.current?.close();
   }, []);
 
+  const handleScenesPress = useCallback(() => {
+    setIsScenesSheetOpen(true);
+    scenesSheetRef.current?.open();
+  }, []);
+
+  const handleScenesSheetChange = useCallback((index: number) => {
+    setIsScenesSheetOpen(index >= 0);
+  }, []);
+
+  const handleScenesSheetDismiss = useCallback(() => {
+    setIsScenesSheetOpen(false);
+  }, []);
+
+  const closeScenesSheet = useCallback(() => {
+    scenesSheetRef.current?.close();
+  }, []);
+
   const handleSelectionSheetChange = useCallback((index: number) => {
     setIsSelectionSheetOpen(index >= 0);
   }, []);
@@ -96,13 +116,16 @@ export function useBreathingSheets() {
   const closeAllSheets = useCallback(() => {
     if (isSheetOpen) closeSheet();
     if (isSupportSheetOpen) closeSupportSheet();
+    if (isScenesSheetOpen) closeScenesSheet();
     if (isSelectionSheetOpen) closeSelectionSheet();
   }, [
     isSheetOpen,
     isSupportSheetOpen,
+    isScenesSheetOpen,
     isSelectionSheetOpen,
     closeSheet,
     closeSupportSheet,
+    closeScenesSheet,
     closeSelectionSheet,
   ]);
 
@@ -110,6 +133,7 @@ export function useBreathingSheets() {
     // State
     isSheetOpen,
     isSupportSheetOpen,
+    isScenesSheetOpen,
     isSelectionSheetOpen,
     exercises,
     currentExercise,
@@ -118,6 +142,7 @@ export function useBreathingSheets() {
     // Refs
     sheetRef,
     supportSheetRef,
+    scenesSheetRef,
     selectionSheetRef,
 
     // Handlers
@@ -129,10 +154,14 @@ export function useBreathingSheets() {
     handleSupportPress,
     handleSupportSheetChange,
     handleSupportSheetDismiss,
+    handleScenesPress,
+    handleScenesSheetChange,
+    handleScenesSheetDismiss,
     handleSelectionSheetChange,
     handleSelectionSheetDismiss,
     closeSheet,
     closeSupportSheet,
+    closeScenesSheet,
     closeSelectionSheet,
     closeAllSheets,
   };

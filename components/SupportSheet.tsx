@@ -3,14 +3,14 @@ import { AppearancePref, useTheme } from "@/components/Theme";
 import React, { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
 import { Linking } from "react-native";
 import BaseBottomSheet, { BaseBottomSheetHandle } from "./BaseBottomSheet";
+import { SettingsSheetScreen } from "./SettingsBottomSheet";
 import {
   SettingsGroupedCheckRow,
   SettingsGroupedFooter,
   SettingsGroupedLinkRow,
-  SettingsGroupedRow,
-  SettingsGroupedSection,
   SettingsGroupedToggleRow,
-  SettingsInsetGroupedLayout,
+  SettingsRow,
+  SettingsSection,
 } from "./SettingsInsetGrouped";
 
 export type SupportSheetHandle = BaseBottomSheetHandle;
@@ -48,71 +48,70 @@ type ScreenProps = {
   onDone: () => void;
 };
 
-function SupportMainScreen({ onNavigate, onDone }: ScreenProps) {
+function SettingsMainScreen({ onNavigate, onDone }: ScreenProps) {
   return (
-    <SettingsInsetGroupedLayout
-      title="Support"
-      onDone={onDone}
-      variant="bottomSheet"
-      doneTestID="support.done-button"
+    <SettingsSheetScreen
+      title="Settings"
+      onClose={onDone}
+      closeTestID="settings.close-button"
     >
-      <SettingsGroupedSection title="Session">
-        <SettingsGroupedRow
+      <SettingsSection title="Session">
+        <SettingsRow
           title="Sounds & Haptics"
           icon={{ name: "musical-notes-outline", backgroundColor: "#FF2D55" }}
           onPress={() => onNavigate("sounds-haptics")}
         />
-        <SettingsGroupedRow
+        <SettingsRow
           title="Reminders"
           icon={{ name: "notifications-outline", backgroundColor: "#FF9500" }}
           onPress={() => onNavigate("reminders")}
         />
-        <SettingsGroupedRow
+        <SettingsRow
           title="Apple Health"
           icon={{ name: "heart-outline", backgroundColor: "#FF3B30" }}
           onPress={() => onNavigate("apple-health")}
         />
-      </SettingsGroupedSection>
+      </SettingsSection>
 
-      <SettingsGroupedSection title="Look">
-        <SettingsGroupedRow
+      <SettingsSection title="Look">
+        <SettingsRow
           title="Appearance"
           icon={{ name: "contrast-outline", backgroundColor: "#5856D6" }}
           onPress={() => onNavigate("appearance")}
         />
-        <SettingsGroupedRow
+        <SettingsRow
           title="App Icon"
           icon={{ name: "apps-outline", backgroundColor: "#8E8E93" }}
           onPress={() => onNavigate("app-icon")}
         />
-      </SettingsGroupedSection>
+      </SettingsSection>
 
-      <SettingsGroupedSection title="Contact Us">
-        <SettingsGroupedRow
+      <SettingsSection title="Contact Us">
+        <SettingsRow
           title="Ideas & Suggestions"
           icon={{ name: "bulb-outline", backgroundColor: "#FF9500" }}
           onPress={() => onNavigate("ideas")}
         />
-      </SettingsGroupedSection>
+      </SettingsSection>
 
-      <SettingsGroupedSection title="Legal Notice">
-        <SettingsGroupedRow
+      <SettingsSection title="Legal Notice">
+        <SettingsRow
           title="Privacy Policy"
           icon={{ name: "shield-checkmark-outline", backgroundColor: "#8E8E93" }}
           onPress={() => onNavigate("privacy-policy")}
         />
-        <SettingsGroupedRow
+        <SettingsRow
           title="Terms of Service"
           icon={{ name: "document-text-outline", backgroundColor: "#8E8E93" }}
           onPress={() => onNavigate("terms")}
         />
-      </SettingsGroupedSection>
+      </SettingsSection>
 
       <SettingsGroupedFooter>
         Breathing is cool. All the cool kids do it.{"\n"}
         Version 2.0.8
       </SettingsGroupedFooter>
-    </SettingsInsetGroupedLayout>
+    </SettingsSheetScreen>
   );
 }
 
@@ -123,14 +122,13 @@ function SoundsHapticsScreen({
   const { settings, toggleSound, toggleHaptics } = useAppSettings();
 
   return (
-    <SettingsInsetGroupedLayout
+    <SettingsSheetScreen
       title="Sounds & Haptics"
-      onDone={onDone}
+      onClose={onDone}
       onBack={() => onNavigate("main")}
-      backLabel="Support"
-      variant="bottomSheet"
+      backLabel="Settings"
     >
-      <SettingsGroupedSection title="Session">
+      <SettingsSection title="Session">
         <SettingsGroupedToggleRow
           title="Sound"
           value={settings.soundEnabled}
@@ -141,8 +139,8 @@ function SoundsHapticsScreen({
           value={settings.hapticsEnabled}
           onValueChange={() => toggleHaptics()}
         />
-      </SettingsGroupedSection>
-    </SettingsInsetGroupedLayout>
+      </SettingsSection>
+    </SettingsSheetScreen>
   );
 }
 
@@ -151,14 +149,13 @@ function AppearanceScreen({ onNavigate, onDone }: ScreenProps) {
   const usesSystem = appearance === "system";
 
   return (
-    <SettingsInsetGroupedLayout
+    <SettingsSheetScreen
       title="Appearance"
-      onDone={onDone}
+      onClose={onDone}
       onBack={() => onNavigate("main")}
-      backLabel="Support"
-      variant="bottomSheet"
+      backLabel="Settings"
     >
-      <SettingsGroupedSection title="Appearance">
+      <SettingsSection title="Appearance">
         <SettingsGroupedToggleRow
           title="System"
           value={usesSystem}
@@ -175,13 +172,13 @@ function AppearanceScreen({ onNavigate, onDone }: ScreenProps) {
           value={APPEARANCE_LABELS[appearance]}
           onPress={() => onNavigate("appearance-theme")}
         />
-      </SettingsGroupedSection>
+      </SettingsSection>
 
       <SettingsGroupedFooter>
         Matching your system settings will automatically switch between light and
         dark mode.
       </SettingsGroupedFooter>
-    </SettingsInsetGroupedLayout>
+    </SettingsSheetScreen>
   );
 }
 
@@ -191,14 +188,13 @@ function AppearanceThemeScreen({ onNavigate, onDone }: ScreenProps) {
   const options: AppearancePref[] = ["light", "dark", "system"];
 
   return (
-    <SettingsInsetGroupedLayout
+    <SettingsSheetScreen
       title="Theme"
-      onDone={onDone}
+      onClose={onDone}
       onBack={() => onNavigate("appearance")}
       backLabel="Appearance"
-      variant="bottomSheet"
     >
-      <SettingsGroupedSection title="Appearance">
+      <SettingsSection title="Appearance">
         {options.map((option) => (
           <SettingsGroupedCheckRow
             key={option}
@@ -207,8 +203,8 @@ function AppearanceThemeScreen({ onNavigate, onDone }: ScreenProps) {
             onPress={() => setAppearance(option)}
           />
         ))}
-      </SettingsGroupedSection>
-    </SettingsInsetGroupedLayout>
+      </SettingsSection>
+    </SettingsSheetScreen>
   );
 }
 
@@ -218,62 +214,59 @@ function IdeasScreen({ onNavigate, onDone }: ScreenProps) {
   };
 
   return (
-    <SettingsInsetGroupedLayout
+    <SettingsSheetScreen
       title="Ideas & Suggestions"
-      onDone={onDone}
+      onClose={onDone}
       onBack={() => onNavigate("main")}
-      backLabel="Support"
-      variant="bottomSheet"
+      backLabel="Settings"
     >
-      <SettingsGroupedSection>
+      <SettingsSection>
         <SettingsGroupedLinkRow
           title="Send Feedback"
           onPress={openFeedback}
         />
-      </SettingsGroupedSection>
+      </SettingsSection>
 
       <SettingsGroupedFooter>
         Help us improve by sharing your thoughts.
       </SettingsGroupedFooter>
-    </SettingsInsetGroupedLayout>
+    </SettingsSheetScreen>
   );
 }
 
 function PrivacyPolicyScreen({ onNavigate, onDone }: ScreenProps) {
   return (
-    <SettingsInsetGroupedLayout
+    <SettingsSheetScreen
       title="Privacy Policy"
-      onDone={onDone}
+      onClose={onDone}
       onBack={() => onNavigate("main")}
-      backLabel="Support"
-      variant="bottomSheet"
+      backLabel="Settings"
     >
-      <SettingsGroupedSection>
+      <SettingsSection>
         <SettingsGroupedLinkRow
           title="View Privacy Policy"
           onPress={() => Linking.openURL(PRIVACY_URL)}
         />
-      </SettingsGroupedSection>
-    </SettingsInsetGroupedLayout>
+      </SettingsSection>
+    </SettingsSheetScreen>
   );
 }
 
 function TermsScreen({ onNavigate, onDone }: ScreenProps) {
   return (
-    <SettingsInsetGroupedLayout
+    <SettingsSheetScreen
       title="Terms of Service"
-      onDone={onDone}
+      onClose={onDone}
       onBack={() => onNavigate("main")}
-      backLabel="Support"
-      variant="bottomSheet"
+      backLabel="Settings"
     >
-      <SettingsGroupedSection>
+      <SettingsSection>
         <SettingsGroupedLinkRow
           title="View Terms of Service"
           onPress={() => Linking.openURL(TERMS_URL)}
         />
-      </SettingsGroupedSection>
-    </SettingsInsetGroupedLayout>
+      </SettingsSection>
+    </SettingsSheetScreen>
   );
 }
 
@@ -289,15 +282,14 @@ function ComingSoonScreen({
   backLabel: string;
 }) {
   return (
-    <SettingsInsetGroupedLayout
+    <SettingsSheetScreen
       title={title}
-      onDone={onDone}
+      onClose={onDone}
       onBack={() => onNavigate(backTarget)}
       backLabel={backLabel}
-      variant="bottomSheet"
     >
       <SettingsGroupedFooter>Coming soon.</SettingsGroupedFooter>
-    </SettingsInsetGroupedLayout>
+    </SettingsSheetScreen>
   );
 }
 
@@ -342,7 +334,7 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
               {...screenProps}
               title="Reminders"
               backTarget="main"
-              backLabel="Support"
+              backLabel="Settings"
             />
           );
         case "apple-health":
@@ -351,7 +343,7 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
               {...screenProps}
               title="Apple Health"
               backTarget="main"
-              backLabel="Support"
+              backLabel="Settings"
             />
           );
         case "appearance":
@@ -364,7 +356,7 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
               {...screenProps}
               title="App Icon"
               backTarget="main"
-              backLabel="Support"
+              backLabel="Settings"
             />
           );
         case "ideas":
@@ -375,7 +367,7 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
           return <TermsScreen {...screenProps} />;
         case "main":
         default:
-          return <SupportMainScreen {...screenProps} />;
+          return <SettingsMainScreen {...screenProps} />;
       }
     })();
 

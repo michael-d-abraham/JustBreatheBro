@@ -1,10 +1,10 @@
-import React from "react";
+import { settingsPickerSurfaceColor } from "@/components/settingsScreenTokens";
+import ThemeCard from "@/components/ThemeCard";
+import { SettingsOptionCardRow, usePickerCardWidth } from "@/components/SettingsOptionCard";
 import { useAppSettings } from "@/contexts/appSettingsContext";
-import BreathingThemeGraphic from "./BreathingThemeGraphic";
 import CircularOptionButton from "./CircularOptionButton";
-import ScenesHorizontalPicker from "./ScenesHorizontalPicker";
-import ScenesPreviewTile from "./ScenesPreviewTile";
-import { THEMES, ThemeName, useTheme } from "./Theme";
+import { THEMES, ThemeName, useTheme, palettes } from "./Theme";
+import React from "react";
 
 type ThemePickerTarget = "app" | "animation";
 type ThemePickerVariant = "page" | "bottomSheet";
@@ -13,6 +13,8 @@ interface ThemePickerProps {
   target?: ThemePickerTarget;
   variant?: ThemePickerVariant;
 }
+
+const THEME_ORDER: ThemeName[] = ["grounded", "calm", "uplifting"];
 
 export default function ThemePicker({
   target = "app",
@@ -25,10 +27,6 @@ export default function ThemePicker({
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Page variant: circular colored option buttons                             */
-/* -------------------------------------------------------------------------- */
-
 function CircleThemePicker({ target }: { target: ThemePickerTarget }) {
   const themeContext = useTheme();
   const appSettings = useAppSettings();
@@ -39,43 +37,55 @@ function CircleThemePicker({ target }: { target: ThemePickerTarget }) {
 
   return (
     <>
-      {Object.entries(THEMES).map(([key, t]) => (
-        <CircularOptionButton
-          key={key}
-          label={t.name}
-          color={t.preview}
-          isSelected={selectedTheme === key}
-          onPress={() => setTheme(key as ThemeName)}
-        />
-      ))}
+      {THEME_ORDER.map((key) => {
+        const t = THEMES[key];
+        return (
+          <CircularOptionButton
+            key={key}
+            label={t.name}
+            color={t.preview}
+            isSelected={selectedTheme === key}
+            onPress={() => setTheme(key)}
+          />
+        );
+      })}
     </>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Bottom sheet variant: horizontal scrolling preview tiles                  */
-/* -------------------------------------------------------------------------- */
-
 function TileThemePicker({ target }: { target: ThemePickerTarget }) {
   const themeContext = useTheme();
   const appSettings = useAppSettings();
+  const { mode, tokens } = themeContext;
+  const cardSurface = settingsPickerSurfaceColor(
+    mode,
+    tokens.systemSecondaryGroupedBg,
+  );
+  const cardWidth = usePickerCardWidth();
 
   const isApp = target === "app";
   const selectedTheme = isApp ? themeContext.themeName : appSettings.settings.animationTheme;
   const setTheme = isApp ? themeContext.setThemeName : appSettings.setAnimationTheme;
 
   return (
-    <ScenesHorizontalPicker>
-      {Object.entries(THEMES).map(([key, t]) => (
-        <ScenesPreviewTile
-          key={key}
-          label={t.name}
-          selected={selectedTheme === key}
-          onPress={() => setTheme(key as ThemeName)}
-        >
-          <BreathingThemeGraphic themeName={key as ThemeName} />
-        </ScenesPreviewTile>
-      ))}
-    </ScenesHorizontalPicker>
+    <SettingsOptionCardRow>
+      {THEME_ORDER.map((key) => {
+        const meta = THEMES[key];
+        const palette = palettes[key][mode];
+        return (
+          <ThemeCard
+            key={key}
+            title={meta.name}
+            themeName={key}
+            selected={selectedTheme === key}
+            onPress={() => setTheme(key)}
+            accentColor={palette.accentPrimary}
+            backgroundColor={cardSurface}
+            width={cardWidth}
+            testID={`scenes.theme-${key}`}
+          />
+        );
+      })}
+    </SettingsOptionCardRow>
   );
 }

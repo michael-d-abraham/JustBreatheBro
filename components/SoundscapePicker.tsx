@@ -1,19 +1,20 @@
-import React, { useMemo, useState } from "react";
-import { LayoutChangeEvent, useWindowDimensions, View } from "react-native";
-import Svg, { Path } from "react-native-svg";
-import { SOUNDSCAPE_COLORS } from "@/constants/featureColors";
+import { settingsPickerSurfaceColor } from "@/components/settingsScreenTokens";
+import SoundscapeCard from "@/components/SoundscapeCard";
+import { SettingsOptionCardRow, usePickerCardWidth } from "@/components/SettingsOptionCard";
+import { SOUNDSCAPE_COLORS, SOUNDSCAPE_PALETTES } from "@/constants/featureColors";
 import { SoundscapeType, useAppSettings } from "@/contexts/appSettingsContext";
 import CircularOptionButton from "./CircularOptionButton";
-import { SCENES_PICKER_TILE_SIZE } from "./ScenesHorizontalPicker";
-import ScenesPreviewTile from "./ScenesPreviewTile";
-import SoundscapePreviewGraphic from "./SoundscapePreviewGraphic";
 import { useTheme } from "./Theme";
+import React from "react";
+import Svg, { Path } from "react-native-svg";
 
 type SoundscapePickerVariant = "page" | "bottomSheet";
 
 interface SoundscapePickerProps {
   variant?: SoundscapePickerVariant;
 }
+
+const SHEET_SOUNDSCAPE_ORDER: SoundscapeType[] = ["off", "dream", "fuzzy", "keys"];
 
 export default function SoundscapePicker({
   variant = "page",
@@ -25,18 +26,6 @@ export default function SoundscapePicker({
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Page variant: colored circular option buttons                             */
-/* -------------------------------------------------------------------------- */
-
-type PageSoundscapeOption = {
-  label: string;
-  value: SoundscapeType;
-  color?: string;
-  iconComponent?: React.ReactNode;
-};
-
-// Off icon component (horizontal line)
 const OffIcon = () => {
   const { tokens } = useTheme();
   return (
@@ -49,6 +38,13 @@ const OffIcon = () => {
       />
     </Svg>
   );
+};
+
+type PageSoundscapeOption = {
+  label: string;
+  value: SoundscapeType;
+  color?: string;
+  iconComponent?: React.ReactNode;
 };
 
 const PAGE_SOUNDSCAPE_OPTIONS: PageSoundscapeOption[] = [
@@ -77,74 +73,43 @@ function PageSoundscapePicker() {
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Bottom sheet variant: responsive preview-graphic tiles                     */
-/* -------------------------------------------------------------------------- */
-
-type SheetSoundscapeOption = {
-  label: string;
-  value: SoundscapeType;
-};
-
-const SHEET_SOUNDSCAPE_OPTIONS: SheetSoundscapeOption[] = [
-  { label: "OFF", value: "off" },
-  { label: "Dream", value: "dream" },
-  { label: "Fuzzy", value: "fuzzy" },
-  { label: "Keys", value: "keys" },
-];
-
-const SOUNDSCAPE_ROW_GAP = 6;
-
-/** Graphic scales like the default 100px SVG inside an 110px tile. */
-const GRAPHIC_RATIO = 100 / 110;
+function soundscapeAccent(value: SoundscapeType): string {
+  if (value === "off") {
+    return "#8E8E93";
+  }
+  return SOUNDSCAPE_PALETTES[value].mainStroke;
+}
 
 function SheetSoundscapePicker() {
   const { settings, setSoundscape } = useAppSettings();
-  const { width: windowWidth } = useWindowDimensions();
-  const [rowWidth, setRowWidth] = useState(0);
-
-  const onRowLayout = (e: LayoutChangeEvent) => {
-    setRowWidth(e.nativeEvent.layout.width);
-  };
-
-  const { tileSize, svgSize } = useMemo(() => {
-    const widthBasis =
-      rowWidth > 0
-        ? rowWidth
-        : Math.max(0, windowWidth - 48);
-    const nextTile = Math.min(
-      SCENES_PICKER_TILE_SIZE,
-      (widthBasis - 3 * SOUNDSCAPE_ROW_GAP) / 4
-    );
-    return {
-      tileSize: nextTile,
-      svgSize: nextTile * GRAPHIC_RATIO,
-    };
-  }, [rowWidth, windowWidth]);
+  const { tokens, mode } = useTheme();
+  const cardSurface = settingsPickerSurfaceColor(
+    mode,
+    tokens.systemSecondaryGroupedBg,
+  );
+  const cardWidth = usePickerCardWidth();
 
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignSelf: "stretch",
-        flexGrow: 1,
-        minWidth: 0,
-        gap: SOUNDSCAPE_ROW_GAP,
-      }}
-      onLayout={onRowLayout}
-    >
-      {SHEET_SOUNDSCAPE_OPTIONS.map(({ label, value }) => (
-        <ScenesPreviewTile
-          key={value}
-          label={label}
-          selected={settings.soundscape === value}
-          onPress={() => setSoundscape(value)}
-          tileSize={tileSize}
-        >
-          <SoundscapePreviewGraphic soundscape={value} svgSize={svgSize} />
-        </ScenesPreviewTile>
-      ))}
-    </View>
+    <SettingsOptionCardRow>
+      {SHEET_SOUNDSCAPE_ORDER.map((value) => {
+        const label = value === "off" ? "OFF" : value.charAt(0).toUpperCase() + value.slice(1);
+        const accentHex =
+          value === "off" ? "#8E8E93" : soundscapeAccent(value);
+
+        return (
+          <SoundscapeCard
+            key={value}
+            title={label}
+            soundscape={value}
+            selected={settings.soundscape === value}
+            onPress={() => setSoundscape(value)}
+            accentColor={accentHex}
+            backgroundColor={cardSurface}
+            width={cardWidth}
+            testID={`scenes.soundscape-${value}`}
+          />
+        );
+      })}
+    </SettingsOptionCardRow>
   );
 }

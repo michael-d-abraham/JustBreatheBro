@@ -1,6 +1,7 @@
 import BreathingPageHeader from "@/components/BreathingPageHeader";
 import ExerciseDetailSheet from "@/components/ExerciseDetailSheet";
 import ExerciseSelectionSheet from "@/components/ExerciseSelectionSheet";
+import ScenesSheet from "@/components/ScenesSheet";
 import SupportSheet from "@/components/SupportSheet";
 import { useWallpaperForeground } from "@/components/Theme";
 import { useAppSettings } from "@/contexts/appSettingsContext";
@@ -226,7 +227,7 @@ export default function Index() {
         <SafeAreaView style={styles.container}>
           <View style={styles.headerContainer}>
             <BreathingPageHeader
-              onScenesPress={() => router.push("/scenes")}
+              onScenesPress={sheets.handleScenesPress}
               onSupportPress={sheets.handleSupportPress}
             />
           </View>
@@ -304,6 +305,7 @@ export default function Index() {
 
           {(sheets.isSheetOpen ||
             sheets.isSupportSheetOpen ||
+            sheets.isScenesSheetOpen ||
             sheets.isSelectionSheetOpen) && (
             <Pressable
               onPress={sheets.closeAllSheets}
@@ -326,6 +328,11 @@ export default function Index() {
             onSelectExercise={sheets.handleSelectExercise}
             onChange={sheets.handleSelectionSheetChange}
             onDismiss={sheets.handleSelectionSheetDismiss}
+          />
+          <ScenesSheet
+            ref={sheets.scenesSheetRef}
+            onChange={sheets.handleScenesSheetChange}
+            onDismiss={sheets.handleScenesSheetDismiss}
           />
           <SupportSheet
             ref={sheets.supportSheetRef}
