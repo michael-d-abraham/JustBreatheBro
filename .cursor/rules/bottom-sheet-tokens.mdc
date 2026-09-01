@@ -19,6 +19,10 @@ NEVER use in bottom sheets:
 - tokens.textOnAccent
 - tokens.borderSubtle
 
+Inset-grouped settings UI (`SettingsInsetGrouped.tsx`, Support sheet, Scenes) may also use:
+- tokens.systemGroupedBg
+- tokens.systemSecondaryGroupedBg
+
 These themed tokens are for the main app UI only.
 
 ## Bottom Sheet Components

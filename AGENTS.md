@@ -27,6 +27,23 @@ The app is distributed via Expo / EAS (OTA updates enabled). It targets iOS with
 
 ---
 
+## 1b. Git — home-base branch
+
+| | |
+|---|---|
+| **Home base (spoken)** | "make it urs" |
+| **Home base (git)** | `make_it_urs` |
+| **Role** | Canonical integration branch — treat like `main` / `master` |
+
+- Branch **from** `make_it_urs` for feature work; merge **back into** `make_it_urs`.
+- PRs, diffs, and "compare to base" default to `make_it_urs`, not `origin/main`.
+- `main` and `old-main-backup` are legacy — do not use as the default base unless explicitly asked.
+- Remote: `origin/make_it_urs`.
+
+See `.cursor/rules/home-base-branch.mdc` for full agent rules.
+
+---
+
 ## 2. Tech stack
 
 | Layer | Technology |
@@ -194,10 +211,9 @@ adding get/set wrappers here. Do not change existing key strings (would break ex
 ### Automated checks (run before every commit)
 
 ```bash
-npm run lint        # must exit 0
-npm test            # 76 tests in 6 suites — all must pass
-npx tsc --noEmit    # must exit 0
-git status          # verify no unintended staged files
+npm run check     # lint + 76 tests — must pass
+npx tsc --noEmit  # must exit 0
+git status        # verify no unintended staged files
 ```
 
 ### Manual smoke test (30 seconds, required before committing session/audio/navigation changes)
@@ -298,29 +314,23 @@ Lint (`expo lint`) enforces no unused imports; the linter is the source of truth
    `themeContext.tsx`. It exports `AppProvider` and `useAppSettings` (app settings + wallpaper),
    not visual tokens. Visual tokens are in `components/Theme.tsx` (`useTheme`). Do not confuse them.
 
-5. **`app/settings.tsx` — orphaned, review pending** — fully implemented full-screen settings
-   page, but no `router.push('/settings')` exists anywhere in the codebase. Before deleting,
-   compare its coverage against `SettingsSheet` to confirm nothing would be lost. Do not delete
-   until that comparison is done.
+5. **`app/settings.tsx` — deleted.** Settings live in `SettingsSheet` (in-session) and `app/scenes.tsx`
+   (full-screen). See `docs/ROUTE_AUDIT.md`.
 
-6. **`app/settings.tsx` — deleted.** The Color Theme picker (its only unique section) was moved to
-   `scenes.tsx`. All other sections were already covered by `SettingsSheet` and/or `scenes.tsx`.
-   See `docs/ROUTE_AUDIT.md` for the full coverage comparison.
-
-7. **`app/_deprecated/breathsetup.tsx`** — a fully working custom breathing pattern builder with
+6. **`app/_deprecated/breathsetup.tsx`** — a fully working custom breathing pattern builder with
    no entry point. If you add a "Create Custom" button to `ExerciseSelectionSheet`, wire to this.
    The `@/` alias imports are already correct.
 
-8. **`StyleSheet.create` inside components** — several components call `StyleSheet.create` inside
+7. **`StyleSheet.create` inside components** — several components call `StyleSheet.create` inside
    the render function (because they depend on theme tokens that change). This is intentional in
    those files. If you move styles outside render, pass tokens explicitly.
 
-9. **`expo-audio` (`useAudioPlayer`)** — two player instances per session (inhale + exhale). The
+8. **`expo-audio` (`useAudioPlayer`)** — two player instances per session (inhale + exhale). The
    `off` sound type still loads a placeholder source to keep hook call order stable. Do not
    conditionalize the number of `useAudioPlayer` calls.
 
-10. **React Compiler is active** — do not add redundant `useMemo`/`useCallback` wrappers without
-    a clear reason; the compiler may already optimize them and double-wrapping can cause issues.
+9. **React Compiler is active** — do not add redundant `useMemo`/`useCallback` wrappers without
+   a clear reason; the compiler may already optimize them and double-wrapping can cause issues.
 
 ---
 
@@ -363,12 +373,17 @@ Read these in order before starting a task that touches the listed area:
 | **This file (`AGENTS.md`)** | Always — read first |
 | **`.cursorrules`** | Always — agent guardrails and invariants |
 | **`docs/ARCHITECTURE.md`** | Touching any core system; note: some paths/names are pre-cleanup |
+| **`docs/PROJECT_KNOWLEDGE.md`** | Living facts from sessions — read for quirks, persistence, audio behavior, Maestro status |
+| **`docs/DEV_SESSION.md`** | Starting/ending a dev session; manual test tiers A/B/C; terminal commands |
+| **`docs/MAESTRO.md`** | Maestro E2E install, sim prereqs, `npm run e2e:ios` smoke flows |
+| **`docs/SESSION_LOG.md`** | Dated session entries (updated on "Mr cursor end session") |
 | **`docs/REGRESSION_CHECKLIST.md`** | Before any commit on session, audio, haptics, animation, navigation, settings |
 | **`docs/ROUTE_AUDIT.md`** | Before adding, moving, or deleting any route |
 | **`docs/GLOBAL_ROOM_HOOK_REVIEW.md`** | Before touching `useGlobalBreathingRoom` or `global_room.tsx` |
 | **`docs/BASELINE_STATUS.md`** | Understanding known pre-existing issues (TypeScript errors, broken script) |
 | **`docs/NAVIGATION_DECISION.md`** | Historical context on why `_tabs/` was deleted |
 | **`.cursor/rules/bottom-sheet-tokens.mdc`** | Before touching any bottom sheet component or styling |
+| **`.cursor/rules/settings-screen-template.mdc`** | Before adding a full-screen settings-style route (Scenes pattern) |
 
 ### Key source files to read before touching their area
 

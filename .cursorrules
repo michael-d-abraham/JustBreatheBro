@@ -1,8 +1,13 @@
 # Breath — Cursor Project Rules
 
-**Read `AGENTS.md` first.** It has the full project map, folder structure, naming conventions,
-import conventions, risky areas, refactor protocol, and links to every relevant doc.
+**Read `AGENTS.md` first.** Session learnings and quirks: `docs/PROJECT_KNOWLEDGE.md`.
 This file contains only the guardrails that must be in front of you at all times.
+
+**Dev session triggers:** `"Mr cursor start up a session"` / `"Mr cursor end session"` — see
+`.cursor/rules/dev-session.mdc` and `docs/DEV_SESSION.md`.
+
+**Home-base branch:** `make_it_urs` ("make it urs") — treat as master for diffs, PRs, and new
+branches. See `.cursor/rules/home-base-branch.mdc`.
 
 ---
 
@@ -29,6 +34,7 @@ This file contains only the guardrails that must be in front of you at all times
 | Haptics | `hooks/useBreathingHaptics.ts` |
 | Ambient soundscape | `hooks/useBackgroundSoundscape.ts` |
 | Bottom sheet base | `components/BaseBottomSheet.tsx` |
+| Full-screen settings layout | `components/SettingsScreenLayout.tsx` + `components/SettingsInsetGrouped.tsx` (rule: `.cursor/rules/settings-screen-template.mdc`) |
 | Sheet coordination | `hooks/useBreathingSheets.ts` |
 | Storage keys | `lib/storage.ts` |
 | Wallpaper images | `constants/wallpapers.ts` |
@@ -52,9 +58,8 @@ stuck states.
 ## Before committing
 
 ```bash
-npm run lint   # must exit 0
-npm test       # 21 tests — all must pass
+npm run check   # lint + all tests — must exit 0
 ```
 
 If you touched session logic, audio, haptics, animation, navigation, or settings — also run
-the manual checklist in `docs/REGRESSION_CHECKLIST.md`.
+the manual checklist in `docs/REGRESSION_CHECKLIST.md` (Tier A minimum; see `docs/DEV_SESSION.md`).

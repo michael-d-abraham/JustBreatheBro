@@ -68,6 +68,8 @@ export default function BreathingSessionLayout({
           
           {/* Main Content Area - Tap to toggle UI */}
           <Pressable 
+            testID="breathing.screen-tap"
+            accessibilityLabel="Toggle controls"
             style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
             onPress={onScreenTap}
           >
@@ -98,7 +100,11 @@ export default function BreathingSessionLayout({
             uiAnimatedStyle
           ]}>
             {/* Back Arrow */}
-            <Pressable onPress={onStopAndExit}>
+            <Pressable
+              testID="breathing.back-button"
+              accessibilityLabel="Exit session"
+              onPress={onStopAndExit}
+            >
               <Text style={{ color: wallpaperFg, fontSize: 28 }}>←</Text>
             </Pressable>
             

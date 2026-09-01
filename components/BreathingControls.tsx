@@ -59,6 +59,8 @@ export default function BreathingControls({
       
       {/* Play/Pause Button - Middle */}
       <Pressable
+        testID="breathing.pause-button"
+        accessibilityLabel={isRunning ? "Pause" : "Resume"}
         onPress={onPlayPause}
         style={{
           width: 70,
@@ -84,6 +86,8 @@ export default function BreathingControls({
       
       {/* Stop Button - Right */}
       <Pressable
+        testID="breathing.stop-button"
+        accessibilityLabel="Stop"
         onPress={onStopPress}
         style={{
           width: 70,

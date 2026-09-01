@@ -1,176 +1,42 @@
-import AppearancePicker from "@/components/AppearancePicker";
-import SoundHapticsPicker from "@/components/SoundHapticsPicker";
+import SettingsScreenLayout, {
+  SettingsScreenSection,
+} from "@/components/SettingsScreenLayout";
 import SoundscapePicker from "@/components/SoundscapePicker";
 import ThemePicker from "@/components/ThemePicker";
-import { useTheme } from "@/components/Theme";
 import WallpaperCarousel from "@/components/WallpaperCarousel";
 import { useAppSettings } from "@/contexts/appSettingsContext";
-import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useMemo } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
-/** Slight see-through over root wallpaper (aligned with BaseBottomSheet). */
-const SCENES_BACKGROUND_ALPHA = 0.96;
-
-function hexWithAlpha(hex: string, alpha: number): string {
-  const clean = hex.replace("#", "");
-  if (clean.length !== 6) return hex;
-  const a = Math.min(255, Math.max(0, Math.round(alpha * 255)))
-    .toString(16)
-    .padStart(2, "0");
-  return `#${clean}${a}`;
-}
+import React from "react";
 
 export default function ScenesScreen() {
-  const { tokens } = useTheme();
   const { backgroundImage, setBackgroundImage } = useAppSettings();
   const router = useRouter();
-
-  const containerBackgroundColor = useMemo(() => {
-    const bg = tokens.bottomSheetBg;
-    if (typeof bg === "string" && /^#[0-9A-Fa-f]{6}$/.test(bg)) {
-      return hexWithAlpha(bg, SCENES_BACKGROUND_ALPHA);
-    }
-    return bg;
-  }, [tokens.bottomSheetBg]);
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: containerBackgroundColor,
-    },
-    header: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: 20,
-      paddingVertical: 16,
-    },
-    closeButton: {
-      width: 40,
-      height: 40,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    headerTitle: {
-      color: tokens.bottomSheetText,
-      fontSize: 24,
-      fontWeight: "700",
-      position: "absolute",
-      left: 0,
-      right: 0,
-      textAlign: "center",
-      zIndex: -1,
-    },
-    scrollContent: {
-      paddingHorizontal: 20,
-      paddingBottom: 40,
-    },
-    sectionTitle: {
-      color: tokens.bottomSheetText,
-      fontSize: 13,
-      fontWeight: "600",
-      letterSpacing: 0.5,
-      textTransform: "uppercase",
-      opacity: 0.6,
-      marginTop: 24,
-      marginBottom: 12,
-    },
-    divider: {
-      height: 1,
-      backgroundColor: tokens.bottomSheetSeparator,
-      marginVertical: 20,
-    },
-    appearanceSection: {
-      marginTop: 12,
-      alignSelf: "stretch",
-    },
-    appearanceSectionSpaced: {
-      flexDirection: "row",
-      justifyContent: "space-evenly",
-      marginTop: 12,
-      paddingHorizontal: 32,
-    },
-  });
 
   const handleScenePress = async (filename: string) => {
     await setBackgroundImage(filename);
   };
 
-  const handleClosePress = () => {
-    router.push("/");
-  };
-
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={handleClosePress} style={styles.closeButton}>
-          <Ionicons name="close" size={28} color={tokens.bottomSheetText} />
-        </Pressable>
-        <Text style={styles.headerTitle}>Scenes</Text>
-        <View style={{ width: 40 }} />
-      </View>
+    <SettingsScreenLayout
+      title="Scenes"
+      onClose={() => router.push("/")}
+      closeTestID="scenes.close-button"
+      closeAccessibilityLabel="Done"
+    >
+      <SettingsScreenSection title="Soundscape">
+        <SoundscapePicker variant="bottomSheet" />
+      </SettingsScreenSection>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* Soundscape Section */}
-        <Text style={styles.sectionTitle}>SOUNDSCAPE</Text>
-        <View style={styles.appearanceSection}>
-          <SoundscapePicker variant="bottomSheet" />
-        </View>
-
-        <View style={styles.divider} />
-
-        {/* Scenes Gallery */}
-        <Text style={styles.sectionTitle}>SCENES</Text>
+      <SettingsScreenSection title="Scenes" overflowVisible>
         <WallpaperCarousel
           selectedFilename={backgroundImage}
           onSelect={handleScenePress}
         />
+      </SettingsScreenSection>
 
-        <View style={styles.divider} />
-
-        {/* Animation Theme Section */}
-        <Text style={styles.sectionTitle}>ANIMATION THEME</Text>
-        <View style={styles.appearanceSection}>
-          <ThemePicker target="animation" variant="bottomSheet" />
-        </View>
-
-        <View style={styles.divider} />
-
-        {/* Color Theme Section */}
-        <Text style={styles.sectionTitle}>COLOR THEME</Text>
-        <View style={styles.appearanceSection}>
-          <ThemePicker variant="bottomSheet" />
-        </View>
-
-        <View style={styles.divider} />
-
-        {/* Appearance Mode Section */}
-        <Text style={styles.sectionTitle}>APPEARANCE MODE</Text>
-        <View style={styles.appearanceSectionSpaced}>
-          <AppearancePicker variant="bottomSheet" />
-        </View>
-
-        <View style={styles.divider} />
-
-        {/* Sound & Haptics Section */}
-        <Text style={styles.sectionTitle}>SOUND & HAPTICS</Text>
-        <View style={{ marginTop: 4, alignSelf: "stretch" }}>
-          <SoundHapticsPicker variant="bottomSheet" />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      <SettingsScreenSection title="Theme">
+        <ThemePicker variant="bottomSheet" />
+      </SettingsScreenSection>
+    </SettingsScreenLayout>
   );
 }

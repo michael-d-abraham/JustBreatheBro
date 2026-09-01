@@ -9,7 +9,12 @@
     "ios:build": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "jest"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "check": "npm run lint && npm test",
+    "session:ios": "expo start --dev-client",
+    "e2e:ios": "maestro test .maestro/flows",
+    "e2e:ios:breathing": "maestro test .maestro/flows/smoke-breathing.yaml"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -24,6 +29,7 @@
     "expo-audio": "~1.1.1",
     "expo-blur": "~15.0.8",
     "expo-constants": "~18.0.10",
+    "expo-dev-client": "~6.0.20",
     "expo-device": "^8.0.10",
     "expo-font": "~14.0.9",
     "expo-haptics": "~15.0.8",

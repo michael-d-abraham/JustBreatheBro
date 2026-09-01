@@ -1,0 +1,11 @@
+# Smoke: home → Scenes → close → home
+appId: com.michaelabraham.breathbro
+---
+- launchApp
+- assertVisible: "Relax"
+- tapOn:
+    id: "home.scenes-button"
+- assertVisible: "Scenes"
+- tapOn:
+    id: "scenes.close-button"
+- assertVisible: "Relax"

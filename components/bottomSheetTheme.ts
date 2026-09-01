@@ -9,6 +9,10 @@
  * `tokens.accentMuted`, `tokens.textOnAccent`, or `tokens.borderSubtle`
  * inside bottom sheet components. Use only these four tokens.
  *
+ * Inset-grouped settings UI (`SettingsInsetGrouped.tsx`) may also use:
+ * - `tokens.systemGroupedBg` — page/sheet grouped background
+ * - `tokens.systemSecondaryGroupedBg` — white grouped card surfaces
+ *
  * @see BaseBottomSheet.tsx for usage contract
  */
 export type BottomSheetTokens = {

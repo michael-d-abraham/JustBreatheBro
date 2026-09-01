@@ -1,11 +1,18 @@
 import { SoundscapeType } from "@/contexts/appSettingsContext";
 import { useAudioPlayer } from "expo-audio";
 import { useEffect, useRef } from "react";
+import { AppState, AppStateStatus } from "react-native";
 
 const SOUNDSCAPE_FILES: Record<Exclude<SoundscapeType, 'off'>, any> = {
   dream: require('../assets/SoundScapes/DreamScape.m4a'),
   fuzzy: require('../assets/SoundScapes/Fuzzy.m4a'),
   keys: require('../assets/SoundScapes/Keys.mp3'),
+};
+
+const SOUNDSCAPE_DISPLAY_NAMES: Record<Exclude<SoundscapeType, 'off'>, string> = {
+  dream: 'Dreamscape',
+  fuzzy: 'Fuzzy Rain',
+  keys: 'Keys',
 };
 
 interface UseBackgroundSoundscapeProps {
@@ -29,6 +36,8 @@ export function useBackgroundSoundscape({ soundscape, soundEnabled }: UseBackgro
   
   const player = useAudioPlayer(audioSource, { keepAudioSessionActive: true });
   const previousSoundscapeRef = useRef<SoundscapeType | null>(null);
+  // True when WE paused playback due to an AppState transition; cleared on foreground.
+  const pausedByBackgroundRef = useRef(false);
 
   // Prefer native looping (more reliable than polling timers).
   useEffect(() => {
@@ -40,6 +49,53 @@ export function useBackgroundSoundscape({ soundscape, soundEnabled }: UseBackgro
     }
   }, [player]);
 
+  // Pause on background / inactive; resume on foreground.
+  // Lock-screen controls are kept active while paused so the user can resume
+  // from the iOS lock screen or Control Center.
+  useEffect(() => {
+    if (!player) return;
+
+    const handleAppStateChange = (nextState: AppStateStatus) => {
+      if (nextState === 'background' || nextState === 'inactive') {
+        try {
+          if (player.playing) {
+            player.pause();
+            pausedByBackgroundRef.current = true;
+          }
+          // Do NOT call setActiveForLockScreen(false) here — keep controls
+          // visible so the user can resume from the lock screen.
+        } catch {
+          // Ignore
+        }
+      } else if (nextState === 'active') {
+        try {
+          if (pausedByBackgroundRef.current && !player.playing && audioActive) {
+            // Resume from current position (no seekTo — preserve loop position).
+            player.play();
+            // soundscape is narrowed to Exclude<SoundscapeType, 'off'> here
+            // because audioActive = soundEnabled && soundscape !== 'off'.
+            try {
+              (player as any).setActiveForLockScreen(true, {
+                title: 'JustBreatheBro',
+                artist: SOUNDSCAPE_DISPLAY_NAMES[soundscape],
+              });
+            } catch {
+              // Ignore if setActiveForLockScreen is not available
+            }
+          }
+        } catch {
+          // Ignore
+        }
+        pausedByBackgroundRef.current = false;
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => {
+      subscription.remove();
+    };
+  }, [player, audioActive, soundscape]);
+
   // Handle soundscape changes - stop current playback when switching
   useEffect(() => {
     if (previousSoundscapeRef.current !== null && previousSoundscapeRef.current !== soundscape) {
@@ -47,6 +103,11 @@ export function useBackgroundSoundscape({ soundscape, soundEnabled }: UseBackgro
         try {
           if (player.playing) {
             player.pause();
+          }
+          try {
+            (player as any).setActiveForLockScreen(false);
+          } catch {
+            // Ignore
           }
         } catch (error) {
           // Ignore errors
@@ -67,6 +128,11 @@ export function useBackgroundSoundscape({ soundscape, soundEnabled }: UseBackgro
       if (typeof player.seekTo === 'function') {
         player.seekTo(0);
       }
+      try {
+        (player as any).setActiveForLockScreen(false);
+      } catch {
+        // Ignore
+      }
     } catch {
       // Ignore
     }
@@ -79,11 +145,25 @@ export function useBackgroundSoundscape({ soundscape, soundEnabled }: UseBackgro
     let cancelled = false;
     let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
+    // soundscape is narrowed to Exclude<SoundscapeType, 'off'> here because
+    // audioActive = soundEnabled && soundscape !== 'off', and !audioActive returns above.
+    const activateLockScreen = () => {
+      try {
+        (player as any).setActiveForLockScreen(true, {
+          title: 'JustBreatheBro',
+          artist: SOUNDSCAPE_DISPLAY_NAMES[soundscape],
+        });
+      } catch {
+        // Ignore if setActiveForLockScreen is not available
+      }
+    };
+
     const startPlayback = () => {
       if (cancelled) return;
       try {
         player.seekTo(0);
         player.play();
+        activateLockScreen();
       } catch (error) {
         console.error('Failed to start soundscape:', error);
         retryTimer = setTimeout(() => {
@@ -91,6 +171,7 @@ export function useBackgroundSoundscape({ soundscape, soundEnabled }: UseBackgro
           try {
             player.seekTo(0);
             player.play();
+            activateLockScreen();
           } catch (retryError) {
             console.error('Failed to start soundscape on retry:', retryError);
           }
@@ -111,13 +192,17 @@ export function useBackgroundSoundscape({ soundscape, soundEnabled }: UseBackgro
           if (player.playing) {
             player.pause();
           }
+          try {
+            (player as any).setActiveForLockScreen(false);
+          } catch {
+            // Ignore
+          }
         } catch (error) {
           // Ignore cleanup errors
         }
       }
     };
-  }, [player, audioActive]);
+  }, [player, audioActive, soundscape]);
 
   return { player };
 }
-

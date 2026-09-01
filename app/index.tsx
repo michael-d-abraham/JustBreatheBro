@@ -3,31 +3,85 @@ import ExerciseDetailSheet from "@/components/ExerciseDetailSheet";
 import ExerciseSelectionSheet from "@/components/ExerciseSelectionSheet";
 import SupportSheet from "@/components/SupportSheet";
 import { useWallpaperForeground } from "@/components/Theme";
-import { useBreathing } from "@/contexts/breathingContext";
 import { useAppSettings } from "@/contexts/appSettingsContext";
+import { useBreathing } from "@/contexts/breathingContext";
 import { useBreathingSheets } from "@/hooks/useBreathingSheets";
 import { defaultExercises } from "@/lib/storage";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
-import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Dimensions,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+const PAGES = [
+  {
+    id: "oneBreath",
+    subtitle: "One Breath",
+    description: "Breathe together in a live room",
+  },
+  {
+    id: "relax",
+    subtitle: "Relax",
+    description: "Quiet your mind and relieve stress",
+  },
+  {
+    id: "benefits",
+    subtitle: "Benefits",
+    description: "Articles, books, and videos to go deeper",
+  },
+] as const;
+
+type PageId = (typeof PAGES)[number]["id"];
 
 export default function Index() {
   const wallpaperFg = useWallpaperForeground();
   const router = useRouter();
   const { currentExercise, updateExercise } = useBreathing();
   const sheets = useBreathingSheets();
+  const { backgroundImage } = useAppSettings();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [currentPageIndex, setCurrentPageIndex] = useState(1); // Start at Relax
 
-  // Get current exercise or default to Deep Breathing
+  useEffect(() => {
+    const id = setTimeout(() => {
+      scrollViewRef.current?.scrollTo({
+        x: 1 * SCREEN_WIDTH,
+        animated: false,
+      });
+    }, 100);
+    return () => clearTimeout(id);
+  }, []);
+
   const displayExercise =
     currentExercise ||
     defaultExercises.find((ex) => ex.id === "1") ||
     defaultExercises[0];
 
+  const currentPageId: PageId = PAGES[currentPageIndex]?.id ?? "relax";
+  const isRelaxPage = currentPageId === "relax";
+
   const handleStartPress = async () => {
+    if (currentPageId === "oneBreath") {
+      router.push("/global_room_picker");
+      return;
+    }
+    if (currentPageId === "benefits") {
+      router.push("/informationarchive");
+      return;
+    }
     await updateExercise(displayExercise);
     router.push({
       pathname: "/breathing",
@@ -35,16 +89,33 @@ export default function Index() {
     });
   };
 
-  const handleCirclePress = () => {
-    // Navigate to scenes screen
-    router.push("/scenes");
+  const scrollToPage = (index: number) => {
+    scrollViewRef.current?.scrollTo({
+      x: index * SCREEN_WIDTH,
+      animated: false,
+    });
+    setCurrentPageIndex(index);
   };
 
-  const handleInfoLibraryPress = () => {
-    router.push("/informationarchive");
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const pageIndex = Math.round(offsetX / SCREEN_WIDTH);
+    if (pageIndex !== currentPageIndex) {
+      setCurrentPageIndex(pageIndex);
+    }
   };
 
-  const { backgroundImage } = useAppSettings();
+  const handleLeftArrow = () => {
+    if (currentPageIndex > 0) {
+      scrollToPage(currentPageIndex - 1);
+    }
+  };
+
+  const handleRightArrow = () => {
+    if (currentPageIndex < PAGES.length - 1) {
+      scrollToPage(currentPageIndex + 1);
+    }
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -58,12 +129,16 @@ export default function Index() {
       right: 0,
       zIndex: 10,
     },
-    contentArea: {
+    scrollableContent: {
       flex: 1,
-      marginTop: 60, // Space for fixed header
-      marginBottom: 180, // Space for fixed footer
+      marginTop: 60,
+      marginBottom: 180,
+    },
+    scrollView: {
+      flex: 1,
     },
     pageContainer: {
+      width: SCREEN_WIDTH,
       flex: 1,
       paddingHorizontal: 24,
       alignItems: "center",
@@ -107,8 +182,22 @@ export default function Index() {
       fontSize: 28,
       fontWeight: "700",
     },
+    arrowButton: {
+      position: "absolute",
+      width: 48,
+      height: 48,
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 5,
+    },
+    arrowIcon: {
+      color: wallpaperFg,
+      fontSize: 32,
+      opacity: 0.7,
+    },
     techniqueContainer: {
       alignItems: "center",
+      minHeight: 56,
     },
     techniqueLabel: {
       color: wallpaperFg,
@@ -135,52 +224,84 @@ export default function Index() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
         <SafeAreaView style={styles.container}>
-          {/* Fixed Header */}
           <View style={styles.headerContainer}>
             <BreathingPageHeader
-              supportSheetRef={sheets.supportSheetRef}
+              onScenesPress={() => router.push("/scenes")}
               onSupportPress={sheets.handleSupportPress}
-              onCirclePress={handleCirclePress}
-              onInfoLibraryPress={handleInfoLibraryPress}
-              globalBreathLabel="One Breath"
-              onGlobalBreathPress={() => router.push("/global_room_picker")}
             />
           </View>
 
-          {/* Fixed middle content: Relax only */}
-          <View style={styles.contentArea}>
-            <View style={styles.pageContainer}>
-              <Text style={styles.subtitle}>Relax</Text>
-              <Text style={styles.description}>
-                Quiet your mind and relieve stress
-              </Text>
-            </View>
+          <View style={styles.scrollableContent}>
+            <ScrollView
+              ref={scrollViewRef}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={handleScroll}
+              onScroll={handleScroll}
+              scrollEventThrottle={16}
+              style={styles.scrollView}
+              contentContainerStyle={{ flexDirection: "row" }}
+            >
+              {PAGES.map((page) => (
+                <View key={page.id} style={styles.pageContainer}>
+                  <Text style={styles.subtitle}>{page.subtitle}</Text>
+                  <Text style={styles.description}>{page.description}</Text>
+                </View>
+              ))}
+            </ScrollView>
           </View>
 
-          {/* Fixed Footer */}
           <View style={styles.footerContainer}>
             <View style={styles.startButtonContainer}>
-              <Pressable onPress={handleStartPress} style={styles.startButton}>
+              {currentPageIndex > 0 && (
+                <Pressable
+                  accessibilityLabel="Previous page"
+                  onPress={handleLeftArrow}
+                  style={[styles.arrowButton, { left: 20 }]}
+                >
+                  <Text style={styles.arrowIcon}>‹</Text>
+                </Pressable>
+              )}
+
+              <Pressable
+                testID="home.start-button"
+                accessibilityLabel="Start"
+                onPress={handleStartPress}
+                style={styles.startButton}
+              >
                 <Text style={styles.startButtonText}>Start</Text>
               </Pressable>
+
+              {currentPageIndex < PAGES.length - 1 && (
+                <Pressable
+                  accessibilityLabel="Next page"
+                  onPress={handleRightArrow}
+                  style={[styles.arrowButton, { right: 20 }]}
+                >
+                  <Text style={styles.arrowIcon}>›</Text>
+                </Pressable>
+              )}
             </View>
 
-            {/* Technique Section */}
             <View style={styles.techniqueContainer}>
-              <Text style={styles.techniqueLabel}>Technique:</Text>
-              <Pressable
-                onPress={sheets.handleTechniquePress}
-                style={styles.techniqueSelectable}
-              >
-                <Text style={styles.techniqueValue}>
-                  {displayExercise.title}
-                </Text>
-                <Text style={styles.chevronIcon}>⌄</Text>
-              </Pressable>
+              {isRelaxPage && (
+                <>
+                  <Text style={styles.techniqueLabel}>Technique:</Text>
+                  <Pressable
+                    onPress={sheets.handleTechniquePress}
+                    style={styles.techniqueSelectable}
+                  >
+                    <Text style={styles.techniqueValue}>
+                      {displayExercise.title}
+                    </Text>
+                    <Text style={styles.chevronIcon}>⌄</Text>
+                  </Pressable>
+                </>
+              )}
             </View>
           </View>
 
-          {/* Blurred backdrop (tap to dismiss) */}
           {(sheets.isSheetOpen ||
             sheets.isSupportSheetOpen ||
             sheets.isSelectionSheetOpen) && (
@@ -192,7 +313,6 @@ export default function Index() {
             </Pressable>
           )}
 
-          {/* Bottom Sheet Modals */}
           <ExerciseDetailSheet
             ref={sheets.sheetRef}
             exercise={sheets.selectedExerciseForInfo}

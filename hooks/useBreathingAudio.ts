@@ -1,6 +1,7 @@
 import { SoundType } from "@/contexts/appSettingsContext";
 import { useAudioPlayer } from "expo-audio";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { AppState, AppStateStatus } from "react-native";
 
 const SOUND_FILES: Record<Exclude<SoundType, 'off'>, { inhale: any; exhale: any }> = {
   guzheng: {
@@ -40,6 +41,20 @@ export function useBreathingAudio({ soundEnabled, isRunning, soundType }: UseBre
   
   const inhalePlayer = useAudioPlayer(inhaleSource, { keepAudioSessionActive: true });
   const exhalePlayer = useAudioPlayer(exhaleSource, { keepAudioSessionActive: true });
+
+  // Tracks whether the app is currently in the foreground. Used to suppress
+  // audio cues when the breathing cycle advances while the app is backgrounded.
+  const isAppActiveRef = useRef(true);
+
+  useEffect(() => {
+    const handleAppStateChange = (nextState: AppStateStatus) => {
+      isAppActiveRef.current = nextState === 'active';
+    };
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => {
+      subscription.remove();
+    };
+  }, []);
   
   // Helper to safely check if player is valid
   const isPlayerValid = (p: typeof inhalePlayer): boolean => {
@@ -142,6 +157,7 @@ export function useBreathingAudio({ soundEnabled, isRunning, soundType }: UseBre
   }, [inhalePlayer, exhalePlayer]);
 
   const playInhaleSound = async () => {
+    if (!isAppActiveRef.current) return;
     if (!soundEnabled) return;
     if (soundType === 'off' || !inhalePlayer) return; // Don't play if sound is off
     
@@ -168,6 +184,7 @@ export function useBreathingAudio({ soundEnabled, isRunning, soundType }: UseBre
   };
 
   const playExhaleSound = async () => {
+    if (!isAppActiveRef.current) return;
     if (!soundEnabled) return;
     if (soundType === 'off' || !exhalePlayer) return; // Don't play if sound is off
     

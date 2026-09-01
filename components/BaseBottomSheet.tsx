@@ -27,17 +27,19 @@ export type BaseBottomSheetHandle = {
 
 /**
  * Props for BaseBottomSheet component
- * @property {string} title - Main title displayed at top of sheet
+ * @property {string} [title] - Main title displayed at top of sheet (default header only)
  * @property {string} [subtitle] - Optional subtitle below title
  * @property {string[]} [snapPoints] - Sheet height snapPoints (default: ['80%'])
+ * @property {boolean} [headerless] - Child owns scroll + header (inset grouped layout)
  * @property {React.ReactNode} children - Content to display in sheet
  * @property {function} [onChange] - Callback when sheet index changes
  * @property {function} [onDismiss] - Callback when sheet is dismissed
  */
 interface BaseBottomSheetProps {
-  title: string;
+  title?: string;
   subtitle?: string;
   snapPoints?: string[];
+  headerless?: boolean;
   children: React.ReactNode;
   onChange?: (index: number) => void;
   onDismiss?: () => void;
@@ -85,17 +87,20 @@ interface BaseBottomSheetProps {
  * ```
  */
 const BaseBottomSheet = forwardRef<BaseBottomSheetHandle, BaseBottomSheetProps>(
-  ({ title, subtitle, snapPoints, children, onChange, onDismiss }, ref) => {
+  ({ title, subtitle, snapPoints, headerless = false, children, onChange, onDismiss }, ref) => {
     const { tokens } = useTheme();
     const modalRef = useRef<BottomSheetModal>(null);
 
     const sheetBackgroundColor = useMemo(() => {
+      if (headerless) {
+        return tokens.systemGroupedBg;
+      }
       const bg = tokens.bottomSheetBg;
       if (typeof bg === 'string' && /^#[0-9A-Fa-f]{6}$/.test(bg)) {
         return hexWithAlpha(bg, BOTTOM_SHEET_BACKGROUND_ALPHA);
       }
       return bg;
-    }, [tokens.bottomSheetBg]);
+    }, [headerless, tokens.bottomSheetBg, tokens.systemGroupedBg]);
 
     useImperativeHandle(ref, () => ({
       open: () => modalRef.current?.present(),
@@ -115,40 +120,42 @@ const BaseBottomSheet = forwardRef<BaseBottomSheetHandle, BaseBottomSheetProps>(
         backgroundStyle={{ backgroundColor: sheetBackgroundColor }}
         handleIndicatorStyle={{ backgroundColor: tokens.bottomSheetSeparator }}
       >
-        <BottomSheetScrollView 
-          style={{ flex: 1, paddingHorizontal: 20 }} 
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Title */}
-          <Text style={{ 
-            color: tokens.bottomSheetText, 
-            fontSize: 28, 
-            fontWeight: '700', 
-            marginBottom: subtitle ? 8 : 24, 
-            textAlign: 'center' 
-          }}>
-            {title}
-          </Text>
+        {headerless ? (
+          <View style={{ flex: 1 }}>{children}</View>
+        ) : (
+          <BottomSheetScrollView 
+            style={{ flex: 1, paddingHorizontal: 20 }} 
+            showsVerticalScrollIndicator={false}
+          >
+            {title ? (
+              <Text style={{ 
+                color: tokens.bottomSheetText, 
+                fontSize: 28, 
+                fontWeight: '700', 
+                marginBottom: subtitle ? 8 : 24, 
+                textAlign: 'center' 
+              }}>
+                {title}
+              </Text>
+            ) : null}
 
-          {/* Subtitle (optional) */}
-          {subtitle && (
-            <Text style={{ 
-              color: tokens.bottomSheetText, 
-              fontSize: 16, 
-              textAlign: 'center', 
-              opacity: 0.8,
-              marginBottom: 24
-            }}>
-              {subtitle}
-            </Text>
-          )}
+            {subtitle && (
+              <Text style={{ 
+                color: tokens.bottomSheetText, 
+                fontSize: 16, 
+                textAlign: 'center', 
+                opacity: 0.8,
+                marginBottom: 24
+              }}>
+                {subtitle}
+              </Text>
+            )}
 
-          {/* Content */}
-          {children}
+            {children}
 
-          {/* Bottom safe area padding */}
-          <View style={{ height: 40 }} />
-        </BottomSheetScrollView>
+            <View style={{ height: 40 }} />
+          </BottomSheetScrollView>
+        )}
       </BottomSheetModal>
     );
   }

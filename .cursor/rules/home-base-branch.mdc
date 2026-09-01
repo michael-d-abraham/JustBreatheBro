@@ -1,0 +1,35 @@
+---
+description: Home-base git branch — treat make_it_urs as master for all agent git/PR work
+alwaysApply: true
+---
+
+# Home-base branch
+
+**Spoken name:** "make it urs"  
+**Git branch:** `make_it_urs` (underscores)
+
+This is the project's **home base** — functionally equivalent to `main` / `master` for day-to-day
+work. The user branches off `make_it_urs` for features; they merge back here.
+
+## Agent behavior
+
+1. **Assume home base** — treat `make_it_urs` as the canonical integration branch unless the user
+   says otherwise.
+2. **Default comparison base** — diffs, PRs, "what changed since base", and cleanup reviews should
+   use `make_it_urs`, not `main`.
+3. **New work** — when suggesting branch names, branch **from** `make_it_urs`:
+   `git checkout make_it_urs && git pull && git checkout -b feature/…`
+4. **PRs** — default PR base branch is `make_it_urs`. Only target `main` if the user explicitly asks.
+5. **Do not merge/rebase onto `main`** or treat `origin/main` as source of truth without explicit
+   user instruction.
+6. **Remote** — `origin/make_it_urs` exists; prefer syncing home base with that remote when pushing.
+
+## Legacy branches (do not use as home base)
+
+`main`, `old-main-backup`, `cleanup2026`, `final`, and other historical branches are **not** the
+active home base unless the user redirects you.
+
+## When starting a dev session
+
+If `git branch --show-current` is not `make_it_urs` and the user did not name a feature branch,
+mention they are off home base — but continue on their current branch if that is intentional.

@@ -107,12 +107,10 @@ refactor protocol — see [`AGENTS.md`](./AGENTS.md) and [`docs/ARCHITECTURE.md`
 ## Testing and regression
 
 ```bash
-npm run lint   # must exit 0
-npm test       # 76 tests across 6 suites — all must pass
+npm run check  # lint + 76 tests — must pass
 ```
 
-Before committing any change to session logic, audio, haptics, animation, navigation, or
-settings, run the full manual checklist in [`docs/REGRESSION_CHECKLIST.md`](./docs/REGRESSION_CHECKLIST.md).
+Before committing session/audio/navigation changes, run Tier A in [`docs/DEV_SESSION.md`](./docs/DEV_SESSION.md) or the full [`docs/REGRESSION_CHECKLIST.md`](./docs/REGRESSION_CHECKLIST.md).
 
 ---
 
