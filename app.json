@@ -13,6 +13,9 @@
       "bundleIdentifier": "com.michaelabraham.breathbro",
       "supportsTablet": true,
       "buildNumber": "15",
+      "entitlements": {
+        "com.apple.developer.healthkit": true
+      },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": ["audio"]
@@ -58,7 +61,15 @@
           "organization": "breath-bro"
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "@kingstinct/react-native-healthkit",
+        {
+          "background": false,
+          "NSHealthUpdateUsageDescription": "Just Breathe uses Apple Health to save your completed breathing and meditation sessions as Mindful Minutes.",
+          "NSHealthShareUsageDescription": "Just Breathe reads your Mindful Minutes to show your mindfulness activity and progress."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

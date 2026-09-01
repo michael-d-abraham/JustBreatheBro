@@ -7,6 +7,8 @@ import { useBreathingAnimation } from "@/hooks/useBreathingAnimation";
 import { useBreathingAudio } from "@/hooks/useBreathingAudio";
 import { BreathingPhase, useBreathingCycle } from "@/hooks/useBreathingCycle";
 import { BeginBreathingPhaseHapticsArgs, useBreathingHaptics } from "@/hooks/useBreathingHaptics";
+import { createMindfulSessionId } from "@/lib/health/healthService";
+import { syncCompletedMindfulSession } from "@/lib/health/syncCompletedSession";
 import { trackBreathingEntered, trackBreathingExited, trackBreathingStarted } from "@/utils/sentryTracking";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
@@ -71,6 +73,8 @@ export default function BreathingPage() {
   
   // Tracking refs
   const sessionStartTimeRef = useRef<number | null>(null);
+  const sessionIdRef = useRef<string | null>(null);
+  const healthWriteAttemptedRef = useRef(false);
   const breathingReadyTimeRef = useRef<number | null>(null);
   const hasExitedRef = useRef(false);
   const hasTrackedEnteredRef = useRef(false);
@@ -212,6 +216,8 @@ export default function BreathingPage() {
     if (!hasTrackedStartedRef.current) {
       hasTrackedStartedRef.current = true;
       sessionStartTimeRef.current = Date.now();
+      sessionIdRef.current = createMindfulSessionId();
+      healthWriteAttemptedRef.current = false;
       trackBreathingStarted(settings.soundEnabled, settings.hapticsEnabled);
     }
     
@@ -264,6 +270,22 @@ export default function BreathingPage() {
         'user_exit',
         breathingReadyMs
       );
+    }
+
+    const startedAt = sessionStartTimeRef.current;
+    const sessionId = sessionIdRef.current;
+    if (
+      startedAt &&
+      sessionId &&
+      !healthWriteAttemptedRef.current
+    ) {
+      healthWriteAttemptedRef.current = true;
+      void syncCompletedMindfulSession({
+        startMs: startedAt,
+        endMs: Date.now(),
+        sessionId,
+        syncEnabled: settings.appleHealthSyncEnabled,
+      });
     }
     
     // Force stop everything immediately, even mid-sound
@@ -358,6 +380,8 @@ export default function BreathingPage() {
         if (!hasTrackedStartedRef.current) {
           hasTrackedStartedRef.current = true;
           sessionStartTimeRef.current = Date.now();
+          sessionIdRef.current = createMindfulSessionId();
+          healthWriteAttemptedRef.current = false;
           trackBreathingStarted(settings.soundEnabled, settings.hapticsEnabled);
         }
         

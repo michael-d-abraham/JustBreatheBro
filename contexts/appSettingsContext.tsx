@@ -1,6 +1,15 @@
 import { useTheme as useBaseTheme, ThemeName } from '@/components/Theme';
 import { DEFAULT_ZENSCAPE_BACKGROUND_FILENAME, isKnownZenscapeFilename, ZENSCAPE_IMAGE_MAP } from '@/constants/wallpapers';
-import { getBackgroundImage, getAnimationTheme, saveAnimationTheme, saveBackgroundImage } from '@/lib/storage';
+import {
+  getAnimationTheme,
+  getAppleHealthConnected,
+  getAppleHealthSyncEnabled,
+  getBackgroundImage,
+  saveAnimationTheme,
+  saveAppleHealthConnected,
+  saveAppleHealthSyncEnabled,
+  saveBackgroundImage,
+} from '@/lib/storage';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { ImageBackground, View } from 'react-native';
 
@@ -15,6 +24,8 @@ type AppSettings = {
   soundType: SoundType;
   soundscape: SoundscapeType;
   animationTheme: ThemeName;
+  appleHealthSyncEnabled: boolean;
+  appleHealthConnected: boolean;
 };
 
 type AppContextType = {
@@ -29,6 +40,8 @@ type AppContextType = {
   setSoundType: (soundType: SoundType) => void;
   setSoundscape: (soundscape: SoundscapeType) => void;
   setAnimationTheme: (theme: ThemeName) => void;
+  setAppleHealthSyncEnabled: (enabled: boolean) => Promise<void>;
+  setAppleHealthConnected: (connected: boolean) => Promise<void>;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -42,6 +55,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     soundType: 'sine',
     soundscape: 'dream',
     animationTheme: 'calm',
+    appleHealthSyncEnabled: false,
+    appleHealthConnected: false,
   });
   // Start with default zenscape so the first paint matches first-launch storage (no solid flash).
   const [backgroundImage, setBackgroundImageState] = useState<string | null>(
@@ -83,6 +98,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setSettings(prev => ({ ...prev, animationTheme: stored as ThemeName }));
       }
     });
+
+    (async () => {
+      const [syncEnabled, connected] = await Promise.all([
+        getAppleHealthSyncEnabled(),
+        getAppleHealthConnected(),
+      ]);
+      if (cancelled) return;
+      setSettings(prev => ({
+        ...prev,
+        appleHealthSyncEnabled: syncEnabled,
+        appleHealthConnected: connected,
+      }));
+    })();
     return () => {
       cancelled = true;
     };
@@ -93,6 +121,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const toggleAnimations = () => setSettings(prev => ({ ...prev, animationsEnabled: !prev.animationsEnabled }));
   const setSoundType = (soundType: SoundType) => setSettings(prev => ({ ...prev, soundType }));
   const setSoundscape = (soundscape: SoundscapeType) => setSettings(prev => ({ ...prev, soundscape }));
+
+  const setAppleHealthSyncEnabled = async (enabled: boolean) => {
+    setSettings(prev => ({ ...prev, appleHealthSyncEnabled: enabled }));
+    await saveAppleHealthSyncEnabled(enabled);
+  };
+
+  const setAppleHealthConnected = async (connected: boolean) => {
+    setSettings((prev) => ({
+      ...prev,
+      appleHealthConnected: connected,
+      appleHealthSyncEnabled: connected ? prev.appleHealthSyncEnabled : false,
+    }));
+    await saveAppleHealthConnected(connected);
+    if (!connected) {
+      await saveAppleHealthSyncEnabled(false);
+    }
+  };
 
   return (
     <AppContext.Provider value={{ 
@@ -105,7 +150,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       toggleAnimations,
       setSoundType,
       setSoundscape,
-      setAnimationTheme
+      setAnimationTheme,
+      setAppleHealthSyncEnabled,
+      setAppleHealthConnected,
     }}>
       <ThemedWrapper>
         {children}

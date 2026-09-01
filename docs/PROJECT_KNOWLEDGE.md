@@ -39,7 +39,7 @@
 
 | Layer | Tool | Covers |
 |-------|------|--------|
-| Automated logic | Jest (**76 tests**, 6 suites) | Cycle, audio, haptics, storage, global room mock WS |
+| Automated logic | Jest (**104 tests**, 8 suites) | Cycle, audio, haptics, storage, global room mock WS, Apple Health |
 | UI smoke | Maestro on iOS sim | Tier A nav — `npm run e2e:ios` (see `docs/MAESTRO.md`) |
 | Truth for native feel | Physical iPhone | Haptics, lock-screen audio, silent switch |
 
@@ -70,6 +70,7 @@ Regression checklist §3b reflects this (updated 2026-06-10).
 | Wallpaper (zenscape filename) | Yes |
 | Animation theme | Yes |
 | Current exercise | Yes |
+| Apple Health connect + Save Mindful Minutes | Yes (`apple_health_connected`, `apple_health_sync_enabled`) |
 | Sound on/off, haptics, sound type, soundscape | **No** — in-memory in `appSettingsContext` until app restart |
 | Theme palette, appearance mode | **No** — in-memory in `Theme.tsx` |
 
