@@ -11,11 +11,15 @@ type SyncArgs = {
   syncEnabled: boolean;
 };
 
+function isDev(): boolean {
+  return typeof __DEV__ !== "undefined" && __DEV__;
+}
+
 function reportHealthKitIssue(
   message: string,
   extra?: Record<string, string | number | boolean>,
 ) {
-  if (__DEV__) {
+  if (isDev()) {
     console.warn("[Apple Health]", message, extra ?? "");
   }
   Sentry.addBreadcrumb({
@@ -53,7 +57,7 @@ export async function syncCompletedMindfulSession(
     reportHealthKitIssue("Mindful session write threw", {
       elapsed_seconds: Math.floor((args.endMs - args.startMs) / 1000),
     });
-    if (__DEV__) {
+    if (isDev()) {
       console.warn("[Apple Health]", error);
     }
     return { ok: false, reason: "error" };

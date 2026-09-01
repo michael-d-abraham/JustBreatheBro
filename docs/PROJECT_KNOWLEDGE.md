@@ -39,7 +39,7 @@
 
 | Layer | Tool | Covers |
 |-------|------|--------|
-| Automated logic | Jest (**76 tests**, 6 suites) | Cycle, audio, haptics, storage, global room mock WS |
+| Automated logic | Jest (**104 tests**, 8 suites) | Cycle, audio, haptics, storage, global room mock WS, Apple Health |
 | UI smoke | Maestro on iOS sim | Tier A nav — `npm run e2e:ios` (see `docs/MAESTRO.md`) |
 | Truth for native feel | Physical iPhone | Haptics, lock-screen audio, silent switch |
 

@@ -16,23 +16,18 @@ jest.mock(
     ),
 );
 
-const isHealthDataAvailable = jest.fn(() => true);
-const requestAuthorization = jest.fn(async () => true);
-const authorizationStatusFor = jest.fn(() => 2);
-const saveCategorySample = jest.fn(async () => ({ uuid: "hk-sample" }));
-
 jest.mock("@kingstinct/react-native-healthkit", () => ({
-  isHealthDataAvailable: (...args: unknown[]) => isHealthDataAvailable(...args),
-  requestAuthorization: (...args: unknown[]) => requestAuthorization(...args),
-  authorizationStatusFor: (...args: unknown[]) =>
-    authorizationStatusFor(...args),
-  saveCategorySample: (...args: unknown[]) => saveCategorySample(...args),
+  isHealthDataAvailable: jest.fn(() => true),
+  requestAuthorization: jest.fn(async () => true),
+  authorizationStatusFor: jest.fn(() => 2),
+  saveCategorySample: jest.fn(async () => ({ uuid: "hk-sample" })),
 }));
 
 jest.mock("react-native", () => ({
   Platform: { OS: "ios" },
 }));
 
+import * as HealthKit from "@kingstinct/react-native-healthkit";
 import {
   createMindfulSessionId,
   getMindfulSessionWriteStatus,
@@ -42,6 +37,29 @@ import {
   requestHealthAuthorization,
   saveMindfulSession,
 } from "@/lib/health/healthService";
+
+const isHealthDataAvailable =
+  HealthKit.isHealthDataAvailable as jest.MockedFunction<
+    () => boolean
+  >;
+const requestAuthorization =
+  HealthKit.requestAuthorization as unknown as jest.MockedFunction<
+    (opts: { toShare?: readonly string[] }) => Promise<boolean>
+  >;
+const authorizationStatusFor =
+  HealthKit.authorizationStatusFor as unknown as jest.MockedFunction<
+    (type: string) => number
+  >;
+const saveCategorySample =
+  HealthKit.saveCategorySample as unknown as jest.MockedFunction<
+    (
+      identifier: string,
+      value: number,
+      startDate: Date,
+      endDate: Date,
+      metadata?: Record<string, string | number>,
+    ) => Promise<unknown>
+  >;
 
 describe("lib/health/healthService", () => {
   beforeEach(async () => {

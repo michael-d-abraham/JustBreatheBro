@@ -120,7 +120,7 @@ function AppleHealthScreen({ onBack }: { onBack: () => void }) {
               paddingVertical: 16,
             }}
           >
-            Apple Health Connected
+            ✓ Apple Health Connected
           </Text>
           <BottomSheetDivider />
           <View

@@ -212,7 +212,7 @@ adding get/set wrappers here. Do not change existing key strings (would break ex
 ### Automated checks (run before every commit)
 
 ```bash
-npm run check     # lint + 76 tests — must pass
+npm run check     # lint + 104 tests — must pass
 npx tsc --noEmit  # must exit 0
 git status        # verify no unintended staged files
 ```
@@ -353,7 +353,7 @@ Follow this protocol for any refactor beyond a trivial edit:
 
 **After coding:**
 1. Run `npm run lint` — fix all errors.
-2. Run `npm test` — all 76 tests must pass.
+2. Run `npm test` — all 104 tests must pass.
 3. Run the manual smoke test (§6).
 4. If you touched session logic, audio, haptics, animation, navigation, or settings — run the
    full checklist in `docs/REGRESSION_CHECKLIST.md`.
