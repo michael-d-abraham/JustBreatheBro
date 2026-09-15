@@ -150,6 +150,39 @@ export function getSoundscapeEnvironmentOffCardWidth(baseWidth: number): number 
   return Math.round(baseWidth * soundscapeEnvironmentCard.offWidthScale);
 }
 
+/** Square app-icon tiles — same row rhythm as soundscape, 1:1 preview. */
+export const appIconEnvironmentCard = {
+  radius: 14,
+  gap: 10,
+  screenInset: settingsScreenPadding,
+  /** ~4 tiles + peek — slightly smaller than default app-icon footprint */
+  scrollVisibleCount: 4.25,
+  aspectRatio: 1,
+  labelSize: 12,
+  labelGap: 5,
+  selectedRingWidth: 2,
+  selectedRingColor: "rgba(255, 255, 255, 0.62)",
+  unselectedOpacity: 0.9,
+  pressedOpacity: settingsSelectionIndicator.pressedOpacity,
+} as const;
+
+export function getAppIconEnvironmentBaseWidth(
+  screenWidth: number,
+  visibleCount = appIconEnvironmentCard.scrollVisibleCount,
+): number {
+  const available = screenWidth - appIconEnvironmentCard.screenInset * 2;
+  const gap = appIconEnvironmentCard.gap;
+  return Math.floor((available - (visibleCount - 1) * gap) / visibleCount);
+}
+
+export function getAppIconEnvironmentCardSize(
+  baseWidth: number,
+): { width: number; height: number } {
+  const width = baseWidth;
+  const height = Math.round(width / appIconEnvironmentCard.aspectRatio);
+  return { width, height };
+}
+
 /** @deprecated use getSoundscapeEnvironmentBaseWidth */
 export function getSoundscapeEnvironmentCardWidth(
   screenWidth: number,

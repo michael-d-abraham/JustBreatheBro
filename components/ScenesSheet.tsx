@@ -4,7 +4,9 @@ import { scenesLayout } from "@/components/settingsScreenTokens";
 import { useSoundscapeSheetAuditionHandlers } from "@/hooks/useSoundscapePickerAudition";
 import React, { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
 import { View } from "react-native";
+import AppIconPicker from "./AppIconPicker";
 import { ScenesHeroSection } from "./ScenesPageSections";
+import QuotesPicker from "./QuotesPicker";
 import SettingsBottomSheet, {
   SettingsBottomSheetHandle,
 } from "./SettingsBottomSheet";
@@ -60,12 +62,20 @@ const ScenesSheet = forwardRef<ScenesSheetHandle, ScenesSheetProps>(
             <SoundscapePicker variant="bottomSheet" />
           </SettingsSection>
 
-          <ScenesHeroSection title="Scene">
+          <ScenesHeroSection title="Scenes">
             <WallpaperCarousel
               selectedFilename={backgroundImage}
               onSelect={handleScenePress}
             />
           </ScenesHeroSection>
+
+          <SettingsSection title="Quotes" bare>
+            <QuotesPicker />
+          </SettingsSection>
+
+          <SettingsSection title="App Icon" bare>
+            <AppIconPicker />
+          </SettingsSection>
         </View>
       </SettingsBottomSheet>
     );
