@@ -1,12 +1,12 @@
+import LearnTabContent from "@/components/learn/LearnTabContent";
 import { useAppSettings } from "@/contexts/appSettingsContext";
-import { AppearancePref, useTheme } from "@/components/Theme";
+import { useTheme } from "@/components/Theme";
 import React, { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
 import { Linking } from "react-native";
 import BaseBottomSheet, { BaseBottomSheetHandle } from "./BaseBottomSheet";
 import { SettingsSheetScreen } from "./SettingsBottomSheet";
 import { settingsRowIcons } from "./settingsRowIcons";
 import {
-  SettingsGroupedCheckRow,
   SettingsGroupedFooter,
   SettingsScreenFooter,
   SettingsGroupedLinkRow,
@@ -15,7 +15,12 @@ import {
   SettingsSection,
 } from "./SettingsInsetGrouped";
 
-export type SupportSheetHandle = BaseBottomSheetHandle;
+export type SupportSheetEntry = "settings" | "explore";
+
+export type SupportSheetHandle = {
+  open: (entry?: SupportSheetEntry) => void;
+  close: () => void;
+};
 
 interface SupportSheetProps {
   onChange?: (index: number) => void;
@@ -23,12 +28,11 @@ interface SupportSheetProps {
 }
 
 type SupportScreen =
+  | "explore"
   | "main"
   | "sounds-haptics"
-  | "appearance"
   | "reminders"
   | "apple-health"
-  | "app-icon"
   | "ideas"
   | "about-me"
   | "privacy-policy"
@@ -38,12 +42,6 @@ const SUPPORT_VIDEO_URL = "https://www.youtube.com/watch?v=8WPaO819-_g";
 const PRIVACY_URL =
   "https://michael-d-abraham.github.io/brethbro-privacy/privacy.html";
 const TERMS_URL = "https://www.youtube.com/watch?v=8WPaO819-_g";
-
-const APPEARANCE_LABELS: Record<AppearancePref, string> = {
-  light: "Light",
-  dark: "Dark",
-  system: "System",
-};
 
 function soundsHapticsSummary(
   soundEnabled: boolean,
@@ -62,9 +60,20 @@ type ScreenProps = {
   onDone: () => void;
 };
 
+function ExploreScreen({ onDone }: Pick<ScreenProps, "onDone">) {
+  return (
+    <SettingsSheetScreen
+      title="Explore"
+      onClose={onDone}
+      closeTestID="explore.close-button"
+    >
+      <LearnTabContent variant="sheet" bottomInset={8} />
+    </SettingsSheetScreen>
+  );
+}
+
 function SettingsMainScreen({ onNavigate, onDone }: ScreenProps) {
   const { settings } = useAppSettings();
-  const { appearance } = useTheme();
 
   return (
     <SettingsSheetScreen
@@ -81,20 +90,6 @@ function SettingsMainScreen({ onNavigate, onDone }: ScreenProps) {
           )}
           icon={settingsRowIcons.soundsHaptics}
           onPress={() => onNavigate("sounds-haptics")}
-        />
-      </SettingsSection>
-
-      <SettingsSection title="Appearance">
-        <SettingsRow
-          title="Theme"
-          value={APPEARANCE_LABELS[appearance]}
-          icon={settingsRowIcons.theme}
-          onPress={() => onNavigate("appearance")}
-        />
-        <SettingsRow
-          title="App Icon"
-          icon={settingsRowIcons.appIcon}
-          onPress={() => onNavigate("app-icon")}
         />
       </SettingsSection>
 
@@ -165,43 +160,6 @@ function SoundsHapticsScreen({ onNavigate, onDone }: ScreenProps) {
           value={settings.hapticsEnabled}
           onValueChange={() => toggleHaptics()}
         />
-      </SettingsSection>
-    </SettingsSheetScreen>
-  );
-}
-
-function AppearanceScreen({ onNavigate, onDone }: ScreenProps) {
-  const { appearance, setAppearance } = useTheme();
-  const usesSystem = appearance === "system";
-  const themeOptions: AppearancePref[] = ["light", "dark", "system"];
-
-  return (
-    <SettingsSheetScreen
-      title="Theme"
-      onClose={onDone}
-      onBack={() => onNavigate("main")}
-      backLabel="Settings"
-    >
-      <SettingsSection title="Appearance">
-        <SettingsGroupedToggleRow
-          title="System"
-          value={usesSystem}
-          onValueChange={(enabled) => {
-            if (enabled) {
-              setAppearance("system");
-            } else {
-              setAppearance("light");
-            }
-          }}
-        />
-        {themeOptions.map((option) => (
-          <SettingsGroupedCheckRow
-            key={option}
-            title={APPEARANCE_LABELS[option]}
-            selected={appearance === option}
-            onPress={() => setAppearance(option)}
-          />
-        ))}
       </SettingsSection>
     </SettingsSheetScreen>
   );
@@ -310,8 +268,8 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
     const [screen, setScreen] = useState<SupportScreen>("main");
 
     useImperativeHandle(ref, () => ({
-      open: () => {
-        setScreen("main");
+      open: (entry: SupportSheetEntry = "settings") => {
+        setScreen(entry === "explore" ? "explore" : "main");
         sheetRef.current?.open();
       },
       close: () => sheetRef.current?.close(),
@@ -337,6 +295,8 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
 
     const content = (() => {
       switch (screen) {
+        case "explore":
+          return <ExploreScreen onDone={handleDone} />;
         case "sounds-haptics":
           return <SoundsHapticsScreen {...screenProps} />;
         case "reminders":
@@ -353,17 +313,6 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
             <ComingSoonScreen
               {...screenProps}
               title="Apple Health"
-              backTarget="main"
-              backLabel="Settings"
-            />
-          );
-        case "appearance":
-          return <AppearanceScreen {...screenProps} />;
-        case "app-icon":
-          return (
-            <ComingSoonScreen
-              {...screenProps}
-              title="App Icon"
               backTarget="main"
               backLabel="Settings"
             />

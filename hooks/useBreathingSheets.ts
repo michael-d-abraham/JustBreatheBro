@@ -1,6 +1,9 @@
 import { ExerciseDetailSheetHandle } from "@/components/ExerciseDetailSheet";
 import { ScenesSheetHandle } from "@/components/ScenesSheet";
-import { SupportSheetHandle } from "@/components/SupportSheet";
+import {
+  SupportSheetEntry,
+  SupportSheetHandle,
+} from "@/components/SupportSheet";
 import { useBreathing } from "@/contexts/breathingContext";
 import { Exercise, getExercises } from "@/lib/storage";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -51,10 +54,18 @@ export function useBreathingSheets() {
     sheetRef.current?.close();
   }, []);
 
-  const handleSupportPress = useCallback(() => {
+  const openSupportSheet = useCallback((entry: SupportSheetEntry = "settings") => {
     setIsSupportSheetOpen(true);
-    supportSheetRef.current?.open();
+    supportSheetRef.current?.open(entry);
   }, []);
+
+  const handleSupportPress = useCallback(() => {
+    openSupportSheet("settings");
+  }, [openSupportSheet]);
+
+  const handleTipsAndTricksPress = useCallback(() => {
+    openSupportSheet("explore");
+  }, [openSupportSheet]);
 
   const handleSupportSheetChange = useCallback((index: number) => {
     setIsSupportSheetOpen(index >= 0);
@@ -112,6 +123,7 @@ export function useBreathingSheets() {
     handleSheetChange,
     handleSheetDismiss,
     handleSupportPress,
+    handleTipsAndTricksPress,
     handleSupportSheetChange,
     handleSupportSheetDismiss,
     handleScenesPress,

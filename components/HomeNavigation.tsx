@@ -1,6 +1,4 @@
 import HomeNavFrostedSurface from "@/components/HomeNavFrostedSurface";
-import HomeNavIconButton from "@/components/HomeNavIconButton";
-import HomeNavMenu from "@/components/HomeNavMenu";
 import { useTheme } from "@/components/Theme";
 import {
   HOME_NAV_CHROME_LABEL_LETTER_SPACING,
@@ -47,7 +45,7 @@ const TAB_ITEMS: TabItem[] = [
   },
   {
     id: "benefits",
-    label: "Learn",
+    label: "Explore",
     index: 2,
     testID: "home.nav-learn",
     TabIcon: LearnNavIcon,
@@ -55,26 +53,17 @@ const TAB_ITEMS: TabItem[] = [
 ];
 
 const FLOAT_ABOVE_SAFE_AREA = 10;
-const TOP_FLOAT_BELOW_SAFE_AREA = 8;
 export const HOME_NAV_HORIZONTAL_INSET = 22;
 const TAB_PILL_MIN_HEIGHT = 54;
 
 type Props = {
   selectedIndex: number;
   onSelect: (index: number) => void;
-  onScenesPress: () => void;
-  onOneBreathPress: () => void;
-  onProfilePress: () => void;
-  onSettingsPress: () => void;
 };
 
 export default function HomeNavigation({
   selectedIndex,
   onSelect,
-  onScenesPress,
-  onOneBreathPress,
-  onProfilePress,
-  onSettingsPress,
 }: Props) {
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
@@ -90,17 +79,6 @@ export default function HomeNavigation({
   const styles = useMemo(
     () =>
       StyleSheet.create({
-        topBar: {
-          position: "absolute",
-          top: insets.top + TOP_FLOAT_BELOW_SAFE_AREA,
-          left: 0,
-          right: 0,
-          flexDirection: "row",
-          justifyContent: "space-between",
-          paddingHorizontal: HOME_NAV_HORIZONTAL_INSET,
-          zIndex: 26,
-          overflow: "visible",
-        },
         bottomBar: {
           position: "absolute",
           left: 0,
@@ -108,7 +86,7 @@ export default function HomeNavigation({
           bottom: insets.bottom + FLOAT_ABOVE_SAFE_AREA,
           alignItems: "center",
           paddingHorizontal: HOME_NAV_HORIZONTAL_INSET,
-          zIndex: 20,
+          zIndex: 30,
         },
         tabPill: {
           width: pillWidth,
@@ -145,26 +123,11 @@ export default function HomeNavigation({
           opacity: 0.88,
         },
       }),
-    [iconColor, inactiveOpacity, insets.bottom, insets.top, pillWidth, tokens.mode],
+    [iconColor, inactiveOpacity, insets.bottom, pillWidth, tokens.mode],
   );
 
   return (
     <>
-      <View style={styles.topBar} pointerEvents="box-none">
-        <HomeNavIconButton
-          testID="home.scenes-button"
-          accessibilityLabel="Scenes"
-          onPress={onScenesPress}
-          imageSource={require("../assets/icons/tulip.png")}
-        />
-
-        <HomeNavMenu
-          onOneBreathPress={onOneBreathPress}
-          onProfilePress={onProfilePress}
-          onSettingsPress={onSettingsPress}
-        />
-      </View>
-
       <View style={styles.bottomBar} pointerEvents="box-none">
         <HomeNavFrostedSurface style={styles.tabPill}>
           {TAB_ITEMS.map(({ id, label, index, testID, TabIcon }) => {

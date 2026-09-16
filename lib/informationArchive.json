@@ -116,6 +116,74 @@
       "mindset",
       "easy watch"
     ]
+  },
+  {
+    "id": "8",
+    "name": "Box Breathing — Navy SEAL Technique for Calm",
+    "link": "https://www.youtube.com/watch?v=tEmtuNHDqD0",
+    "type": "video",
+    "vibe": "chill",
+    "shortDescription": "A quick guided walkthrough of box breathing: four counts in, hold, out, hold. Easy to follow along.",
+    "AI_description": "Placeholder seed video for the Learn carousel. Demonstrates the box breathing pattern used for stress regulation and focus, with a simple visual timer and cueing for each phase of the breath cycle.",
+    "tags": [
+      "video",
+      "breathing",
+      "box-breathing",
+      "stress-management",
+      "easy watch",
+      "meditation"
+    ]
+  },
+  {
+    "id": "9",
+    "name": "4-7-8 Breathing for Sleep and Anxiety",
+    "link": "https://www.youtube.com/watch?v=Uxbdx-SeOOo",
+    "type": "video",
+    "vibe": "chill",
+    "shortDescription": "Dr. Weil's relaxing breath — inhale 4, hold 7, exhale 8. A classic wind-down technique.",
+    "AI_description": "Placeholder seed video for the Learn carousel. Covers the 4-7-8 breathing method and when to use it before sleep or during anxious moments.",
+    "tags": [
+      "video",
+      "breathing",
+      "deep-breathing",
+      "relaxation",
+      "easy watch",
+      "meditation"
+    ]
+  },
+  {
+    "id": "10",
+    "name": "5-Minute Guided Breath Meditation",
+    "link": "https://www.youtube.com/watch?v=inpok4MKVLM",
+    "type": "video",
+    "vibe": "chill",
+    "shortDescription": "Short guided session — follow the voice and breathe. Good for a daily reset.",
+    "AI_description": "Placeholder seed video for the Learn carousel. A brief guided meditation focused on natural breath awareness, suitable for beginners who want a low-commitment daily practice.",
+    "tags": [
+      "video",
+      "meditation",
+      "breathing",
+      "mindset",
+      "easy watch",
+      "transformation"
+    ]
+  },
+  {
+    "id": "11",
+    "name": "Why Slow Breathing Changes Your Nervous System",
+    "link": "https://www.youtube.com/watch?v=0Ua9bOsZTYw",
+    "type": "video",
+    "vibe": "Academic",
+    "shortDescription": "A plain-language explainer on how paced breathing shifts autonomic balance — vagus nerve, HRV, and calm.",
+    "AI_description": "Placeholder seed video for the Learn carousel. Summarizes how slow, intentional breathing influences parasympathetic activity and why breath work shows up in stress and recovery research.",
+    "tags": [
+      "video",
+      "breathing",
+      "vagus-nerve",
+      "autonomic-nervous-system",
+      "popular-science",
+      "easy watch"
+    ]
   }
 
 ]

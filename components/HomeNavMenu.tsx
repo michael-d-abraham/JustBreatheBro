@@ -3,9 +3,9 @@ import HomeNavMenuItem from "@/components/HomeNavMenuItem";
 import {
   CloseNavIcon,
   HamburgerNavIcon,
-  OneBreathMenuIcon,
   ProfileMenuIcon,
   SettingsMenuIcon,
+  TipsMenuIcon,
 } from "@/components/HomeNavIcons";
 import {
   HOME_NAV_ICON_BUTTON_SIZE,
@@ -27,21 +27,21 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-type MenuItemId = "oneBreath" | "profile" | "settings";
+type MenuItemId = "tipsAndTricks" | "profile" | "settings";
 
 type MenuItemConfig = {
   id: MenuItemId;
   label: string;
   testID: string;
-  Icon: typeof OneBreathMenuIcon;
+  Icon: typeof TipsMenuIcon;
 };
 
 const MENU_ITEMS: MenuItemConfig[] = [
   {
-    id: "oneBreath",
-    label: "Breath",
-    testID: "home.menu-one-breath",
-    Icon: OneBreathMenuIcon,
+    id: "tipsAndTricks",
+    label: "Tips and tricks",
+    testID: "home.menu-tips-and-tricks",
+    Icon: TipsMenuIcon,
   },
   {
     id: "profile",
@@ -58,7 +58,7 @@ const MENU_ITEMS: MenuItemConfig[] = [
 ];
 
 type Props = {
-  onOneBreathPress: () => void;
+  onTipsAndTricksPress: () => void;
   onProfilePress: () => void;
   onSettingsPress: () => void;
 };
@@ -70,7 +70,7 @@ const MENU_TIMING = {
 
 /** Top-right hamburger — mode-aware menu pills beneath frosted trigger. */
 export default function HomeNavMenu({
-  onOneBreathPress,
+  onTipsAndTricksPress,
   onProfilePress,
   onSettingsPress,
 }: Props) {
@@ -84,11 +84,11 @@ export default function HomeNavMenu({
 
   const menuActions: Record<MenuItemId, () => void> = useMemo(
     () => ({
-      oneBreath: onOneBreathPress,
+      tipsAndTricks: onTipsAndTricksPress,
       profile: onProfilePress,
       settings: onSettingsPress,
     }),
-    [onOneBreathPress, onProfilePress, onSettingsPress],
+    [onTipsAndTricksPress, onProfilePress, onSettingsPress],
   );
 
   const animatePanel = useCallback(

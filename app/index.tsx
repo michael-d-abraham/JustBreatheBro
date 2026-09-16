@@ -1,4 +1,7 @@
 import HomeMeditateHero from "@/components/HomeMeditateHero";
+import HomeMeditateTopChrome from "@/components/HomeMeditateTopChrome";
+import HomeOneBreathHero from "@/components/HomeOneBreathHero";
+import LearnTabContent from "@/components/learn/LearnTabContent";
 import HomeNavigation, {
   HOME_FLOATING_NAV_ESTIMATED_HEIGHT,
 } from "@/components/HomeNavigation";
@@ -8,9 +11,11 @@ import SupportSheet from "@/components/SupportSheet";
 import { useAppSettings } from "@/contexts/appSettingsContext";
 import { useBreathing } from "@/contexts/breathingContext";
 import { useBreathingSheets } from "@/hooks/useBreathingSheets";
+import {
+  BREATH_ROOM_DEEP,
+  type CanonicalBreathRoomId,
+} from "@/hooks/useGlobalBreathingRoom";
 import { defaultExercises } from "@/lib/storage";
-import { useTheme, useWallpaperForeground } from "@/components/Theme";
-import { homeNavIconSecondaryOpacity } from "@/components/homeNavTokens";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -21,7 +26,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -30,29 +34,14 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const PAGES = [
-  {
-    id: "oneBreath",
-    subtitle: "One Breath",
-    description: "Breathe together in a live room",
-  },
-  {
-    id: "relax",
-    subtitle: "",
-    description: "",
-  },
-  {
-    id: "benefits",
-    subtitle: "Benefits",
-    description: "Articles, books, and videos to go deeper",
-  },
+  { id: "oneBreath" },
+  { id: "relax" },
+  { id: "benefits" },
 ] as const;
 
 export default function Index() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const wallpaperFg = useWallpaperForeground();
-  const { tokens } = useTheme();
-  const inactiveOpacity = homeNavIconSecondaryOpacity(tokens.mode);
   const {
     currentExercise,
     sessionDurationMinutes,
@@ -63,6 +52,8 @@ export default function Index() {
   const { backgroundImage } = useAppSettings();
   const scrollViewRef = useRef<ScrollView>(null);
   const [currentPageIndex, setCurrentPageIndex] = useState(1); // Start at Relax
+  const [selectedBreathRoomId, setSelectedBreathRoomId] =
+    useState<CanonicalBreathRoomId>(BREATH_ROOM_DEEP);
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -94,8 +85,15 @@ export default function Index() {
     }
   };
 
-  const handleOneBreathPress = () => {
-    router.push("/global_room_picker");
+  const handleOneBreathJoin = () => {
+    router.push({
+      pathname: "/global_room",
+      params: { room: selectedBreathRoomId },
+    });
+  };
+
+  const handleTipsAndTricksPress = () => {
+    sheets.handleTipsAndTricksPress();
   };
 
   const handleProfilePress = () => {
@@ -136,31 +134,24 @@ export default function Index() {
     },
     scrollableContent: {
       flex: 1,
-      marginTop: 60,
-      marginBottom: bottomContentInset,
     },
     scrollView: {
       flex: 1,
     },
-    pageContainer: {
+    learnPageContainer: {
       width: SCREEN_WIDTH,
       flex: 1,
-      paddingHorizontal: 24,
+      alignItems: "stretch",
+    },
+    meditatePageContainer: {
+      width: SCREEN_WIDTH,
+      flex: 1,
+    },
+    meditateHeroCenter: {
+      flex: 1,
       alignItems: "center",
       justifyContent: "center",
-    },
-    subtitle: {
-      color: wallpaperFg,
-      fontSize: 48,
-      fontWeight: "700",
-      textAlign: "center",
-      marginBottom: 16,
-    },
-    description: {
-      color: wallpaperFg,
-      fontSize: 18,
-      textAlign: "center",
-      opacity: inactiveOpacity,
+      paddingHorizontal: 24,
     },
   });
 
@@ -181,24 +172,44 @@ export default function Index() {
               contentContainerStyle={{ flexDirection: "row" }}
             >
               {PAGES.map((page) => (
-                <View key={page.id} style={styles.pageContainer}>
-                  {page.id === "relax" ? (
-                    <HomeMeditateHero
-                      onStartPress={handleStartPress}
-                      exerciseId={displayExercise.id}
-                      exerciseTitle={displayExercise.title}
-                      onTechniqueSelect={handleTechniqueSelect}
-                      durationMinutes={sessionDurationMinutes}
-                      onTimerSelect={updateSessionDuration}
-                    />
+                <View
+                  key={page.id}
+                  style={
+                    page.id === "benefits"
+                      ? styles.learnPageContainer
+                      : styles.meditatePageContainer
+                  }
+                >
+                  {page.id === "benefits" ? (
+                    <LearnTabContent bottomInset={bottomContentInset} />
+                  ) : page.id === "oneBreath" ? (
+                    <View style={styles.meditateHeroCenter}>
+                      <HomeOneBreathHero
+                        onJoinPress={handleOneBreathJoin}
+                        roomId={selectedBreathRoomId}
+                        onRoomSelect={setSelectedBreathRoomId}
+                        durationMinutes={sessionDurationMinutes}
+                        onTimerSelect={updateSessionDuration}
+                      />
+                    </View>
                   ) : (
                     <>
-                      {page.subtitle ? (
-                        <Text style={styles.subtitle}>{page.subtitle}</Text>
-                      ) : null}
-                      {page.description ? (
-                        <Text style={styles.description}>{page.description}</Text>
-                      ) : null}
+                      <HomeMeditateTopChrome
+                        onScenesPress={sheets.handleScenesPress}
+                        onTipsAndTricksPress={handleTipsAndTricksPress}
+                        onProfilePress={handleProfilePress}
+                        onSettingsPress={handleSettingsPress}
+                      />
+                      <View style={styles.meditateHeroCenter}>
+                        <HomeMeditateHero
+                          onStartPress={handleStartPress}
+                          exerciseId={displayExercise.id}
+                          exerciseTitle={displayExercise.title}
+                          onTechniqueSelect={handleTechniqueSelect}
+                          durationMinutes={sessionDurationMinutes}
+                          onTimerSelect={updateSessionDuration}
+                        />
+                      </View>
                     </>
                   )}
                 </View>
@@ -209,10 +220,6 @@ export default function Index() {
           <HomeNavigation
             selectedIndex={currentPageIndex}
             onSelect={handleNavSelect}
-            onScenesPress={sheets.handleScenesPress}
-            onOneBreathPress={handleOneBreathPress}
-            onProfilePress={handleProfilePress}
-            onSettingsPress={handleSettingsPress}
           />
 
           {(sheets.isSheetOpen ||

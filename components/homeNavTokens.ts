@@ -5,6 +5,7 @@ import { accentHighlightWash } from '@/components/modeTokens';
 import type { ThemeAccentTokens } from '@/components/themeAccentTokens';
 
 export const HOME_TAGLINE = "A calmer you starts here";
+export const HOME_ONE_BREATH_TAGLINE = "Breathe together in a live room";
 
 export const HOME_NAV_ICON_SIZE = 21;
 export const HOME_NAV_ICON_BUTTON_SIZE = 44;
@@ -27,6 +28,13 @@ export const HOME_START_PILL_WIDTH = 248;
 export const HOME_START_PILL_HEIGHT = 56;
 export const HOME_START_PILL_FONT_SIZE = 28;
 export const HOME_START_PILL_HORIZONTAL_PADDING = 32;
+
+/** One Breath hero — circular Join CTA (world-scale primary action) */
+export const HOME_JOIN_CIRCLE_SIZE = 260;
+export const HOME_JOIN_CIRCLE_FONT_SIZE = 34;
+export const HOME_JOIN_CIRCLE_GAP = 24;
+export const HOME_JOIN_CIRCLE_BLUR = 56;
+export const HOME_JOIN_CIRCLE_SHADOW_OPACITY = 0.28;
 
 /** Secondary hero — technique + timer pickers (side by side; row = START width) */
 export const HOME_TECHNIQUE_PILL_WIDTH = 144;

@@ -113,6 +113,27 @@ export function OneBreathMenuIcon({ size = 22, color }: IconProps) {
   );
 }
 
+/** Lightbulb outline — Tips and tricks. */
+export function TipsMenuIcon({ size = 22, color }: IconProps) {
+  const stroke = Math.max(1.5, size * 0.07);
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M9 18 H15 M10 21 H14"
+        stroke={color}
+        strokeWidth={stroke}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M12 3 C9.2 3 7 5.4 7 8.2 C7 10.2 8 11.8 9.2 13 C9.7 13.5 10 14.2 10 15 V16 H14 V15 C14 14.2 14.3 13.5 14.8 13 C16 11.8 17 10.2 17 8.2 C17 5.4 14.8 3 12 3 Z"
+        stroke={color}
+        strokeWidth={stroke}
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
 /** Person outline — Profile. */
 export function ProfileMenuIcon({ size = 22, color }: IconProps) {
   const stroke = Math.max(1.5, size * 0.07);
