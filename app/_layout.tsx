@@ -125,7 +125,8 @@ function RootContent() {
         <Stack.Screen
           name="breathing"
           options={{
-            animation: "none",
+            animation: "default",
+            gestureEnabled: true,
           }}
         />
       </Stack>

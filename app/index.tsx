@@ -23,6 +23,7 @@ import {
   Dimensions,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -55,7 +56,9 @@ export default function Index() {
   const [selectedBreathRoomId, setSelectedBreathRoomId] =
     useState<CanonicalBreathRoomId>(BREATH_ROOM_DEEP);
 
+  // Android has no ScrollView contentOffset; iOS uses contentOffset on the ScrollView below.
   useEffect(() => {
+    if (Platform.OS === "ios") return;
     const id = setTimeout(() => {
       scrollViewRef.current?.scrollTo({
         x: 1 * SCREEN_WIDTH,
@@ -170,6 +173,9 @@ export default function Index() {
               scrollEventThrottle={16}
               style={styles.scrollView}
               contentContainerStyle={{ flexDirection: "row" }}
+              {...(Platform.OS === "ios"
+                ? { contentOffset: { x: SCREEN_WIDTH, y: 0 } }
+                : {})}
             >
               {PAGES.map((page) => (
                 <View

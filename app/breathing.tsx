@@ -12,8 +12,11 @@ import { useFocusEffect } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { AppState, AppStateStatus, StatusBar } from "react-native";
+import { AppState, AppStateStatus, Platform, StatusBar } from "react-native";
 import { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+
+/** Match iOS native-stack pop duration so status bar restore does not shift home layout mid-transition. */
+const STATUS_BAR_RESTORE_DELAY_MS = Platform.OS === "ios" ? 350 : 0;
 
 const BREATHING_PHASE_HAPTICS: Record<
   "inhale" | "hold" | "exhale",
@@ -281,9 +284,14 @@ export default function BreathingPage() {
     shouldHideImmediatelyRef.current = true;
     setIsUIVisible(false);
     
-    // Small delay to ensure everything is stopped before navigation
+    // Small delay to ensure everything is stopped before navigation.
+    // Pop the stack so home keeps scroll position instead of remounting via push('/').
     setTimeout(() => {
-      router.push('/');
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace("/");
+      }
     }, 50);
   };
 
@@ -381,9 +389,15 @@ export default function BreathingPage() {
       // Hide status bar when entering breathing screen
       StatusBar.setHidden(true, 'fade');
       
-      // Restore status bar when leaving breathing screen
+      // Restore status bar after the pop animation so home safe-area does not jump mid-transition.
       return () => {
-        StatusBar.setHidden(false, 'fade');
+        if (STATUS_BAR_RESTORE_DELAY_MS > 0) {
+          setTimeout(() => {
+            StatusBar.setHidden(false, "fade");
+          }, STATUS_BAR_RESTORE_DELAY_MS);
+        } else {
+          StatusBar.setHidden(false, "fade");
+        }
       };
     }, [])
   );
