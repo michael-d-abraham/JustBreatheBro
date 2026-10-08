@@ -55,19 +55,6 @@ export const defaultExercises: Exercise[] = [
     method: "Let the exhale be slow and complete. Stay soft during the hold no strain. With each round, allow the body to feel heavier and more still.",
     symbol: "🌙",
   },
-  {
-    id: "4",
-    title: "Physiological Sigh",
-    inhale: 2,
-    hold1: 0,
-    exhale: 6,
-    hold2: 0,
-    shortDescription: "A quick reset for stress",
-    description: "A natural breath pattern. A double inhale followed by a long, releasing exhale.",
-    benefit: "Rapidly reduces CO₂ imbalance, increases alveolar ventilation, lowers acute stress response, and downregulates amygdala activity.",
-    method: "Fully expand the lungs with the second inhale. Then let the exhale fall out naturally—long, unforced. Feel the body drop with each release.",
-    symbol: "⚡",
-  }
 ];
 
 // Storage keys

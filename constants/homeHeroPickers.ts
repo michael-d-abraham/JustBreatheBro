@@ -3,7 +3,6 @@ export const HOME_TECHNIQUE_OPTIONS = [
   { id: "1", label: "Deep Breathing" },
   { id: "2", label: "Box Breathing" },
   { id: "3", label: "Extended Exhale" },
-  { id: "4", label: "Release Sign" },
 ] as const;
 
 export type HomeTechniqueOptionId = (typeof HOME_TECHNIQUE_OPTIONS)[number]["id"];
