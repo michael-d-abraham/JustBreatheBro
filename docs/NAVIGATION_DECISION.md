@@ -10,6 +10,9 @@
 > was read to confirm which files are registered as routes, and every `app/` source file was read to
 > confirm inbound `router.push` / `router.replace` / `<Link>` navigation.
 
+
+> **Note (2026-10):** `/global_room_picker` mentioned below has since been deleted; the home screen's Join now opens `/global_room` directly. See `docs/ROUTE_AUDIT.md`.
+
 ---
 
 ## TL;DR

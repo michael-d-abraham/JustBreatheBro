@@ -19,8 +19,9 @@ JustBreatheBro is a mindfulness and breathing mobile app (iOS live, Android pend
 - **Scenes / wallpapers** — zenscape background images the user picks from the Scenes screen.
 - **Information archive** — curated articles, books, and videos seeded by the external BreathBot
   content pipeline.
-- **Live "Breathe Together" rooms** — real-time synchronized group sessions over WebSocket, with
-  the server as the authoritative clock.
+- **Global Room** — a minimal, real-time world map of everyone connected right now (coarse,
+  country-level dots) where anyone can send one gentle haptic pulse that everyone feels and sees.
+  Presence + pulses over WebSocket; no breathing clock, no audio, no accounts.
 
 The app is distributed via Expo / EAS (OTA updates enabled). It targets iOS with
 `playsInSilentMode: true` (audio plays through hardware mute). Sentry is active in production.
@@ -60,7 +61,7 @@ See `.cursor/rules/home-base-branch.mdc` for full agent rules.
 | Build / OTA | EAS Build + `expo-updates` |
 | Tests | Jest + `ts-jest` |
 | Lint | `expo lint` (ESLint) |
-| TypeScript | enabled; `npx tsc --noEmit` exits **0** (all pre-existing errors resolved) |
+| TypeScript | enabled; `npx tsc --noEmit` currently reports 7 errors, all in `components/SupportSheet.tsx` (6) and `components/SettingsOptionCard.tsx` (1) — present on `make_it_urs` before the Global Room work; new code must add none |
 
 **Active compiler flags:** New Architecture (`newArchEnabled: true`) and React Compiler
 (`experiments.reactCompiler: true`) are both enabled in `app.json`. Be conservative with manual
@@ -78,8 +79,7 @@ Breath/
     breathing.tsx          Solo breathing session screen (~496 lines)
     scenes.tsx             Scenes: wallpaper + soundscape + theme + appearance
     informationarchive.tsx Information archive browser
-    global_room_picker.tsx Live room selection (fetches participant counts)
-    global_room.tsx        Live "Breathe Together" session (~495 lines)
+    global_room.tsx        Global Room: world map of presence + one pulse button (~150 lines)
     support.tsx            Legacy deep-link stub → <Redirect href="/" />
     _deprecated/           Dormant routes — DO NOT edit, DO NOT lint
       exercises.tsx        Exercise grid (no entry point; preserved for possible restoration)
@@ -92,7 +92,8 @@ Breath/
     BottomSheet*.tsx       Sheet building blocks (rows, toggles, section titles, dividers…)
     BackgroundSoundscapePlayer.tsx  Mounts useBackgroundSoundscape (renders null)
     BreathingPage*.tsx     Presentational pieces extracted from breathing.tsx
-    GlobalRoom*.tsx        Presentational pieces extracted from global_room.tsx
+    GlobalRoomMap.tsx      Land outline + presence dots + ghosts + ripples (presentational)
+    GlobalRoomPulseButton.tsx  The one control: send a gentle pulse
     WallpaperCarousel.tsx  Horizontal scroll of wallpaper tiles
     WallpaperPreview.tsx   Single wallpaper tile (image + label + selection state)
     SettingsSheet.tsx      In-session settings bottom sheet
@@ -111,21 +112,30 @@ Breath/
     useBreathingHaptics.ts     Phase-quantized haptic pulses
     useBreathingSheets.ts      Sheet open/close coordination + exercise list loader
     useBackgroundSoundscape.ts App-wide looping ambient audio
-    useGlobalBreathingRoom.ts  Live room WebSocket state machine (~552 lines)
+    useGlobalPresence.ts       Global Room client: socket lifecycle, presence, pulses, cooldown
+    useGlobalPulseHaptics.ts   One soft tap per incoming pulse (not the phase-quantized scheduler)
     __tests__/                 Jest tests (useBreathingCycle, useBreathingAudio, useBreathingHaptics,
-                               useGlobalBreathingRoom URL/config, useGlobalBreathingRoom behavior)
+                               useGlobalPresence, useGlobalPulseHaptics)
 
   lib/
     storage.ts                AsyncStorage wrappers + defaultExercises seed data
     informationArchive.ts     Archive CRUD over AsyncStorage
     informationArchive.json   Seed content
-    breathRoomBackend.ts      WebSocket / HTTP endpoint config (env-var overridable)
+    breathRoomBackend.ts      WebSocket endpoint config (env-var overridable); getGlobalRoomWsUrl → /global
+    globalPresenceProtocol.ts Wire types + defensive decoder for the /global protocol (v1)
+    globalPresenceState.ts    Pure presence/pulse/cooldown state machine (no timers, injected `nowMs`)
+    reconnectingSocket.ts     Reconnecting WebSocket wrapper (backoff, stale-socket guard, idempotent)
+    worldMapProjection.ts     Pure lat/lon → map-fraction projection for the land outline
     breathingHapticsResolve.ts  Pure math helper: haptic pulse-plan calculation
 
   constants/
     wallpapers.ts             WALLPAPER_IMAGES, ZENSCAPE_IMAGE_MAP, WallpaperImage type
                               (single source of truth — do not redefine inline elsewhere)
     featureColors.ts          Theme preview color tables
+    worldMap.ts               GENERATED Global Room land outline (SVG path) + map bounds — do not hand-edit
+
+  jest/
+    mockWebSocket.ts          Shared MockWebSocket test helper (outside __tests__ so it isn't run as a test)
 
   utils/
     sentryTracking.ts         Breathing session analytics events
@@ -164,14 +174,33 @@ scheduling, and stuck states. Tests live in `hooks/__tests__/useBreathingCycle.t
 `app/_layout.tsx`. It must survive navigation without re-mounting. Do **not** add competing
 soundscape players in any other screen or component.
 
-### 4c. Live room WebSocket (`hooks/useGlobalBreathingRoom.ts`)
+### 4c. Global Room (`hooks/useGlobalPresence.ts` + `app/global_room.tsx`)
 
-The server is the authoritative clock — the client must not introduce its own phase timer. The
-hook owns: connect/reconnect with exponential backoff, phase-step deduplication (by
-`roomId:phaseSeq`), `skipBreathCueAudio` suppression on first step after connect/switch, and a
-stale-socket guard. Tests cover URL/config (`.test.ts`) and join/leave/reconnect/cleanup
-behavior via a mock-WebSocket suite (`.behavior.test.ts`). Real network timing is not mocked — manual
-smoke test is still required after any timing change.
+Presence and pulses over one WebSocket to `/global` (same host as the legacy breathing rooms, which
+the server keeps serving for installed App Store builds). Wire protocol v1 is specified in the
+backend repo (`server/GLOBAL_PRESENCE.md`) and mirrored by `lib/globalPresenceProtocol.ts`.
+
+Invariants:
+- **The server owns presence and pulse distribution.** There is no client breathing clock, no
+  `phaseSeq`, no countdown, no audio. Your own pulse only ripples when the server *echoes* it, so a
+  rejected pulse never ripples.
+- **Connecting is joining; a new connection is a new session** (fresh id, fresh snapshot). Nothing
+  is replayed after a reconnect — state is cleared the moment the socket is not `connected`.
+- **Teardown:** the socket, retry timer, AppState listener and the single expiry timer are released
+  on unmount, `enabled=false` (screen unfocused), and app `background` (not `inactive`).
+  `ReconnectingSocket.start/stop` are idempotent. Exactly one expiry timer exists at a time.
+- **Privacy:** the client never asks for device location. Positions are server-assigned, coarse
+  (country-level, jittered) and ephemeral; ghost dots fade client-side after 20 s and no history is
+  kept. Do not add precise location, persistent ids, or logging of coordinates.
+- **Haptics:** one soft impact per incoming pulse (`useGlobalPulseHaptics`), gated by
+  `settings.hapticsEnabled`, skipped for your own pulse, overlapping pulses coalesced (350 ms).
+  Do not route pulses through `useBreathingHaptics`.
+- Decode every frame defensively (`decodeGlobalMessage` never throws; unknown/malformed frames are
+  dropped).
+
+Tests: `hooks/__tests__/useGlobalPresence.test.ts` (mock WebSocket, fake timers) plus pure suites
+for the protocol, state machine, socket, projection and URL config. Real-network timing and
+haptics feel are not covered — manual device smoke test required after changes.
 
 ### 4d. Bottom sheet system
 
@@ -211,8 +240,8 @@ adding get/set wrappers here. Do not change existing key strings (would break ex
 ### Automated checks (run before every commit)
 
 ```bash
-npm run check     # lint + 76 tests — must pass
-npx tsc --noEmit  # must exit 0
+npm run check     # lint + 184 tests — must pass
+npx tsc --noEmit  # must add no new errors (7 pre-existing: SupportSheet, SettingsOptionCard)
 git status        # verify no unintended staged files
 ```
 
@@ -240,8 +269,13 @@ navigation, or settings.
 | `hooks/__tests__/useBreathingCycle.test.ts` | Phase state machine, timing, pause/resume |
 | `hooks/__tests__/useBreathingAudio.test.ts` | Audio cue playback |
 | `hooks/__tests__/useBreathingHaptics.test.ts` | Haptic pulse scheduling |
-| `hooks/__tests__/useGlobalBreathingRoom.test.ts` | URL/config resolution |
-| `hooks/__tests__/useGlobalBreathingRoom.behavior.test.ts` | Join/leave/reconnect/cleanup (mock WebSocket) |
+| `hooks/__tests__/useGlobalPresence.test.ts` | Global Room: connect/snapshot, join/leave/ghosts, pulses, cooldown, overlap, reconnect, background/foreground, malformed frames, teardown |
+| `hooks/__tests__/useGlobalPulseHaptics.test.ts` | One soft tap; own-pulse skip; haptics disabled/unavailable; coalescing |
+| `lib/__tests__/globalPresenceProtocol.test.ts` | Wire decoder hardening |
+| `lib/__tests__/globalPresenceState.test.ts` | Presence/pulse/cooldown/expiry state machine |
+| `lib/__tests__/reconnectingSocket.test.ts` | Backoff, idempotent start/stop, stale-socket guard |
+| `lib/__tests__/worldMapProjection.test.ts` | Projection + generated map data sanity |
+| `lib/__tests__/breathRoomBackend.test.ts` | WS URL/config resolution incl. `/global` |
 | `lib/__tests__/storage.test.ts` | AsyncStorage round-trips |
 
 Coverage gaps (tracked for future work): `useBackgroundSoundscape`, `useBreathingSheets`.
@@ -300,15 +334,12 @@ Lint (`expo lint`) enforces no unused imports; the linter is the source of truth
 1. **`app/breathing.tsx` (~496 lines)** — the orchestrator for solo sessions. High cognitive load;
    high merge risk. Any change must preserve all lifecycle invariants in §4a.
 
-2. **`hooks/useGlobalBreathingRoom.ts` (~552 lines)** — socket management, backoff, clock sync,
-   phase dedupe, presence, and catalog helpers all in one file. Join/leave/reconnect/cleanup are
-   covered by the mock-WebSocket test suite; real-network timing is not. The in-place `switchRoom`
-   path is currently dead (room changes happen via remount).
-   See `docs/GLOBAL_ROOM_HOOK_REVIEW.md` for the full analysis.
+2. **`hooks/useGlobalPresence.ts`** — socket lifecycle + presence + pulses + cooldown + one expiry
+   timer. Covered by the mock-WebSocket suite; real-network behaviour and the Cloudflare
+   `CF-IPCountry` header on WebSocket upgrades are not (verify after each backend deploy).
 
-3. **`app/global_room.tsx` (~495 lines)** — consumes the above hook; drives animation, audio, and
-   haptics from server-broadcast timing. Changing timing logic here can cause drift against the
-   server clock.
+3. **`app/global_room.tsx`** — thin screen over the hook; scoped to focus via `useIsFocused`. It
+   deliberately has no settings sheet: the haptics preference lives in the existing settings.
 
 4. **`contexts/appSettingsContext.tsx`** — note the naming confusion: this file was previously
    `themeContext.tsx`. It exports `AppProvider` and `useAppSettings` (app settings + wallpaper),
@@ -352,7 +383,7 @@ Follow this protocol for any refactor beyond a trivial edit:
 
 **After coding:**
 1. Run `npm run lint` — fix all errors.
-2. Run `npm test` — all 76 tests must pass.
+2. Run `npm test` — all 184 tests must pass.
 3. Run the manual smoke test (§6).
 4. If you touched session logic, audio, haptics, animation, navigation, or settings — run the
    full checklist in `docs/REGRESSION_CHECKLIST.md`.
@@ -379,7 +410,7 @@ Read these in order before starting a task that touches the listed area:
 | **`docs/SESSION_LOG.md`** | Dated session entries (updated on "Mr cursor end session") |
 | **`docs/REGRESSION_CHECKLIST.md`** | Before any commit on session, audio, haptics, animation, navigation, settings |
 | **`docs/ROUTE_AUDIT.md`** | Before adding, moving, or deleting any route |
-| **`docs/GLOBAL_ROOM_HOOK_REVIEW.md`** | Before touching `useGlobalBreathingRoom` or `global_room.tsx` |
+| **`docs/GLOBAL_ROOM_HOOK_REVIEW.md`** | Historical only — reviews the retired `useGlobalBreathingRoom`; §4c above is current |
 | **`docs/BASELINE_STATUS.md`** | Understanding known pre-existing issues (TypeScript errors, broken script) |
 | **`docs/NAVIGATION_DECISION.md`** | Historical context on why `_tabs/` was deleted |
 | **`.cursor/rules/bottom-sheet-tokens.mdc`** | Before touching any bottom sheet component or styling |
@@ -394,7 +425,7 @@ Read these in order before starting a task that touches the listed area:
 | Audio cues | `hooks/useBreathingAudio.ts` |
 | Haptics | `hooks/useBreathingHaptics.ts` + `lib/breathingHapticsResolve.ts` |
 | Soundscape | `hooks/useBackgroundSoundscape.ts` + `components/BackgroundSoundscapePlayer.tsx` |
-| Live room | `hooks/useGlobalBreathingRoom.ts` + `app/global_room.tsx` |
+| Global Room | `hooks/useGlobalPresence.ts` + `app/global_room.tsx` (+ `lib/globalPresenceState.ts`) |
 | App settings | `contexts/appSettingsContext.tsx` |
 | Visual tokens | `components/Theme.tsx` |
 | Storage | `lib/storage.ts` |

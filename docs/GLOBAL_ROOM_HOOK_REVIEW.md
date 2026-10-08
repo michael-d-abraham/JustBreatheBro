@@ -1,3 +1,5 @@
+> **Historical (retired 2026-10).** This reviews `hooks/useGlobalBreathingRoom.ts`, the server-clocked three-room breathing hook, which was deleted in the Global Room redesign (presence + pulses). Kept only as a record; for the current design see `AGENTS.md` §4c and `hooks/useGlobalPresence.ts`.
+
 # `useGlobalBreathingRoom` — Code Review
 
 Review of [`hooks/useGlobalBreathingRoom.ts`](../hooks/useGlobalBreathingRoom.ts).

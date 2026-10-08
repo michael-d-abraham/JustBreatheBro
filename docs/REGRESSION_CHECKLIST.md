@@ -118,25 +118,44 @@
 
 ---
 
-## 5. Global Room ("Breathe Together")
+## 5. Global Room (presence + pulses)
 
-### 5a. Join room
+> Needs a backend that serves `/global` (deployed, or local via `EXPO_PUBLIC_BREATH_ROOM_WS_URL`).
+> **Haptics and two-person checks need a physical device** (simulator has no haptics). The easiest
+> second participant is a second device/simulator, or the local backend's `DEV_COUNTRY` env.
 
-- [ ] Tap the Global Breath button on the home screen.
-- [ ] The room picker loads with the three room options (Deep Rest, Clear Focus, Gentle Unwind).
-- [ ] Participant counts load (or show a loading indicator if the server is cold-starting).
-- [ ] Tap a room — the session screen opens.
-- [ ] Connection state transitions from "connecting" to "connected" without an error message.
-- [ ] The breathing ring begins animating in sync with the server-broadcast phase.
-- [ ] Participant count is visible and greater than 0.
+### 5a. Join
 
-### 5b. Leave room
+- [ ] Home → One Breath page → tap **Join**. There is no room picker or room dropdown.
+- [ ] The Global Room opens: faint world map, one pulse button, status text at the top.
+- [ ] Status goes "Connecting…" → "Just you here for now" (or "N people here") with no error.
+- [ ] **Your dot** is visible, accent-coloured and slightly larger than others.
+- [ ] Alone in the room: tapping the pulse button shows your own ripple and **no** haptic.
 
-- [ ] Tap the back/exit button in the room session screen.
-- [ ] App navigates to the room picker (or home), without freezing.
-- [ ] No WebSocket errors appear in the console after leaving.
-- [ ] Rejoining the same or a different room works correctly.
-- [ ] Leaving and returning to home does not cause duplicate soundscape audio.
+### 5b. Two participants
+
+- [ ] A second client appears as a dot within a second or two; the count updates on both.
+- [ ] A pulse from one: sender sees their ripple; **receiver feels one soft tap** and sees a ripple at the sender's dot.
+- [ ] Two pulses at nearly the same time → two ripples, but only one tap on the receiver.
+- [ ] Pulse button rests (dim, "Pulse sent") for ~5 s after sending; tapping meanwhile does nothing.
+- [ ] Second client leaves → its dot fades out dimly over ~20 s; count drops immediately.
+- [ ] Haptics **off** in settings → receiver still sees ripples, feels nothing.
+- [ ] Reduce Motion on → ripples are a gentle fade, not an expanding ring.
+
+### 5c. Privacy
+
+- [ ] The app never shows a location permission prompt.
+- [ ] Dots are at country level (jittered) — never a street/city-exact position.
+- [ ] Caption under the map says locations are approximate and nothing is saved.
+
+### 5d. Connection lifecycle
+
+- [ ] Airplane mode on → "Reconnecting…" + "Try now"; map empties. Off → rejoins with a fresh snapshot, **no replayed pulses**.
+- [ ] Send app to background → return: reconnects as a new session; no stale dots.
+- [ ] Control Center / notification pull-down (`inactive`) does **not** drop the connection.
+- [ ] Back button → home; no WebSocket errors, no leftover haptics; solo breathing still starts and runs normally.
+- [ ] Leave and rejoin repeatedly (5×) → still exactly one dot for you, no duplicated ripples.
+- [ ] Soundscape is unaffected throughout (the Global Room plays no audio of its own).
 
 ---
 

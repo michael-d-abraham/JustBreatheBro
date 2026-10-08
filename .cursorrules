@@ -33,6 +33,7 @@ branches. See `.cursor/rules/home-base-branch.mdc`.
 | Audio cues | `hooks/useBreathingAudio.ts` |
 | Haptics | `hooks/useBreathingHaptics.ts` |
 | Ambient soundscape | `hooks/useBackgroundSoundscape.ts` |
+| Global Room (presence + pulses) | `hooks/useGlobalPresence.ts` (invariants: `AGENTS.md` §4c) |
 | Bottom sheet base | `components/BaseBottomSheet.tsx` |
 | Full-screen settings layout | `components/SettingsScreenLayout.tsx` + `components/SettingsInsetGrouped.tsx` (rule: `.cursor/rules/settings-screen-template.mdc`) |
 | Sheet coordination | `hooks/useBreathingSheets.ts` |

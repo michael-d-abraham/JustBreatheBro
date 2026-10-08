@@ -4,6 +4,10 @@
 > the original draft have been resolved. `AGENTS.md` is the canonical agent guide and is more
 > current than this file on naming and structure details. `docs/FINAL_CLEANUP_REVIEW.md` records
 > the full before/after delta of the cleanup.
+>
+> **Global Room redesign (2026-10):** the three-room "Breathe Together" breathing sessions were
+> replaced by a presence + pulse world map. §3 routes, §6 and the Global Room rows below reflect the
+> new design; the authoritative description is `AGENTS.md` §4c.
 
 ---
 
@@ -17,8 +21,8 @@ JustBreatheBro is a mindfulness and breathing mobile app built with React Native
 - **Ambient soundscapes** — looping background audio that plays app-wide and survives navigation.
 - **Information archive** — curated articles, books, and videos (content produced by the external
   BreathBot pipeline).
-- **Live "Breathe Together" rooms** — real-time synchronized group sessions over WebSockets, with a
-  single authoritative server timer broadcast to all participants.
+- **Global Room** — a minimal real-time world map of everyone connected, where anyone can send one
+  gentle haptic pulse. Presence + pulses over WebSocket (`/global`); no breathing clock or audio.
 
 Tech stack (see [package.json](../package.json), [app.json](../app.json)): Expo `~54`,
 React Native `0.81`, `expo-router ~6`, `react-native-reanimated ~4`, `@gorhom/bottom-sheet`,
@@ -38,8 +42,7 @@ Breath/
     settings.tsx       Full-screen settings — confirmed orphan (no inbound navigation found)
     scenes.tsx         Wallpaper / scene picker (ACTIVE)
     informationarchive.tsx   Information archive browser
-    global_room.tsx    Live "Breathe Together" room session screen (~495 lines)
-    global_room_picker.tsx   Live room selection screen
+    global_room.tsx    Global Room: world map of presence + pulse button
     support.tsx        Legacy route -> Redirect to "/"
     _deprecated/       Dormant routes — DO NOT edit, DO NOT lint
       exercises.tsx    Exercise grid (no entry point; preserved for possible restoration)
@@ -67,9 +70,10 @@ Breath/
     useBreathingHaptics.ts    Phase-quantized haptic pulses
     useBreathingSheets.ts     Sheet open/close coordination for home/session
     useBackgroundSoundscape.ts  App-wide looping ambient audio
-    useGlobalBreathingRoom.ts  Live room WebSocket state machine (~552 lines)
+    useGlobalPresence.ts      Global Room client: socket, presence, pulses, cooldown
+    useGlobalPulseHaptics.ts  One soft tap per incoming pulse
     __tests__/                Jest tests (useBreathingCycle, useBreathingAudio, useBreathingHaptics,
-                              useGlobalBreathingRoom URL/config + behavior, lib/storage)
+                              useGlobalPresence, useGlobalPulseHaptics, lib/*)
 
   lib/
     storage.ts                AsyncStorage wrappers + defaultExercises
@@ -100,8 +104,7 @@ Routing is file-based via Expo Router. The root navigator is a `Stack` defined i
 | `/breathing` | [app/breathing.tsx](../app/breathing.tsx) | `index.tsx` start button (with `autoStart` param) | Active |
 | `/scenes` | [app/scenes.tsx](../app/scenes.tsx) | `index.tsx` (circle press) | Active |
 | `/informationarchive` | [app/informationarchive.tsx](../app/informationarchive.tsx) | `index.tsx` | Active |
-| `/global_room_picker` | [app/global_room_picker.tsx](../app/global_room_picker.tsx) | `index.tsx` (global breath press); `global_room.tsx` (`router.replace`) | Active |
-| `/global_room` | [app/global_room.tsx](../app/global_room.tsx) | `global_room_picker.tsx` (`router.push` with `params.room`) | Active |
+| `/global_room` | [app/global_room.tsx](../app/global_room.tsx) | `index.tsx` (One Breath page → Join) | Active (the old `/global_room_picker` was removed) |
 | `/settings` | [app/settings.tsx](../app/settings.tsx) | No `router.push('/settings')` found anywhere — in-session settings use `SettingsSheet` | **Confirmed orphan** — review pending |
 | `/support` | [app/support.tsx](../app/support.tsx) | Deep link `/support`; renders `<Redirect href="/" />` | Legacy stub (intentional) |
 
@@ -113,10 +116,9 @@ flowchart TD
   home --> breathing["/breathing"]
   home --> scenes["/scenes"]
   home --> archive["/informationarchive"]
-  home --> roomPicker["/global_room_picker"]
+  home --> room["/global_room"]
   scenes --> home
-  roomPicker --> room["/global_room"]
-  room -->|"router.replace"| roomPicker
+  room -->|"back"| home
   breathing -->|"exit"| home
   support["/support"] -->|"Redirect"| home
 
@@ -203,7 +205,7 @@ Persistence runs through [lib/storage.ts](../lib/storage.ts) — `backgroundImag
 Settings UI exists in two places:
 
 - **In-session sheet** — [components/SettingsSheet.tsx](../components/SettingsSheet.tsx), opened from
-  [app/breathing.tsx](../app/breathing.tsx) and [app/global_room.tsx](../app/global_room.tsx). Uses
+  [app/breathing.tsx](../app/breathing.tsx). Uses
   `SoundPicker`, `SoundscapePicker`, and `ThemePicker` with `variant="bottomSheet"`.
 - **Full screen (orphan)** — [app/settings.tsx](../app/settings.tsx). Uses `SoundPicker`,
   `SoundscapePicker`, `ThemePicker`, `AppearancePicker`, `SoundHapticsPicker` with default (`page`)
@@ -221,47 +223,30 @@ flowchart LR
 
 ---
 
-## 6. Live room flow ("Breathe Together")
+## 6. Global Room flow
 
-Selection screen [app/global_room_picker.tsx](../app/global_room_picker.tsx) lists rooms from
-`BREATH_ROOM_CATALOG` (defined in [hooks/useGlobalBreathingRoom.ts](../hooks/useGlobalBreathingRoom.ts):
-`deep` / `box` / `extended-exhale`) and fetches live participant counts via
-`fetchBreathRoomStats(apiBase)` → `GET /api/rooms`. Tapping a room navigates
-`router.push({ pathname: "/global_room", params: { room: opt.id } })`.
-
-Session screen [app/global_room.tsx](../app/global_room.tsx) (~495 lines) consumes
-`useGlobalBreathingRoom({ onPhaseStep, initialRoomId, onSelectedRoomIdChange })`. The hook is a
-WebSocket-driven state machine:
-
-- Endpoints from [lib/breathRoomBackend.ts](../lib/breathRoomBackend.ts): `getBreathRoomWsUrl()`
-  (default `wss://api.hellobreathbro.app`, overridable via `EXPO_PUBLIC_BREATH_ROOM_WS_URL` /
-  `EXPO_PUBLIC_WS_URL`) and `getBreathRoomApiBaseUrl()` (default
-  `https://api.hellobreathbro.app`, overridable via `EXPO_PUBLIC_API_BASE_URL`).
-- `BreathRoomConnectionState = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'disconnected'`.
-- Server is authoritative for timing: the hook tracks `pattern` (`BreathRoomPattern`), `phase`
-  (`GlobalRoomPhase`), `phaseSeq`, `phaseDurationMs`, `phaseEndsAtMs`, `offsetMs`, and
-  `participantCount`, and emits `onPhaseStep(GlobalRoomPhaseStepPayload)` to the screen.
-- Reconnect uses backoff (`INITIAL_CONNECT_BACKOFF_MS = 2000`, `MAX_RECONNECT_BACKOFF_MS = 45000`,
-  jitter) so Render cold starts are not treated as failures. `skipBreathCueAudio` suppresses cue
-  audio on the first step after (re)connect so sounds do not fire mid-phase against wall clock.
-- Phase transitions are de-duplicated with `lastHandledRoomPhaseKeyRef` (phaseSeq can repeat across
-  rooms).
+Home (One Breath page) → **Join** → [app/global_room.tsx](../app/global_room.tsx). The screen is a thin
+view over [hooks/useGlobalPresence.ts](../hooks/useGlobalPresence.ts) (transport via
+`lib/reconnectingSocket.ts`, wire types in `lib/globalPresenceProtocol.ts`, pure state in
+`lib/globalPresenceState.ts`) and [hooks/useGlobalPulseHaptics.ts](../hooks/useGlobalPulseHaptics.ts).
 
 ```mermaid
 sequenceDiagram
-  participant Picker as global_room_picker.tsx
   participant Screen as global_room.tsx
-  participant Hook as useGlobalBreathingRoom
-  participant WS as wss://api.hellobreathbro.app
-  Picker->>WS: GET /api/rooms (fetchBreathRoomStats)
-  Picker->>Screen: router.push(/global_room, {room})
-  Screen->>Hook: useGlobalBreathingRoom({onPhaseStep, initialRoomId})
-  Hook->>WS: connect (backoff on failure)
-  WS-->>Hook: snapshot (pattern) + phase steps
-  Hook-->>Screen: onPhaseStep(phase, durations, seq)
-  Screen->>Screen: drive ring/audio/haptics from server timing
+  participant Hook as useGlobalPresence
+  participant WS as wss://…/global
+  Screen->>Hook: useGlobalPresence({ onPulse, enabled: isFocused })
+  Hook->>WS: connect (connecting is joining)
+  WS-->>Hook: snapshot (selfId, cooldown, participants)
+  WS-->>Hook: join / leave / pulse (echoed to sender too)
+  Hook-->>Screen: dots, ghosts, pulses, isCoolingDown
+  Screen->>Hook: sendPulse()
+  Hook->>WS: {type: "pulse"}
+  WS-->>Hook: pulse (ripple + haptic) or cooldown (no ripple)
 ```
 
+Location is never read from the device: the server assigns a coarse, jittered country-level point
+from the Cloudflare `CF-IPCountry` header. See `AGENTS.md` §4c for the invariants.
 ---
 
 ## 7. Storage flow
@@ -299,7 +284,7 @@ reads resources.
 | `useBreathingHaptics` | [hooks/useBreathingHaptics.ts](../hooks/useBreathingHaptics.ts) | Phase-quantized pulses | `generationRef` guards stale timers; idempotent `cancel` |
 | `useBreathingSheets` | [hooks/useBreathingSheets.ts](../hooks/useBreathingSheets.ts) | Coordinates detail/selection/support sheets on home + session | Owns refs + open/close state, loads exercises |
 | `useBackgroundSoundscape` | [hooks/useBackgroundSoundscape.ts](../hooks/useBackgroundSoundscape.ts) | App-wide looping ambient audio | Mounted once via `BackgroundSoundscapePlayer` in `_layout.tsx`; native loop |
-| `useGlobalBreathingRoom` | [hooks/useGlobalBreathingRoom.ts](../hooks/useGlobalBreathingRoom.ts) | Live room WebSocket state machine | ~552 lines; URL/config + join/leave/reconnect/cleanup tested; real-network timing untested |
+| `useGlobalPresence` | [hooks/useGlobalPresence.ts](../hooks/useGlobalPresence.ts) | Global Room client: presence, pulses, cooldown over `/global` | Mock-WebSocket suite; real-network timing and `CF-IPCountry` untested |
 
 Single-instance rule: the ambient soundscape is mounted exactly once in
 [app/_layout.tsx](../app/_layout.tsx) via
@@ -314,7 +299,8 @@ Single-instance rule: the ambient soundscape is mounted exactly once in
   and configured as an Expo plugin in [app.json](../app.json) (org `breath-bro`). PII-stripping in
   `beforeSend`; replays only on errors. Custom breathing events in
   [utils/sentryTracking.ts](../utils/sentryTracking.ts).
-- **Live WebSocket backend** — `wss://api.hellobreathbro.app` (+ `GET /api/rooms`), configured in
+- **Live WebSocket backend** — `wss://api.hellobreathbro.app` (`/global` for the Global Room; the
+  legacy breathing-room protocol + `GET /api/rooms` stay for installed builds), configured in
   [lib/breathRoomBackend.ts](../lib/breathRoomBackend.ts), overridable via `EXPO_PUBLIC_*` env vars.
   Node service hosted on Render (per README). Separate repo: `breatheAppWebSocketBackEnd`.
 - **BreathBot content pipeline** — external RAG workflow that generates/validates the information
@@ -333,11 +319,9 @@ Single-instance rule: the ambient soundscape is mounted exactly once in
    [app/breathing.tsx](../app/breathing.tsx) and the breathing hooks. Any change must preserve:
    idempotent start/pause/resume/stop, no duplicate timers across re-renders, full teardown on
    stop/unmount/navigation-away, and no double-triggered cues on re-render (see `.cursorrules`).
-2. **Live room timing** — [hooks/useGlobalBreathingRoom.ts](../hooks/useGlobalBreathingRoom.ts) is
-   large and timing-sensitive (reconnect backoff, phase dedupe, `skipBreathCueAudio`). Server is the
-   clock; client must not introduce its own drift.
-3. **Large files** — `breathing.tsx` (~496), `global_room.tsx` (~495), `useGlobalBreathingRoom.ts`
-   (~552). High cognitive load and merge risk.
+2. **Global Room lifecycle** — [hooks/useGlobalPresence.ts](../hooks/useGlobalPresence.ts): one socket,
+   one expiry timer, full teardown on unmount/unfocus/background; server owns presence and pulses.
+3. **Large files** — `breathing.tsx` (~496). High cognitive load and merge risk.
 4. **`app/_tabs/` — deleted.** The tab navigator and its duplicate screens have been removed.
    Navigation is Stack-only via `app/_layout.tsx`.
 5. **`hooks/useSwipeNavigation.ts` — deleted.** It was unused and referenced non-existent routes.

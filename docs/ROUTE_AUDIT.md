@@ -36,12 +36,12 @@ The entire `_tabs/` directory has been removed. See [docs/NAVIGATION_DECISION.md
 
 | Status | Route | File | Purpose | How reached | Verdict |
 |---|---|---|---|---|---|
-| Active | `/` | `app/index.tsx` | Home screen — start session, pick technique, open archive, enter global room | App launch, `router.push('/')` from `breathing.tsx`, `scenes.tsx` | **Keep** |
+| Active | `/` | `app/index.tsx` | Home screen — start session, pick technique, open archive, join the Global Room | App launch, `router.push('/')` from `breathing.tsx`, `scenes.tsx` | **Keep** |
 | Active | `/breathing` | `app/breathing.tsx` | Solo breathing session | `app/index.tsx` start, `app/_tabs/index.tsx` (inactive), `app/exercises.tsx` (inactive), `app/breathsetup.tsx` (inactive) | **Keep** |
 | Active | `/scenes` | `app/scenes.tsx` | Scene + soundscape + animation theme + appearance picker | `app/index.tsx` circle press, `app/wallpaper.tsx` (inactive) | **Keep** |
 | Active | `/informationarchive` | `app/informationarchive.tsx` | Browse articles, books, videos from the information archive | `app/index.tsx` info library press | **Keep** |
-| Active | `/global_room_picker` | `app/global_room_picker.tsx` | Choose a live "Breathe Together" room; shows participant counts | `app/index.tsx` global breath press; `router.replace` from `global_room.tsx` on error | **Keep** |
-| Active | `/global_room` | `app/global_room.tsx` | Live synchronized breathing session over WebSocket | `app/global_room_picker.tsx` room card press | **Keep** |
+| Deleted | `/global_room_picker` | ~~`app/global_room_picker.tsx`~~ | Room selection (Deep / Box / Extended-exhale) with participant counts | Only `app/index.tsx` Join (via room param) and a `router.replace` fallback in the old `global_room.tsx` — both removed | **Deleted** — Global Room redesign (2026-10): Join goes straight to `/global_room` |
+| Active | `/global_room` | `app/global_room.tsx` | Global Room — world map of presence + one gentle pulse (WebSocket `/global`) | `app/index.tsx` One Breath page → Join (`router.push("/global_room")`) | **Keep** |
 | Legacy | `/support` | `app/support.tsx` | Redirect stub — renders `<Redirect href="/" />` | External deep link `/support`; no internal navigation | **Keep** — intentional; prevents missing-route crash for old deep links |
 | Deleted | `/settings` | ~~`app/settings.tsx`~~ | Full-screen settings page (sound, soundscape, theme, appearance) | **No inbound `router.push` or `<Link>` found anywhere in the codebase** | **Deleted** — Color Theme picker moved to `scenes.tsx`; all other sections already covered elsewhere |
 | Deleted | `/wallpaper` | ~~`app/wallpaper.tsx`~~ | Older wallpaper carousel (swipe to pick, left/right arrows, dot indicator) | **No inbound navigation found;** `wallpaper.tsx` itself pushed to `/scenes` | **Deleted** — superseded by `scenes.tsx` |

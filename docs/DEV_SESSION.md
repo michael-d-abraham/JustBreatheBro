@@ -119,9 +119,9 @@ Sim:
 
 #### Global room
 
-- [ ] Picker shows 3 rooms; counts load or show loading
-- [ ] Join → connecting → connected; ring syncs with server
-- [ ] Leave → picker; rejoin works; no duplicate soundscape
+- [ ] Home → Join → map opens, status reaches "Just you here…"/"N people here"; your dot is visible
+- [ ] Pulse button → your ripple (no haptic for your own pulse); ~5 s rest; **device:** receiver feels one soft tap
+- [ ] Back → home; rejoin works; no duplicate soundscape (full list: REGRESSION_CHECKLIST §5)
 
 #### Storage
 
@@ -145,7 +145,7 @@ Run entire [`REGRESSION_CHECKLIST.md`](REGRESSION_CHECKLIST.md) on sim + device 
 | Picker consolidation | A + B settings |
 | Breathing extraction | A + full checklist §1 |
 | Audio / AppState | A + B audio + **device** |
-| Global room hook | A + B global room |
+| Global room (presence/pulses) | A + B global room + **device** (haptics) |
 | Haptics changes | A + **device** |
 
 ---
