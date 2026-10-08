@@ -1,8 +1,7 @@
 import {
-  BREATH_ROOM_PRODUCTION_API_BASE_URL,
   BREATH_ROOM_PRODUCTION_WS_URL,
-  getBreathRoomApiBaseUrl,
   getBreathRoomWsUrl,
+  getGlobalRoomWsUrl,
 } from "@/lib/breathRoomBackend";
 
 describe("getBreathRoomWsUrl", () => {
@@ -47,10 +46,9 @@ describe("getBreathRoomWsUrl", () => {
   });
 });
 
-describe("getBreathRoomApiBaseUrl", () => {
+describe("getGlobalRoomWsUrl", () => {
   const prevRoom = process.env.EXPO_PUBLIC_BREATH_ROOM_WS_URL;
   const prevWs = process.env.EXPO_PUBLIC_WS_URL;
-  const prevApi = process.env.EXPO_PUBLIC_API_BASE_URL;
 
   afterEach(() => {
     if (prevRoom === undefined) {
@@ -63,37 +61,45 @@ describe("getBreathRoomApiBaseUrl", () => {
     } else {
       process.env.EXPO_PUBLIC_WS_URL = prevWs;
     }
-    if (prevApi === undefined) {
-      delete process.env.EXPO_PUBLIC_API_BASE_URL;
-    } else {
-      process.env.EXPO_PUBLIC_API_BASE_URL = prevApi;
+  });
+
+  beforeEach(() => {
+    delete process.env.EXPO_PUBLIC_BREATH_ROOM_WS_URL;
+    delete process.env.EXPO_PUBLIC_WS_URL;
+  });
+
+  it("appends /global to the production host by default", () => {
+    expect(getGlobalRoomWsUrl()).toBe("wss://api.hellobreathbro.app/global");
+  });
+
+  it("uses the same env overrides as the breathing rooms (local server)", () => {
+    process.env.EXPO_PUBLIC_WS_URL = "ws://localhost:8085";
+    expect(getGlobalRoomWsUrl()).toBe("ws://localhost:8085/global");
+    process.env.EXPO_PUBLIC_BREATH_ROOM_WS_URL = "ws://10.0.2.2:8085";
+    expect(getGlobalRoomWsUrl()).toBe("ws://10.0.2.2:8085/global");
+  });
+
+  it("tolerates a trailing slash, an existing path, a query string and a hash", () => {
+    for (const base of [
+      "wss://example.com/",
+      "wss://example.com//",
+      "wss://example.com/some/path",
+      "wss://example.com/?x=1",
+      "wss://example.com#frag",
+      "  wss://example.com  ",
+    ]) {
+      process.env.EXPO_PUBLIC_BREATH_ROOM_WS_URL = base;
+      expect(getGlobalRoomWsUrl()).toBe("wss://example.com/global");
     }
   });
 
-  it("uses EXPO_PUBLIC_API_BASE_URL when set", () => {
-    delete process.env.EXPO_PUBLIC_BREATH_ROOM_WS_URL;
-    delete process.env.EXPO_PUBLIC_WS_URL;
-    process.env.EXPO_PUBLIC_API_BASE_URL = "http://localhost:9999/";
-    expect(getBreathRoomApiBaseUrl()).toBe("http://localhost:9999");
+  it("keeps an explicit port", () => {
+    process.env.EXPO_PUBLIC_BREATH_ROOM_WS_URL = "wss://example.com:8443/old";
+    expect(getGlobalRoomWsUrl()).toBe("wss://example.com:8443/global");
   });
 
-  it("derives http from ws URL when API base unset", () => {
-    delete process.env.EXPO_PUBLIC_API_BASE_URL;
-    process.env.EXPO_PUBLIC_WS_URL = "ws://localhost:8085";
-    expect(getBreathRoomApiBaseUrl()).toBe("http://localhost:8085");
-  });
-
-  it("derives https from wss URL", () => {
-    delete process.env.EXPO_PUBLIC_API_BASE_URL;
-    process.env.EXPO_PUBLIC_WS_URL = "wss://example.com/path";
-    expect(getBreathRoomApiBaseUrl()).toBe("https://example.com");
-  });
-
-  it("uses production API host when env unset (matches default ws)", () => {
-    delete process.env.EXPO_PUBLIC_BREATH_ROOM_WS_URL;
-    delete process.env.EXPO_PUBLIC_WS_URL;
-    delete process.env.EXPO_PUBLIC_API_BASE_URL;
-    expect(getBreathRoomWsUrl()).toBe(BREATH_ROOM_PRODUCTION_WS_URL);
-    expect(getBreathRoomApiBaseUrl()).toBe(BREATH_ROOM_PRODUCTION_API_BASE_URL);
+  it("falls back to plain concatenation for a base that is not ws(s)://", () => {
+    process.env.EXPO_PUBLIC_BREATH_ROOM_WS_URL = "example.com/";
+    expect(getGlobalRoomWsUrl()).toBe("example.com/global");
   });
 });

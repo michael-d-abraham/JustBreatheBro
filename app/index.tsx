@@ -11,10 +11,6 @@ import SupportSheet from "@/components/SupportSheet";
 import { useAppSettings } from "@/contexts/appSettingsContext";
 import { useBreathing } from "@/contexts/breathingContext";
 import { useBreathingSheets } from "@/hooks/useBreathingSheets";
-import {
-  BREATH_ROOM_DEEP,
-  type CanonicalBreathRoomId,
-} from "@/hooks/useGlobalBreathingRoom";
 import { defaultExercises } from "@/lib/storage";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
@@ -53,8 +49,6 @@ export default function Index() {
   const { backgroundImage } = useAppSettings();
   const scrollViewRef = useRef<ScrollView>(null);
   const [currentPageIndex, setCurrentPageIndex] = useState(1); // Start at Relax
-  const [selectedBreathRoomId, setSelectedBreathRoomId] =
-    useState<CanonicalBreathRoomId>(BREATH_ROOM_DEEP);
 
   // Android has no ScrollView contentOffset; iOS uses contentOffset on the ScrollView below.
   useEffect(() => {
@@ -89,10 +83,7 @@ export default function Index() {
   };
 
   const handleOneBreathJoin = () => {
-    router.push({
-      pathname: "/global_room",
-      params: { room: selectedBreathRoomId },
-    });
+    router.push("/global_room");
   };
 
   const handleTipsAndTricksPress = () => {
@@ -190,13 +181,7 @@ export default function Index() {
                     <LearnTabContent bottomInset={bottomContentInset} />
                   ) : page.id === "oneBreath" ? (
                     <View style={styles.meditateHeroCenter}>
-                      <HomeOneBreathHero
-                        onJoinPress={handleOneBreathJoin}
-                        roomId={selectedBreathRoomId}
-                        onRoomSelect={setSelectedBreathRoomId}
-                        durationMinutes={sessionDurationMinutes}
-                        onTimerSelect={updateSessionDuration}
-                      />
+                      <HomeOneBreathHero onJoinPress={handleOneBreathJoin} />
                     </View>
                   ) : (
                     <>

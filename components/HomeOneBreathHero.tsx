@@ -1,10 +1,6 @@
-import HomeBreathRoomDropdown from "@/components/HomeBreathRoomDropdown";
-import HomeTimerDropdown from "@/components/HomeTimerDropdown";
 import HomeNavPressable from "@/components/HomeNavPressable";
 import { useTheme } from "@/components/Theme";
-import type { CanonicalBreathRoomId } from "@/hooks/useGlobalBreathingRoom";
 import {
-  HOME_HERO_PICKER_GAP,
   HOME_HERO_TAGLINE_GAP,
   HOME_JOIN_CIRCLE_BLUR,
   HOME_JOIN_CIRCLE_FONT_SIZE,
@@ -16,29 +12,16 @@ import {
   HOME_TAGLINE_OPACITY,
   homeNavIconPrimary,
 } from "@/components/homeNavTokens";
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
-
-type OpenDropdown = "room" | "timer" | null;
 
 type Props = {
   onJoinPress: () => void;
-  roomId: CanonicalBreathRoomId;
-  onRoomSelect: (roomId: CanonicalBreathRoomId) => void;
-  durationMinutes: number;
-  onTimerSelect: (minutes: number) => void;
 };
 
-export default function HomeOneBreathHero({
-  onJoinPress,
-  roomId,
-  onRoomSelect,
-  durationMinutes,
-  onTimerSelect,
-}: Props) {
+export default function HomeOneBreathHero({ onJoinPress }: Props) {
   const { tokens } = useTheme();
   const foreground = homeNavIconPrimary(tokens.mode);
-  const [openDropdown, setOpenDropdown] = useState<OpenDropdown>(null);
 
   const styles = useMemo(
     () =>
@@ -63,11 +46,6 @@ export default function HomeOneBreathHero({
           alignItems: "center",
           gap: HOME_JOIN_CIRCLE_GAP,
         },
-        pickerRow: {
-          flexDirection: "row",
-          alignItems: "flex-start",
-          gap: HOME_HERO_PICKER_GAP,
-        },
         joinButton: {
           width: HOME_JOIN_CIRCLE_SIZE,
           height: HOME_JOIN_CIRCLE_SIZE,
@@ -82,14 +60,6 @@ export default function HomeOneBreathHero({
       }),
     [foreground],
   );
-
-  const setRoomOpen = (open: boolean) => {
-    setOpenDropdown(open ? "room" : null);
-  };
-
-  const setTimerOpen = (open: boolean) => {
-    setOpenDropdown(open ? "timer" : null);
-  };
 
   return (
     <View style={styles.stack}>
@@ -107,21 +77,6 @@ export default function HomeOneBreathHero({
         >
           <Text style={styles.joinButtonText}>Join</Text>
         </HomeNavPressable>
-
-        <View style={styles.pickerRow}>
-          <HomeBreathRoomDropdown
-            roomId={roomId}
-            open={openDropdown === "room"}
-            onOpenChange={setRoomOpen}
-            onSelect={onRoomSelect}
-          />
-          <HomeTimerDropdown
-            durationMinutes={durationMinutes}
-            open={openDropdown === "timer"}
-            onOpenChange={setTimerOpen}
-            onSelect={onTimerSelect}
-          />
-        </View>
       </View>
     </View>
   );
