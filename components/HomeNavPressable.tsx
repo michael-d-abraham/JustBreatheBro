@@ -16,9 +16,11 @@ type Props = {
   testID?: string;
   accessibilityRole?: AccessibilityRole;
   accessibilityLabel: string;
+  accessibilityHint?: string;
   accessibilityState?: {
     selected?: boolean;
     expanded?: boolean;
+    disabled?: boolean;
   };
   style?: StyleProp<ViewStyle>;
   borderRadius?: number;
@@ -39,6 +41,7 @@ export default function HomeNavPressable({
   testID,
   accessibilityRole = "button",
   accessibilityLabel,
+  accessibilityHint,
   accessibilityState,
   style,
   borderRadius = 999,
@@ -80,6 +83,7 @@ export default function HomeNavPressable({
       testID={testID}
       accessibilityRole={accessibilityRole}
       accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
       accessibilityState={accessibilityState}
       onPress={onPress}
       style={({ pressed }) => [pressed && styles.pressed]}

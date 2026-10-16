@@ -18,6 +18,11 @@ export const HOME_NAV_SHADOW_COLOR = "#000000";
 /** Tagline on wallpaper — primary icon color @ reduced opacity */
 export const HOME_TAGLINE_OPACITY = 0.78;
 
+/** Tagline typography — One Breath hero, and the Global Room status/labels that continue it */
+export const HOME_TAGLINE_FONT_SIZE = 11;
+export const HOME_TAGLINE_FONT_WEIGHT = "500" as const;
+export const HOME_TAGLINE_LETTER_SPACING = 2.4;
+
 /** Typography on frosted nav chrome */
 export const HOME_NAV_CHROME_LABEL_SIZE = 11;
 export const HOME_NAV_CHROME_LABEL_WEIGHT = "500" as const;

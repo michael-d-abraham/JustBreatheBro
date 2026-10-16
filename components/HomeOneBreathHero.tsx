@@ -9,6 +9,9 @@ import {
   HOME_JOIN_CIRCLE_SIZE,
   HOME_ONE_BREATH_TAGLINE,
   HOME_START_STACK_ABOVE_CENTER,
+  HOME_TAGLINE_FONT_SIZE,
+  HOME_TAGLINE_FONT_WEIGHT,
+  HOME_TAGLINE_LETTER_SPACING,
   HOME_TAGLINE_OPACITY,
   homeNavIconPrimary,
 } from "@/components/homeNavTokens";
@@ -32,9 +35,9 @@ export default function HomeOneBreathHero({ onJoinPress }: Props) {
           marginBottom: HOME_START_STACK_ABOVE_CENTER,
         },
         tagline: {
-          fontSize: 11,
-          fontWeight: "500",
-          letterSpacing: 2.4,
+          fontSize: HOME_TAGLINE_FONT_SIZE,
+          fontWeight: HOME_TAGLINE_FONT_WEIGHT,
+          letterSpacing: HOME_TAGLINE_LETTER_SPACING,
           textTransform: "uppercase",
           color: foreground,
           opacity: HOME_TAGLINE_OPACITY,

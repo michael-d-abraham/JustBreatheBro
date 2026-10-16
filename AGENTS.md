@@ -92,8 +92,9 @@ Breath/
     BottomSheet*.tsx       Sheet building blocks (rows, toggles, section titles, dividers…)
     BackgroundSoundscapePlayer.tsx  Mounts useBackgroundSoundscape (renders null)
     BreathingPage*.tsx     Presentational pieces extracted from breathing.tsx
-    GlobalRoomMap.tsx      Land outline + presence dots + ghosts + ripples (presentational)
-    GlobalRoomPulseButton.tsx  The one control: send a gentle pulse
+    GlobalRoomMap.tsx      Land outline + presence dots + glow + ghosts + ripples (presentational; takes a palette)
+    GlobalRoomPulseButton.tsx  The one control: send a gentle pulse (built on HomeNavPressable)
+    globalRoomTokens.ts    Global Room sizes/opacities + globalRoomPalette(mode, accent) — every color derives from theme tokens
     WallpaperCarousel.tsx  Horizontal scroll of wallpaper tiles
     WallpaperPreview.tsx   Single wallpaper tile (image + label + selection state)
     SettingsSheet.tsx      In-session settings bottom sheet
@@ -125,7 +126,10 @@ Breath/
     globalPresenceProtocol.ts Wire types + defensive decoder for the /global protocol (v1)
     globalPresenceState.ts    Pure presence/pulse/cooldown state machine (no timers, injected `nowMs`)
     reconnectingSocket.ts     Reconnecting WebSocket wrapper (backoff, stale-socket guard, idempotent)
-    worldMapProjection.ts     Pure lat/lon → map-fraction projection for the land outline
+    worldMapProjection.ts     Pure lat/lon → map-fraction projection (Natural Earth I; params in worldMap.ts)
+    worldMapProjection.ts     dotted-map Mercator → normalized map fractions (matches precomputed grid)
+    globalRoomLayout.ts       Pure responsive fit (fitMapWidth), dot scale, mark placement in px
+    globalRoomMotion.ts       Pure ripple / glow / ghost-fade math (+ Reduce Motion variants) used by animated styles
     breathingHapticsResolve.ts  Pure math helper: haptic pulse-plan calculation
 
   constants/
@@ -197,6 +201,14 @@ Invariants:
   Do not route pulses through `useBreathingHaptics`.
 - Decode every frame defensively (`decodeGlobalMessage` never throws; unknown/malformed frames are
   dropped).
+- **Design system:** no literal colors in the Global Room. Colors come only from
+  `globalRoomPalette(tokens.mode, tokens.accent)` (`components/globalRoomTokens.ts`); the pulse
+  control is `HomeNavPressable`, the back button `HomeNavIconButton`, text uses the `HOME_TAGLINE_*`
+  tokens. `GlobalRoomMap` is presentational (props only, never touches the socket); its animation and
+  layout math live in `lib/globalRoomMotion.ts` / `lib/globalRoomLayout.ts` and honour Reduce Motion.
+- **Background:** the screen paints an opaque `tokens.sceneBackground` (a plain surface, not the
+  wallpaper that `ThemedAppBackground` draws behind other screens). The map sits directly on it,
+  with no container. Don't make the screen transparent again.
 
 Tests: `hooks/__tests__/useGlobalPresence.test.ts` (mock WebSocket, fake timers) plus pure suites
 for the protocol, state machine, socket, projection and URL config. Real-network timing and
@@ -240,7 +252,7 @@ adding get/set wrappers here. Do not change existing key strings (would break ex
 ### Automated checks (run before every commit)
 
 ```bash
-npm run check     # lint + 184 tests — must pass
+npm run check     # lint + 224 tests — must pass
 npx tsc --noEmit  # must add no new errors (7 pre-existing: SupportSheet, SettingsOptionCard)
 git status        # verify no unintended staged files
 ```
@@ -275,6 +287,9 @@ navigation, or settings.
 | `lib/__tests__/globalPresenceState.test.ts` | Presence/pulse/cooldown/expiry state machine |
 | `lib/__tests__/reconnectingSocket.test.ts` | Backoff, idempotent start/stop, stale-socket guard |
 | `lib/__tests__/worldMapProjection.test.ts` | Projection + generated map data sanity |
+| `lib/__tests__/globalRoomLayout.test.ts` | Responsive fit, dot scale, coordinate → pixel placement |
+| `lib/__tests__/globalRoomMotion.test.ts` | Ripple/glow/ghost-fade frames, Reduce Motion variants |
+| `lib/__tests__/globalRoomPalette.test.ts` | Every Global Room color derives from mode + accent tokens (light/dark × themes) |
 | `lib/__tests__/breathRoomBackend.test.ts` | WS URL/config resolution incl. `/global` |
 | `lib/__tests__/storage.test.ts` | AsyncStorage round-trips |
 
@@ -383,7 +398,7 @@ Follow this protocol for any refactor beyond a trivial edit:
 
 **After coding:**
 1. Run `npm run lint` — fix all errors.
-2. Run `npm test` — all 184 tests must pass.
+2. Run `npm test` — all 224 tests must pass.
 3. Run the manual smoke test (§6).
 4. If you touched session logic, audio, haptics, animation, navigation, or settings — run the
    full checklist in `docs/REGRESSION_CHECKLIST.md`.

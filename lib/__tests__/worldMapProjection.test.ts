@@ -1,6 +1,6 @@
 import {
   WORLD_MAP_HEIGHT,
-  WORLD_MAP_LAND_PATH,
+  WORLD_MAP_LAND_DOTS,
   WORLD_MAP_LAT_MAX,
   WORLD_MAP_LAT_MIN,
   WORLD_MAP_WIDTH,
@@ -8,17 +8,21 @@ import {
 import { projectToWorldMap, worldMapHeightForWidth } from "@/lib/worldMapProjection";
 
 describe("projectToWorldMap", () => {
-  it("maps the map's corners to the unit square", () => {
-    expect(projectToWorldMap(WORLD_MAP_LAT_MAX, -180)).toEqual({ x: 0, y: 0 });
-    expect(projectToWorldMap(WORLD_MAP_LAT_MIN, 180)).toEqual({ x: 1, y: 1 });
-  });
-
-  it("puts the prime meridian horizontally centred and the equator inside the map", () => {
-    const origin = projectToWorldMap(0, 0);
-    expect(origin.x).toBeCloseTo(0.5, 10);
-    expect(origin.y).toBeCloseTo(WORLD_MAP_LAT_MAX / WORLD_MAP_HEIGHT, 10);
-    expect(origin.y).toBeGreaterThan(0);
-    expect(origin.y).toBeLessThan(1);
+  it("returns normalized coordinates inside the unit square", () => {
+    for (const [lat, lon] of [
+      [WORLD_MAP_LAT_MAX, -180],
+      [WORLD_MAP_LAT_MIN, 180],
+      [0, 0],
+      [35.7, 139.7],
+      [40.7, -74],
+      [-33.9, 151.2],
+    ] as const) {
+      const p = projectToWorldMap(lat, lon);
+      expect(p.x).toBeGreaterThanOrEqual(0);
+      expect(p.x).toBeLessThanOrEqual(1);
+      expect(p.y).toBeGreaterThanOrEqual(0);
+      expect(p.y).toBeLessThanOrEqual(1);
+    }
   });
 
   it("is monotonic: east moves right, north moves up", () => {
@@ -60,28 +64,26 @@ describe("projectToWorldMap", () => {
 });
 
 describe("worldMapHeightForWidth", () => {
-  it("preserves the outline's aspect ratio", () => {
+  it("preserves the map aspect ratio", () => {
     expect(worldMapHeightForWidth(WORLD_MAP_WIDTH)).toBe(WORLD_MAP_HEIGHT);
-    expect(worldMapHeightForWidth(720)).toBe(WORLD_MAP_HEIGHT * 2);
+    expect(worldMapHeightForWidth(WORLD_MAP_WIDTH / 2)).toBe(WORLD_MAP_HEIGHT / 2);
   });
 });
 
-describe("WORLD_MAP_LAND_PATH (generated data sanity)", () => {
-  it("is a closed-polygon SVG path using only simple commands", () => {
-    expect(WORLD_MAP_LAND_PATH.length).toBeGreaterThan(10_000);
-    expect(WORLD_MAP_LAND_PATH.startsWith("M")).toBe(true);
-    expect(WORLD_MAP_LAND_PATH.endsWith("Z")).toBe(true);
-    expect(WORLD_MAP_LAND_PATH).toMatch(/^[MLZ0-9.\- ]+$/);
+describe("WORLD_MAP_LAND_DOTS (generated data sanity)", () => {
+  it("has an even-length flat coordinate array with thousands of land points", () => {
+    expect(WORLD_MAP_LAND_DOTS.length % 2).toBe(0);
+    expect(WORLD_MAP_LAND_DOTS.length).toBeGreaterThan(2500);
   });
 
-  it("keeps every coordinate inside the declared canvas", () => {
-    const numbers = WORLD_MAP_LAND_PATH.match(/-?\d+(\.\d+)?/g)!.map(Number);
-    for (let i = 0; i < numbers.length; i += 2) {
-      expect(numbers[i]).toBeGreaterThanOrEqual(0);
-      expect(numbers[i]).toBeLessThanOrEqual(WORLD_MAP_WIDTH);
-      expect(numbers[i + 1]).toBeGreaterThanOrEqual(0);
-      expect(numbers[i + 1]).toBeLessThanOrEqual(WORLD_MAP_HEIGHT);
+  it("keeps every land dot inside the declared canvas", () => {
+    for (let i = 0; i < WORLD_MAP_LAND_DOTS.length; i += 2) {
+      const x = WORLD_MAP_LAND_DOTS[i];
+      const y = WORLD_MAP_LAND_DOTS[i + 1];
+      expect(x).toBeGreaterThanOrEqual(0);
+      expect(x).toBeLessThanOrEqual(WORLD_MAP_WIDTH);
+      expect(y).toBeGreaterThanOrEqual(0);
+      expect(y).toBeLessThanOrEqual(WORLD_MAP_HEIGHT);
     }
-    expect(numbers.length % 2).toBe(0);
   });
 });
