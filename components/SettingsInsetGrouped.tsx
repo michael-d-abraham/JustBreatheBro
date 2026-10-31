@@ -249,9 +249,7 @@ function BackButton({
   return (
     <Pressable onPress={onPress} hitSlop={8} style={styles.backButton}>
       <Ionicons name="chevron-back" size={20} color={color} />
-      <Text style={[styles.backText, { color }]} numberOfLines={1}>
-        {label}
-      </Text>
+      <Text style={[styles.backText, { color }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -406,7 +404,9 @@ export function SettingsInsetGroupedLayout({
   );
 
   const scrollHeaderPaddingTop = isBottomSheet
-    ? SHEET_HEADER_TOP_INSET
+    ? onBack
+      ? SHEET_HEADER_TOP_INSET + sheetStickyBarHeight + 4
+      : SHEET_HEADER_TOP_INSET
     : topBarHeight;
 
   const scrollContent = (
@@ -421,15 +421,6 @@ export function SettingsInsetGroupedLayout({
           },
         ]}
       >
-        {isBottomSheet && onBack ? (
-          <View style={styles.sheetScrollBackRow}>
-            <BackButton
-              onPress={onBack}
-              label={backLabel}
-              color={tokens.settingsLink}
-            />
-          </View>
-        ) : null}
         <Animated.Text
           style={[
             styles.largeTitle,
@@ -570,28 +561,37 @@ export function SettingsInsetGroupedLayout({
           </View>
         </Animated.View>
       ) : (
-        <AnimatedStickyHeader
-          animatedProps={sheetStickyPointerProps}
-          style={[
-            styles.sheetStickyOverlay,
-            { height: sheetStickyOverlayHeight },
-          ]}
-        >
+        <>
           {onBack ? (
             <View
-              pointerEvents="auto"
+              pointerEvents="box-none"
               style={[
-                styles.sheetStickyBack,
-                { top: SHEET_HEADER_TOP_INSET, height: sheetStickyBarHeight },
+                styles.sheetStickyOverlay,
+                styles.sheetStickyBackLayer,
+                { height: sheetStickyOverlayHeight },
               ]}
             >
-              <BackButton
-                onPress={onBack}
-                label={backLabel}
-                color={tokens.settingsLink}
-              />
+              <View
+                style={[
+                  styles.sheetStickyBack,
+                  { top: SHEET_HEADER_TOP_INSET, height: sheetStickyBarHeight },
+                ]}
+              >
+                <BackButton
+                  onPress={onBack}
+                  label={backLabel}
+                  color={tokens.settingsLink}
+                />
+              </View>
             </View>
           ) : null}
+          <AnimatedStickyHeader
+            animatedProps={sheetStickyPointerProps}
+            style={[
+              styles.sheetStickyOverlay,
+              { height: sheetStickyOverlayHeight },
+            ]}
+          >
           <Animated.View
             style={[
               styles.sheetStickyPill,
@@ -621,7 +621,8 @@ export function SettingsInsetGroupedLayout({
               {title}
             </Text>
           </Animated.View>
-        </AnimatedStickyHeader>
+          </AnimatedStickyHeader>
+        </>
       )}
 
       {variant === "bottomSheet" ? (
@@ -966,9 +967,6 @@ const styles = StyleSheet.create({
   sheetScrollHeader: {
     paddingBottom: 0,
   },
-  sheetScrollBackRow: {
-    marginBottom: 4,
-  },
   fixedHeader: {
     position: "absolute",
     top: 0,
@@ -1069,10 +1067,16 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     paddingTop: SHEET_HEADER_TOP_INSET,
   },
+  sheetStickyBackLayer: {
+    zIndex: 13,
+  },
   sheetStickyBack: {
     position: "absolute",
     left: HORIZONTAL_INSET - 6,
+    right: "28%",
     justifyContent: "center",
+    alignItems: "flex-start",
+    zIndex: 2,
   },
   sheetStickyPill: {
     overflow: "hidden",
@@ -1116,13 +1120,15 @@ const styles = StyleSheet.create({
   backButton: {
     flexDirection: "row",
     alignItems: "center",
-    maxWidth: "45%",
+    flexShrink: 0,
     paddingVertical: 8,
     marginLeft: -6,
+    paddingRight: 8,
   },
   backText: {
     fontSize: 17,
     marginLeft: -2,
+    flexShrink: 0,
   },
   row: {
     flexDirection: "row",

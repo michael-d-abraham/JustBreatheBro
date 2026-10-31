@@ -46,6 +46,8 @@ export default function BreathingRing({
         pattern={pattern}
         isRunning={isRunning}
         isPaused={isPaused}
+        mainStroke={breathingAnim.mainStroke}
+        mainFill={breathingAnim.mainFill}
       />
       <Svg width={400} height={400}>
         {/* Outer circle */}

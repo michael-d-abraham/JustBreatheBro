@@ -1,16 +1,48 @@
-/** Short in-app pointers for Tips and Tricks (sheet only). */
+/** Tips and Tricks rows (Support sheet only). */
 export type AppTip = {
   id: string;
-  text: string;
+  title: string;
+  /** List row subtitle */
+  description: string;
+  /** Optional longer copy on the detail screen */
+  detail?: string;
 };
 
+export function getAppTipById(id: string): AppTip | undefined {
+  return APP_TIPS.find((tip) => tip.id === id);
+}
+
 export const APP_TIPS: AppTip[] = [
-  { id: "start", text: "Tap Start on Meditate to breathe with the ring." },
-  { id: "pause", text: "Pause stops the ring, timer, and guide dots." },
-  { id: "technique", text: "Change technique on Meditate — your pick is saved." },
-  { id: "dots", text: "Dots above the ring fill on inhale, empty on exhale." },
-  { id: "scenes", text: "Tulip icon → wallpaper, soundscape, theme, light/dark." },
-  { id: "global", text: "Create tab → Global Room map and gentle pulses." },
-  { id: "videos", text: "Video walkthroughs tab → guided breathing videos." },
-  { id: "settings", text: "Menu → Settings for sound and haptics." },
+  {
+    id: "start",
+    title: "Start a session",
+    description:
+      "On Meditate, tap Start and follow the ring. Guide dots fill on inhale and empty on exhale.",
+  },
+  {
+    id: "pause",
+    title: "Pause a session",
+    description:
+      "Tap pause during a session to freeze the ring, timer, and dots. Resume picks up where you left off.",
+    detail:
+      "During a session, tap pause on the controls to open a rest state. The ring, countdown, and guide dots all stop until you resume.",
+  },
+  {
+    id: "scenes",
+    title: "Scenes",
+    description:
+      "Tap the tulip icon to change wallpaper, soundscape, theme, and light or dark appearance.",
+  },
+  {
+    id: "global",
+    title: "Global Room",
+    description:
+      "Swipe to Create to see the map and send a gentle pulse when you are connected.",
+  },
+  {
+    id: "settings",
+    title: "Settings",
+    description:
+      "Menu → Settings for session sound and haptics. In a live session, the gear opens the same sheet.",
+  },
 ];

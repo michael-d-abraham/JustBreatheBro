@@ -17,6 +17,8 @@ import { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reani
 
 /** Match iOS native-stack pop duration so status bar restore does not shift home layout mid-transition. */
 const STATUS_BAR_RESTORE_DELAY_MS = Platform.OS === "ios" ? 350 : 0;
+/** Wait for stack fade before auto-start so ring/dots do not run over the home screen. */
+const AUTO_START_AFTER_TRANSITION_MS = 380;
 
 const BREATHING_PHASE_HAPTICS: Record<
   "inhale" | "hold" | "exhale",
@@ -374,7 +376,7 @@ export default function BreathingPage() {
           hasShownInitialUI.current = true;
           setIsUIVisible(true);
         }
-      }, 100);
+      }, AUTO_START_AFTER_TRANSITION_MS);
       return () => clearTimeout(timer);
     }
   }, [autoStart, start, settings.soundEnabled, settings.hapticsEnabled]);

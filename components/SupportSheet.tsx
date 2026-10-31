@@ -1,5 +1,5 @@
 import LearnTabContent from "@/components/learn/LearnTabContent";
-import TipsAndTricksContent from "@/components/learn/TipsAndTricksContent";
+import TipsAndTricksFlow from "@/components/learn/TipsAndTricksFlow";
 import { useAppSettings } from "@/contexts/appSettingsContext";
 import { useTheme } from "@/components/Theme";
 import React, { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
@@ -75,16 +75,7 @@ function ExploreScreen({ onDone }: Pick<ScreenProps, "onDone">) {
 }
 
 function TipsAndTricksScreen({ onDone }: Pick<ScreenProps, "onDone">) {
-  return (
-    <SettingsSheetScreen
-      title="Tips and Tricks"
-      subtitle="Short pointers for using the app."
-      onClose={onDone}
-      closeTestID="tips-and-tricks.close-button"
-    >
-      <TipsAndTricksContent bottomInset={8} />
-    </SettingsSheetScreen>
-  );
+  return <TipsAndTricksFlow onDone={onDone} />;
 }
 
 function SettingsMainScreen({ onNavigate, onDone }: ScreenProps) {
@@ -122,11 +113,12 @@ function SettingsMainScreen({ onNavigate, onDone }: ScreenProps) {
       </SettingsSection>
 
       <SettingsSection title="About">
-        <SettingsGroupedLinkRow
+        {/* About Me — hidden for now; re-enable when the page is ready. */}
+        {/* <SettingsGroupedLinkRow
           title="About Me"
           icon={settingsRowIcons.aboutMe}
           onPress={() => onNavigate("about-me")}
-        />
+        /> */}
         <SettingsGroupedLinkRow
           title="Ideas & Suggestions"
           icon={settingsRowIcons.ideas}
