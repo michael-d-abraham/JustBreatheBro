@@ -1,4 +1,7 @@
-import { resolvePhasePulsePlan } from "@/lib/breathingHapticsResolve";
+import {
+  buildPhasePulseDelaysMs,
+  resolvePhasePulsePlan,
+} from "@/lib/breathingHapticsResolve";
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -65,6 +68,13 @@ export function useBreathingHaptics({ hapticsEnabled }: UseBreathingHapticsProps
 
       if (!(plan.resolvedIntervalMs > 0)) return;
 
+      const delays = buildPhasePulseDelaysMs({
+        durationMs,
+        targetIntervalMs,
+        toleranceMs,
+        resumeMidPhase,
+      });
+
       const schedulePulse = (delayMs: number, style: Haptics.ImpactFeedbackStyle) => {
         const id = setTimeout(() => {
           if (gen !== generationRef.current) return;
@@ -75,12 +85,12 @@ export function useBreathingHaptics({ hapticsEnabled }: UseBreathingHapticsProps
 
       if (!resumeMidPhase) {
         void Haptics.impactAsync(transitionIntensity);
-        for (let k = 1; k < plan.pulseCount; k++) {
-          schedulePulse(k * plan.resolvedIntervalMs, pulseIntensity);
+        for (let k = 1; k < delays.length; k++) {
+          schedulePulse(delays[k]!, pulseIntensity);
         }
       } else {
-        for (let k = 0; k < plan.pulseCount; k++) {
-          schedulePulse(k * plan.resolvedIntervalMs, pulseIntensity);
+        for (const delay of delays) {
+          schedulePulse(delay, pulseIntensity);
         }
       }
     },

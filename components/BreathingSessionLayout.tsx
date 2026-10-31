@@ -17,9 +17,11 @@ interface BreathingSessionLayoutProps {
   backgroundImage: string | null;
   currentExercise: Exercise | null;
   phase: BreathingPhase;
+  timeLeft: number;
   radius: SharedValue<number>;
   strokeWidth: SharedValue<number>;
   isRunning: boolean;
+  isPaused: boolean;
   isUIVisible: boolean;
   isSheetOpen: boolean;
   uiAnimatedStyle: StyleProp<ViewStyle>;
@@ -40,9 +42,11 @@ export default function BreathingSessionLayout({
   backgroundImage,
   currentExercise,
   phase,
+  timeLeft,
   radius,
   strokeWidth,
   isRunning,
+  isPaused,
   isUIVisible,
   isSheetOpen,
   uiAnimatedStyle,
@@ -76,6 +80,12 @@ export default function BreathingSessionLayout({
             {/* Breathing Animation */}
             <BreathingRing
               phase={phase}
+              timeLeft={timeLeft}
+              pattern={
+                currentExercise ?? { inhale: 4, hold1: 4, exhale: 4, hold2: 4 }
+              }
+              isRunning={isRunning}
+              isPaused={isPaused}
               radius={radius}
               strokeWidth={strokeWidth}
               onInnerPress={onRingInnerPress}

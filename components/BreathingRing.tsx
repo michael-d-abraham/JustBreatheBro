@@ -1,5 +1,7 @@
+import BreathingPhaseDots from "@/components/BreathingPhaseDots";
 import { useBreathingAnimationTokens, useWallpaperForeground } from "@/components/Theme";
 import { BreathingPhase } from "@/hooks/useBreathingCycle";
+import type { BreathingPattern } from "@/lib/breathingPhaseDots";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 import Animated, { SharedValue, useAnimatedProps } from "react-native-reanimated";
@@ -9,6 +11,10 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 interface BreathingRingProps {
   phase: BreathingPhase;
+  timeLeft: number;
+  pattern: BreathingPattern;
+  isRunning: boolean;
+  isPaused: boolean;
   radius: SharedValue<number>;
   strokeWidth: SharedValue<number>;
   onInnerPress: () => void;
@@ -16,6 +22,10 @@ interface BreathingRingProps {
 
 export default function BreathingRing({
   phase,
+  timeLeft,
+  pattern,
+  isRunning,
+  isPaused,
   radius,
   strokeWidth,
   onInnerPress,
@@ -30,6 +40,13 @@ export default function BreathingRing({
 
   return (
     <View style={{ alignItems: 'center', position: 'relative' }}>
+      <BreathingPhaseDots
+        phase={phase}
+        timeLeft={timeLeft}
+        pattern={pattern}
+        isRunning={isRunning}
+        isPaused={isPaused}
+      />
       <Svg width={400} height={400}>
         {/* Outer circle */}
         <Circle cx={200} cy={200} r={180} stroke={breathingAnim.guideOuterStroke} strokeWidth={1} fill="none" opacity={0.6} />

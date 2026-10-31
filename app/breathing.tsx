@@ -478,9 +478,11 @@ export default function BreathingPage() {
       backgroundImage={backgroundImage}
       currentExercise={currentExercise}
       phase={phase}
+      timeLeft={timeLeft}
       radius={radius}
       strokeWidth={strokeWidth}
       isRunning={isRunning}
+      isPaused={isPaused}
       isUIVisible={isUIVisible}
       isSheetOpen={isSheetOpen}
       uiAnimatedStyle={uiAnimatedStyle}

@@ -51,3 +51,45 @@ export function resolvePhasePulsePlan({
     resolvedIntervalMs: best.resolved,
   };
 }
+
+/** Same target/tolerance as `useBreathingHaptics` / `app/breathing.tsx`. */
+export const BREATHING_HAPTIC_TARGET_INTERVAL_MS = 800;
+export const BREATHING_HAPTIC_TOLERANCE_MS = 50;
+
+/**
+ * Millisecond offsets from phase start when each haptic pulse fires — mirrors
+ * `useBreathingHaptics.beginPhase` scheduling exactly.
+ */
+export function buildPhasePulseDelaysMs({
+  durationMs,
+  targetIntervalMs = BREATHING_HAPTIC_TARGET_INTERVAL_MS,
+  toleranceMs = BREATHING_HAPTIC_TOLERANCE_MS,
+  resumeMidPhase = false,
+}: {
+  durationMs: number;
+  targetIntervalMs?: number;
+  toleranceMs?: number;
+  resumeMidPhase?: boolean;
+}): number[] {
+  const plan = resolvePhasePulsePlan({ durationMs, targetIntervalMs, toleranceMs });
+  if (!(plan.resolvedIntervalMs > 0)) return [];
+
+  const { pulseCount, resolvedIntervalMs } = plan;
+  const delays: number[] = [];
+  if (!resumeMidPhase) {
+    delays.push(0);
+    for (let k = 1; k < pulseCount; k++) {
+      delays.push(k * resolvedIntervalMs);
+    }
+  } else {
+    for (let k = 0; k < pulseCount; k++) {
+      delays.push(k * resolvedIntervalMs);
+    }
+  }
+  return delays;
+}
+
+/** How many pulses (and guide dots) have fired by `elapsedMs` into the phase. */
+export function filledCountAtElapsedMs(delays: number[], elapsedMs: number): number {
+  return delays.filter((d) => d <= elapsedMs + 1e-6).length;
+}
