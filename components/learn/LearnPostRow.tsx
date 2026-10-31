@@ -1,14 +1,17 @@
+import LearnCardGradientFill from "@/components/learn/LearnCardGradientFill";
 import { LEARN_TAB } from "@/components/learn/learnTabTokens";
 import { useLearnChromeColors } from "@/components/learn/useLearnChromeColors";
 import { LearnPost } from "@/lib/learnContent";
 import { Image } from "expo-image";
-import React, { useMemo } from "react";
+import React, { useId, useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type Props = {
   post: LearnPost;
   onPress: () => void;
   showDivider?: boolean;
+  /** Articles list: title + subtitle, no thumbnail or type label. */
+  articleCard?: boolean;
   testID?: string;
 };
 
@@ -16,9 +19,12 @@ export default function LearnPostRow({
   post,
   onPress,
   showDivider = true,
+  articleCard = false,
   testID,
 }: Props) {
   const colors = useLearnChromeColors();
+  const fillGradientId = useId().replace(/:/g, "");
+  const thumbSize = LEARN_TAB.thumbnailSize;
 
   const styles = useMemo(
     () =>
@@ -31,10 +37,11 @@ export default function LearnPostRow({
           minHeight: LEARN_TAB.rowMinHeight,
         },
         thumbnail: {
-          width: LEARN_TAB.thumbnailSize,
-          height: LEARN_TAB.thumbnailSize,
+          width: thumbSize,
+          height: thumbSize,
           borderRadius: LEARN_TAB.thumbnailRadius,
           backgroundColor: colors.separator,
+          overflow: "hidden",
         },
         body: {
           flex: 1,
@@ -65,7 +72,7 @@ export default function LearnPostRow({
         divider: {
           height: StyleSheet.hairlineWidth,
           backgroundColor: colors.separator,
-          marginLeft: LEARN_TAB.thumbnailSize + 14,
+          marginLeft: articleCard ? 0 : LEARN_TAB.thumbnailSize + 14,
         },
       }),
     [
@@ -73,8 +80,12 @@ export default function LearnPostRow({
       colors.onGlassSecondary,
       colors.onGlassTertiary,
       colors.separator,
+      thumbSize,
+      articleCard,
     ],
   );
+
+  const showThumbnail = !articleCard;
 
   return (
     <View>
@@ -85,21 +96,38 @@ export default function LearnPostRow({
         onPress={onPress}
         style={({ pressed }) => [styles.row, pressed && { opacity: 0.72 }]}
       >
-        <Image
-          source={post.imageSource}
-          style={styles.thumbnail}
-          contentFit="cover"
-          cachePolicy="memory-disk"
-          transition={null}
-        />
+        {showThumbnail ? (
+          post.gradient ? (
+            <View style={styles.thumbnail}>
+              <LearnCardGradientFill
+                width={thumbSize}
+                height={thumbSize}
+                gradient={post.gradient}
+                gradientId={fillGradientId}
+              />
+            </View>
+          ) : post.imageSource ? (
+            <Image
+              source={post.imageSource}
+              style={styles.thumbnail}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              transition={null}
+            />
+          ) : (
+            <View style={styles.thumbnail} />
+          )
+        ) : null}
         <View style={styles.body}>
-          <Text style={styles.eyebrow} numberOfLines={1}>
-            {post.eyebrow}
-          </Text>
+          {!articleCard ? (
+            <Text style={styles.eyebrow} numberOfLines={1}>
+              {post.eyebrow}
+            </Text>
+          ) : null}
           <Text style={styles.title} numberOfLines={2}>
             {post.title}
           </Text>
-          <Text style={styles.subtitle} numberOfLines={2}>
+          <Text style={styles.subtitle} numberOfLines={articleCard ? 3 : 2}>
             {post.subtitle}
           </Text>
         </View>

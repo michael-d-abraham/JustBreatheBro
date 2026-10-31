@@ -90,9 +90,9 @@ export default function Index() {
     sheets.handleTipsAndTricksPress();
   };
 
-  const handleProfilePress = () => {
-    scrollToPage(2, true);
-  };
+  // const handleProfilePress = () => {
+  //   scrollToPage(2, true);
+  // };
 
   const handleSettingsPress = () => {
     sheets.handleSupportPress();
@@ -188,7 +188,7 @@ export default function Index() {
                       <HomeMeditateTopChrome
                         onScenesPress={sheets.handleScenesPress}
                         onTipsAndTricksPress={handleTipsAndTricksPress}
-                        onProfilePress={handleProfilePress}
+                        // onProfilePress={handleProfilePress}
                         onSettingsPress={handleSettingsPress}
                       />
                       <View style={styles.meditateHeroCenter}>

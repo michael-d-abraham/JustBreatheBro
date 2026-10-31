@@ -64,7 +64,7 @@ export function useBreathingSheets() {
   }, [openSupportSheet]);
 
   const handleTipsAndTricksPress = useCallback(() => {
-    openSupportSheet("explore");
+    openSupportSheet("tipsAndTricks");
   }, [openSupportSheet]);
 
   const handleSupportSheetChange = useCallback((index: number) => {

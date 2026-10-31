@@ -5,8 +5,10 @@ jest.mock("@/constants/wallpapers", () => ({
 import {
   filterResourcesByQuery,
   filterResourcesBySection,
+  FEATURED_VIDEO_IDS,
   getFeaturedPosts,
   getLatestPosts,
+  getVideoWalkthroughPosts,
   resourceMatchesSection,
   resourceTypeLabel,
 } from "@/lib/learnContent";
@@ -81,6 +83,33 @@ describe("learnContent", () => {
     expect(filtered.map((entry) => entry.id)).toEqual(["sample", "book"]);
   });
 
+  it("lists only videos for walkthroughs", () => {
+    const video: InformationResource = {
+      ...sampleResource,
+      id: "video",
+      type: "video",
+      tags: ["video"],
+    };
+
+    const walkthroughs = getVideoWalkthroughPosts([sampleResource, video]);
+
+    expect(walkthroughs).toHaveLength(1);
+    expect(walkthroughs[0].id).toBe("video");
+  });
+
+  it("orders featured videos by FEATURED_VIDEO_IDS", () => {
+    const videos: InformationResource[] = FEATURED_VIDEO_IDS.map((id) => ({
+      ...sampleResource,
+      id,
+      type: "video",
+      name: `Video ${id}`,
+      tags: ["video"],
+    }));
+
+    const featured = getFeaturedPosts(videos);
+    expect(featured.map((post) => post.id)).toEqual([...FEATURED_VIDEO_IDS]);
+  });
+
   it("features only video resources in the top carousel", () => {
     const video: InformationResource = {
       ...sampleResource,
@@ -94,6 +123,8 @@ describe("learnContent", () => {
     expect(featured).toHaveLength(1);
     expect(featured[0].id).toBe("video");
     expect(featured[0].eyebrow).toBe("Video");
+    expect(featured[0].gradient).toBeDefined();
+    expect(featured[0].imageSource).toBeUndefined();
   });
 
   it("excludes videos from Latest", () => {

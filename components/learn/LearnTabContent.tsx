@@ -1,16 +1,9 @@
 import FeaturedLearnCarousel from "@/components/learn/FeaturedLearnCarousel";
 import LearnGlassPanel from "@/components/learn/LearnGlassPanel";
 import LearnPostRow from "@/components/learn/LearnPostRow";
-import LearnSectionList from "@/components/learn/LearnSectionList";
 import { LEARN_TAB } from "@/components/learn/learnTabTokens";
 import { useLearnChromeColors } from "@/components/learn/useLearnChromeColors";
-import {
-  filterResourcesBySection,
-  getFeaturedPosts,
-  getLatestPosts,
-  LearnPost,
-  LearnSectionId,
-} from "@/lib/learnContent";
+import { getFeaturedPosts, getLatestPosts, LearnPost } from "@/lib/learnContent";
 import { getResources, InformationResource } from "@/lib/informationArchive";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -34,9 +27,6 @@ export default function LearnTabContent({
   const colors = useLearnChromeColors(variant);
   const [resources, setResources] = useState<InformationResource[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeSectionId, setActiveSectionId] = useState<LearnSectionId | null>(
-    null,
-  );
 
   const loadResources = useCallback(async () => {
     try {
@@ -52,11 +42,6 @@ export default function LearnTabContent({
     loadResources();
   }, [loadResources]);
 
-  const filteredResources = useMemo(() => {
-    let result = resources;
-    return filterResourcesBySection(result, activeSectionId);
-  }, [activeSectionId, resources]);
-
   const featuredPosts = useMemo(
     () => getFeaturedPosts(resources),
     [resources],
@@ -64,12 +49,8 @@ export default function LearnTabContent({
 
   const latestPosts = useMemo(() => {
     const featuredIds = new Set(featuredPosts.map((post) => post.id));
-    return getLatestPosts(filteredResources, featuredIds);
-  }, [featuredPosts, filteredResources]);
-
-  const handleSectionPress = (sectionId: LearnSectionId) => {
-    setActiveSectionId((current) => (current === sectionId ? null : sectionId));
-  };
+    return getLatestPosts(resources, featuredIds);
+  }, [featuredPosts, resources]);
 
   const handlePostPress = (post: LearnPost) => {
     Linking.openURL(post.link).catch((error) => {
@@ -95,6 +76,9 @@ export default function LearnTabContent({
         },
         block: {
           gap: LEARN_TAB.blockGap,
+        },
+        articleList: {
+          gap: LEARN_TAB.articleCardGap,
         },
         sectionHeading: {
           color: colors.onWallpaper,
@@ -141,7 +125,7 @@ export default function LearnTabContent({
     <>
       {featuredPosts.length > 0 ? (
         <View style={styles.block}>
-          <Text style={styles.sectionHeading}>Recommended</Text>
+          <Text style={styles.sectionHeading}>Explore</Text>
           <FeaturedLearnCarousel
             posts={featuredPosts}
             onPostPress={handlePostPress}
@@ -150,29 +134,23 @@ export default function LearnTabContent({
       ) : null}
 
       <View style={styles.block}>
-        <LearnSectionList
-          activeSectionId={activeSectionId}
-          onSectionPress={handleSectionPress}
-          chromeVariant={variant}
-        />
-      </View>
-
-      <View style={styles.block}>
-        <Text style={styles.sectionHeading}>Latest</Text>
+        <Text style={styles.sectionHeading}>Articles</Text>
         {latestPosts.length > 0 ? (
-          <LearnGlassPanel contentStyle={{ paddingVertical: 0 }}>
-            {latestPosts.map((post, index) => (
-              <LearnPostRow
-                key={post.id}
-                post={post}
-                onPress={() => handlePostPress(post)}
-                showDivider={index < latestPosts.length - 1}
-                testID={`learn.post-${post.id}`}
-              />
+          <View style={styles.articleList}>
+            {latestPosts.map((post) => (
+              <LearnGlassPanel key={post.id} contentStyle={{ paddingVertical: 0 }}>
+                <LearnPostRow
+                  post={post}
+                  onPress={() => handlePostPress(post)}
+                  showDivider={false}
+                  articleCard
+                  testID={`learn.post-${post.id}`}
+                />
+              </LearnGlassPanel>
             ))}
-          </LearnGlassPanel>
+          </View>
         ) : (
-          <Text style={styles.emptyText}>Nothing matches this filter yet.</Text>
+          <Text style={styles.emptyText}>Nothing here yet.</Text>
         )}
       </View>
     </>

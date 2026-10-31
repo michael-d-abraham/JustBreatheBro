@@ -9,7 +9,7 @@ const TOP_CHROME_PADDING_TOP = 8;
 type Props = {
   onScenesPress: () => void;
   onTipsAndTricksPress: () => void;
-  onProfilePress: () => void;
+  // onProfilePress: () => void;
   onSettingsPress: () => void;
 };
 
@@ -17,7 +17,7 @@ type Props = {
 export default function HomeMeditateTopChrome({
   onScenesPress,
   onTipsAndTricksPress,
-  onProfilePress,
+  // onProfilePress,
   onSettingsPress,
 }: Props) {
   return (
@@ -31,7 +31,7 @@ export default function HomeMeditateTopChrome({
 
       <HomeNavMenu
         onTipsAndTricksPress={onTipsAndTricksPress}
-        onProfilePress={onProfilePress}
+        // onProfilePress={onProfilePress}
         onSettingsPress={onSettingsPress}
       />
     </View>

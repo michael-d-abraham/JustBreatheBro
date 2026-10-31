@@ -3,7 +3,7 @@ import HomeNavMenuItem from "@/components/HomeNavMenuItem";
 import {
   CloseNavIcon,
   HamburgerNavIcon,
-  ProfileMenuIcon,
+  // ProfileMenuIcon,
   SettingsMenuIcon,
   TipsMenuIcon,
 } from "@/components/HomeNavIcons";
@@ -43,12 +43,13 @@ const MENU_ITEMS: MenuItemConfig[] = [
     testID: "home.menu-tips-and-tricks",
     Icon: TipsMenuIcon,
   },
-  {
-    id: "profile",
-    label: "Profile",
-    testID: "home.menu-profile",
-    Icon: ProfileMenuIcon,
-  },
+  // Profile — hidden for now; re-enable when the profile tab is ready.
+  // {
+  //   id: "profile",
+  //   label: "Profile",
+  //   testID: "home.menu-profile",
+  //   Icon: ProfileMenuIcon,
+  // },
   {
     id: "settings",
     label: "Settings",
@@ -59,7 +60,7 @@ const MENU_ITEMS: MenuItemConfig[] = [
 
 type Props = {
   onTipsAndTricksPress: () => void;
-  onProfilePress: () => void;
+  // onProfilePress: () => void;
   onSettingsPress: () => void;
 };
 
@@ -71,7 +72,7 @@ const MENU_TIMING = {
 /** Top-right hamburger — mode-aware menu pills beneath frosted trigger. */
 export default function HomeNavMenu({
   onTipsAndTricksPress,
-  onProfilePress,
+  // onProfilePress,
   onSettingsPress,
 }: Props) {
   const { tokens } = useTheme();
@@ -85,10 +86,10 @@ export default function HomeNavMenu({
   const menuActions: Record<MenuItemId, () => void> = useMemo(
     () => ({
       tipsAndTricks: onTipsAndTricksPress,
-      profile: onProfilePress,
+      // profile: onProfilePress,
       settings: onSettingsPress,
     }),
-    [onTipsAndTricksPress, onProfilePress, onSettingsPress],
+    [onTipsAndTricksPress, onSettingsPress],
   );
 
   const animatePanel = useCallback(

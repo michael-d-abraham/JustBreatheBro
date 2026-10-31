@@ -3,7 +3,13 @@ import {
   InformationResource,
   ResourceType,
 } from "@/lib/informationArchive";
+import {
+  learnVideoGradient,
+  type LearnCardGradient,
+} from "@/lib/learnVideoGradients";
 import { ImageSourcePropType } from "react-native";
+
+export type { LearnCardGradient };
 
 export type LearnSectionId =
   | "guidedBreathing"
@@ -17,7 +23,10 @@ export type LearnPost = {
   eyebrow: string;
   subtitle: string;
   link: string;
-  imageSource: ImageSourcePropType;
+  /** Wallpaper thumbnail for articles/books; omitted for videos (use `gradient`). */
+  imageSource?: ImageSourcePropType;
+  /** Video carousel / row art — color gradient instead of a photo. */
+  gradient?: LearnCardGradient;
   resource: InformationResource;
 };
 
@@ -61,6 +70,40 @@ export const LEARN_SECTIONS: LearnSection[] = [
 
 const FEATURED_COUNT = 5;
 
+/** Explore / walkthrough carousel order (information archive resource ids). */
+export const FEATURED_VIDEO_IDS = [
+  "10", // 5-Minute Guided Breath Meditation
+  "9", // 4-7-8 Breathing for Sleep and Anxiety
+  "8", // Box Breathing — Navy SEAL Technique for Calm
+  "11", // Why Slow Breathing Changes Your Nervous System
+  "7", // Dr. Joe Dispenza — Break the Habit of Being Yourself
+] as const;
+
+function orderResourcesByIds(
+  resources: InformationResource[],
+  ids: readonly string[],
+): InformationResource[] {
+  const byId = new Map(resources.map((resource) => [resource.id, resource]));
+  const ordered: InformationResource[] = [];
+  for (const id of ids) {
+    const match = byId.get(id);
+    if (match) ordered.push(match);
+  }
+  for (const resource of resources) {
+    if (!ids.includes(resource.id)) ordered.push(resource);
+  }
+  return ordered;
+}
+
+function orderedVideoResources(
+  resources: InformationResource[],
+): InformationResource[] {
+  return orderResourcesByIds(
+    resources.filter(isVideoResource),
+    FEATURED_VIDEO_IDS,
+  );
+}
+
 export function resourceTypeLabel(type: string): string {
   switch (type) {
     case "article":
@@ -83,13 +126,16 @@ export function toLearnPost(
   resource: InformationResource,
   index: number,
 ): LearnPost {
+  const isVideo = resource.type === "video";
   return {
     id: resource.id,
     title: resource.name,
     eyebrow: resourceTypeLabel(resource.type),
     subtitle: resource.shortDescription,
     link: resource.link,
-    imageSource: placeholderImage(index),
+    ...(isVideo
+      ? { gradient: learnVideoGradient(resource.id) }
+      : { imageSource: placeholderImage(index) }),
     resource,
   };
 }
@@ -102,10 +148,27 @@ export function isVideoResource(resource: InformationResource): boolean {
   return resource.type === "video";
 }
 
-/** Top carousel — YouTube / video resources only. */
+/** All video resources for the Video walkthroughs tab. */
+export function getVideoWalkthroughPosts(
+  resources: InformationResource[],
+): LearnPost[] {
+  return toLearnPosts(orderedVideoResources(resources));
+}
+
+/** Top carousel — first N videos in `FEATURED_VIDEO_IDS` order. */
 export function getFeaturedPosts(resources: InformationResource[]): LearnPost[] {
-  const videos = resources.filter(isVideoResource);
-  return toLearnPosts(videos.slice(0, FEATURED_COUNT));
+  return toLearnPosts(
+    orderedVideoResources(resources).slice(0, FEATURED_COUNT),
+  );
+}
+
+export function getMoreVideoWalkthroughPosts(
+  resources: InformationResource[],
+  featuredIds: Set<string>,
+): LearnPost[] {
+  return getVideoWalkthroughPosts(resources).filter(
+    (post) => !featuredIds.has(post.id),
+  );
 }
 
 function normalizedTags(resource: InformationResource): string[] {

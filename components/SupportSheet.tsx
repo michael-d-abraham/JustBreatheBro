@@ -1,4 +1,5 @@
 import LearnTabContent from "@/components/learn/LearnTabContent";
+import TipsAndTricksContent from "@/components/learn/TipsAndTricksContent";
 import { useAppSettings } from "@/contexts/appSettingsContext";
 import { useTheme } from "@/components/Theme";
 import React, { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
@@ -15,7 +16,7 @@ import {
   SettingsSection,
 } from "./SettingsInsetGrouped";
 
-export type SupportSheetEntry = "settings" | "explore";
+export type SupportSheetEntry = "settings" | "explore" | "tipsAndTricks";
 
 export type SupportSheetHandle = {
   open: (entry?: SupportSheetEntry) => void;
@@ -29,6 +30,7 @@ interface SupportSheetProps {
 
 type SupportScreen =
   | "explore"
+  | "tipsAndTricks"
   | "main"
   | "sounds-haptics"
   | "reminders"
@@ -68,6 +70,19 @@ function ExploreScreen({ onDone }: Pick<ScreenProps, "onDone">) {
       closeTestID="explore.close-button"
     >
       <LearnTabContent variant="sheet" bottomInset={8} />
+    </SettingsSheetScreen>
+  );
+}
+
+function TipsAndTricksScreen({ onDone }: Pick<ScreenProps, "onDone">) {
+  return (
+    <SettingsSheetScreen
+      title="Tips and Tricks"
+      subtitle="Short pointers for using the app."
+      onClose={onDone}
+      closeTestID="tips-and-tricks.close-button"
+    >
+      <TipsAndTricksContent bottomInset={8} />
     </SettingsSheetScreen>
   );
 }
@@ -269,7 +284,9 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
 
     useImperativeHandle(ref, () => ({
       open: (entry: SupportSheetEntry = "settings") => {
-        setScreen(entry === "explore" ? "explore" : "main");
+        if (entry === "explore") setScreen("explore");
+        else if (entry === "tipsAndTricks") setScreen("tipsAndTricks");
+        else setScreen("main");
         sheetRef.current?.open();
       },
       close: () => sheetRef.current?.close(),
@@ -297,6 +314,8 @@ const SupportSheet = forwardRef<SupportSheetHandle, SupportSheetProps>(
       switch (screen) {
         case "explore":
           return <ExploreScreen onDone={handleDone} />;
+        case "tipsAndTricks":
+          return <TipsAndTricksScreen onDone={handleDone} />;
         case "sounds-haptics":
           return <SoundsHapticsScreen {...screenProps} />;
         case "reminders":

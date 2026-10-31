@@ -4,6 +4,8 @@ export const LEARN_TAB = {
   sectionGap: 32,
   blockGap: 16,
   cardGap: 10,
+  /** Space between stacked article cards in the Articles section. */
+  articleCardGap: 12,
   cardRadius: 18,
   sectionHeadingSize: 22,
   sectionHeadingWeight: "600" as const,

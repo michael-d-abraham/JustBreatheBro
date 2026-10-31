@@ -4,9 +4,10 @@ import {
   HOME_NAV_SHADOW_OPACITY,
   HOME_NAV_SHADOW_RADIUS,
 } from "@/components/homeNavTokens";
+import LearnCardGradientFill from "@/components/learn/LearnCardGradientFill";
 import { LEARN_TAB } from "@/components/learn/learnTabTokens";
 import { LearnPost } from "@/lib/learnContent";
-import { Image } from "expo-image";
+import { learnVideoGradient } from "@/lib/learnVideoGradients";
 import React, { useId, useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
@@ -56,7 +57,10 @@ export default function FeaturedLearnCard({
   onPress,
   testID,
 }: Props) {
-  const gradientId = useId().replace(/:/g, "");
+  const scrimGradientId = useId().replace(/:/g, "");
+  const fillGradientId = useId().replace(/:/g, "");
+  const cardGradient =
+    post.gradient ?? learnVideoGradient(post.id);
 
   const styles = useMemo(
     () =>
@@ -75,10 +79,6 @@ export default function FeaturedLearnCard({
           borderRadius: LEARN_TAB.cardRadius,
           overflow: "hidden",
           backgroundColor: "#E8E8ED",
-        },
-        image: {
-          width,
-          height,
         },
         content: {
           position: "absolute",
@@ -118,15 +118,13 @@ export default function FeaturedLearnCard({
       ]}
     >
       <View style={styles.card}>
-        <Image
-          source={post.imageSource}
-          style={styles.image}
-          contentFit="cover"
-          contentPosition="center"
-          cachePolicy="memory-disk"
-          transition={null}
+        <LearnCardGradientFill
+          width={width}
+          height={height}
+          gradient={cardGradient}
+          gradientId={fillGradientId}
         />
-        <BottomScrim width={width} height={height} gradientId={gradientId} />
+        <BottomScrim width={width} height={height} gradientId={scrimGradientId} />
         <View style={styles.content}>
           <Text style={styles.eyebrow} numberOfLines={1}>
             {post.eyebrow}
