@@ -10,7 +10,7 @@ import {
   homeNavInnerCapsuleWash,
 } from "@/components/homeNavTokens";
 import {
-  CreateNavIcon,
+  ConnectNavIcon,
   LearnNavIcon,
   MeditateNavIcon,
 } from "@/components/HomeNavIcons";
@@ -25,16 +25,16 @@ type TabItem = {
   label: string;
   index: number;
   testID: string;
-  TabIcon: typeof CreateNavIcon;
+  TabIcon: typeof ConnectNavIcon;
 };
 
 const TAB_ITEMS: TabItem[] = [
   {
     id: "oneBreath",
-    label: "Create",
+    label: "Connect",
     index: 0,
-    testID: "home.nav-create",
-    TabIcon: CreateNavIcon,
+    testID: "home.nav-connect",
+    TabIcon: ConnectNavIcon,
   },
   {
     id: "relax",

@@ -37,7 +37,7 @@ export const APP_TIPS: AppTip[] = [
     id: "global",
     title: "Global Room",
     description:
-      "Swipe to Create to see the map and send a gentle pulse when you are connected.",
+      "Swipe to Connect to see the map and send a gentle pulse when you are connected.",
   },
   {
     id: "settings",

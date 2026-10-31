@@ -13,7 +13,7 @@ type Props = {
   onSettingsPress: () => void;
 };
 
-/** Scenes + menu row — Meditate pager page only; slides off when swiping to Create or Explore. */
+/** Scenes + menu row — Meditate pager page only; slides off when swiping to Connect or Explore. */
 export default function HomeMeditateTopChrome({
   onScenesPress,
   onTipsAndTricksPress,

@@ -267,7 +267,6 @@ export default function BreathingPhaseDots({
         alignItems: "center",
         gap,
         maxWidth: 320,
-        marginBottom: 12,
         minHeight: dotSize,
       }}
       accessibilityRole="progressbar"

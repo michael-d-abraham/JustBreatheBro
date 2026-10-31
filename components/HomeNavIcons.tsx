@@ -6,23 +6,33 @@ type IconProps = {
   color: string;
 };
 
-/** Three-leaf nature mark — Create. */
-export function CreateNavIcon({ size = 22, color }: IconProps) {
+/** Two people — Connect / shared presence (matches Profile stroke language). */
+export function ConnectNavIcon({ size = 22, color }: IconProps) {
+  const stroke = Math.max(1.5, size * 0.07);
+  const headR = 2.35;
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx={8.25} cy={8.75} r={headR} stroke={color} strokeWidth={stroke} />
       <Path
-        d="M12 4.5 C12 4.5 9.5 8.5 9.5 11.5 C9.5 13.4 10.6 14.5 12 14.5 C13.4 14.5 14.5 13.4 14.5 11.5 C14.5 8.5 12 4.5 12 4.5 Z"
-        fill={color}
+        d="M4 19.25 C5.1 15.9 6.6 14.35 8.25 14.35 C9.75 14.35 11.1 15.7 12 19.25"
+        stroke={color}
+        strokeWidth={stroke}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Circle cx={15.75} cy={8.75} r={headR} stroke={color} strokeWidth={stroke} />
+      <Path
+        d="M12 19.25 C12.9 15.7 14.25 14.35 15.75 14.35 C17.4 14.35 18.9 15.9 20 19.25"
+        stroke={color}
+        strokeWidth={stroke}
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <Path
-        d="M6.5 10 C6.5 10 4.5 12.5 4.5 14.5 C4.5 16 5.5 17 7 17 C8.2 17 9 16.1 9 14.8 C9 13.2 6.5 10 6.5 10 Z"
-        fill={color}
-        opacity={0.82}
-      />
-      <Path
-        d="M17.5 10 C17.5 10 20 13.2 20 14.8 C20 16.1 19.2 17 18 17 C16.5 17 15.5 16 15.5 14.5 C15.5 12.5 17.5 10 17.5 10 Z"
-        fill={color}
-        opacity={0.82}
+        d="M10.4 11.8 Q12 12.85 13.6 11.8"
+        stroke={color}
+        strokeWidth={stroke}
+        strokeLinecap="round"
       />
     </Svg>
   );
@@ -91,24 +101,6 @@ export function HamburgerNavIcon({ size = 22, color }: IconProps) {
           strokeLinecap="round"
         />
       ))}
-    </Svg>
-  );
-}
-
-/** Connected nodes — One Breath live rooms. */
-export function OneBreathMenuIcon({ size = 22, color }: IconProps) {
-  const stroke = Math.max(1.5, size * 0.07);
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Circle cx={7} cy={12} r={2.75} stroke={color} strokeWidth={stroke} />
-      <Circle cx={17} cy={7} r={2.75} stroke={color} strokeWidth={stroke} />
-      <Circle cx={17} cy={17} r={2.75} stroke={color} strokeWidth={stroke} />
-      <Path
-        d="M9.6 11.1 L14.4 8.4 M9.6 12.9 L14.4 15.6"
-        stroke={color}
-        strokeWidth={stroke}
-        strokeLinecap="round"
-      />
     </Svg>
   );
 }

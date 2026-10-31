@@ -68,16 +68,20 @@ export default function BreathingSessionLayout({
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
-        <SafeAreaView style={{ flex: 1, backgroundColor: backgroundImage ? 'transparent' : '#FFFFFF' }}>
-          
-          {/* Main Content Area - Tap to toggle UI */}
-          <Pressable 
+        <SafeAreaView
+          edges={['bottom', 'left', 'right']}
+          style={{ flex: 1, backgroundColor: backgroundImage ? 'transparent' : '#FFFFFF' }}
+        >
+          {/* Ring stays at visual center — not in flex flow with header/controls/dots. */}
+          <Pressable
             testID="breathing.screen-tap"
             accessibilityLabel="Toggle controls"
-            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
             onPress={onScreenTap}
+            style={[
+              StyleSheet.absoluteFillObject,
+              { justifyContent: 'center', alignItems: 'center' },
+            ]}
           >
-            {/* Breathing Animation */}
             <BreathingRing
               phase={phase}
               timeLeft={timeLeft}

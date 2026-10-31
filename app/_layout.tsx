@@ -125,9 +125,16 @@ function RootContent() {
         <Stack.Screen
           name="breathing"
           options={{
-            animation: "fade",
-            animationDuration: 320,
+            animation: "none",
             gestureEnabled: true,
+          }}
+        />
+        <Stack.Screen
+          name="global_room"
+          options={{
+            animation: "none",
+            gestureEnabled: true,
+            contentStyle: { backgroundColor: "transparent" },
           }}
         />
       </Stack>

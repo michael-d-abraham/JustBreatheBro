@@ -39,16 +39,15 @@ export default function BreathingRing({
   }));
 
   return (
-    <View style={{ alignItems: 'center', position: 'relative' }}>
-      <BreathingPhaseDots
-        phase={phase}
-        timeLeft={timeLeft}
-        pattern={pattern}
-        isRunning={isRunning}
-        isPaused={isPaused}
-        mainStroke={breathingAnim.mainStroke}
-        mainFill={breathingAnim.mainFill}
-      />
+    <View
+      style={{
+        alignItems: 'center',
+        position: 'relative',
+        width: 400,
+        height: 400,
+        overflow: 'visible',
+      }}
+    >
       <Svg width={400} height={400}>
         {/* Outer circle */}
         <Circle cx={200} cy={200} r={180} stroke={breathingAnim.guideOuterStroke} strokeWidth={1} fill="none" opacity={0.6} />
@@ -65,7 +64,30 @@ export default function BreathingRing({
           opacity={0.8}
         />
       </Svg>
-      
+
+      {/* Guide dots — above the ring, out of layout flow so the ring never shifts when they appear. */}
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: '100%',
+          marginBottom: 12,
+          alignItems: 'center',
+        }}
+      >
+        <BreathingPhaseDots
+          phase={phase}
+          timeLeft={timeLeft}
+          pattern={pattern}
+          isRunning={isRunning}
+          isPaused={isPaused}
+          mainStroke={breathingAnim.mainStroke}
+          mainFill={breathingAnim.mainFill}
+        />
+      </View>
+
       {/* Phase text overlay */}
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}>
         <Text style={{ 

@@ -11,14 +11,14 @@ import { trackBreathingEntered, trackBreathingExited, trackBreathingStarted } fr
 import { useFocusEffect } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AppState, AppStateStatus, Platform, StatusBar } from "react-native";
 import { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 
 /** Match iOS native-stack pop duration so status bar restore does not shift home layout mid-transition. */
 const STATUS_BAR_RESTORE_DELAY_MS = Platform.OS === "ios" ? 350 : 0;
-/** Wait for stack fade before auto-start so ring/dots do not run over the home screen. */
-const AUTO_START_AFTER_TRANSITION_MS = 380;
+/** Brief beat so layout (status bar, safe area) settles before the cycle starts. */
+const AUTO_START_DELAY_MS = 120;
 
 const BREATHING_PHASE_HAPTICS: Record<
   "inhale" | "hold" | "exhale",
@@ -376,7 +376,7 @@ export default function BreathingPage() {
           hasShownInitialUI.current = true;
           setIsUIVisible(true);
         }
-      }, AUTO_START_AFTER_TRANSITION_MS);
+      }, AUTO_START_DELAY_MS);
       return () => clearTimeout(timer);
     }
   }, [autoStart, start, settings.soundEnabled, settings.hapticsEnabled]);
@@ -384,12 +384,15 @@ export default function BreathingPage() {
   // ==========================================================================
   // Effects (navigation/system UI)
   // ==========================================================================
-  // Hide status bar when screen is focused, restore when screen loses focus
-  // Using useFocusEffect ensures it works reliably with Expo Router navigation
+  // Hide status bar before first paint so SafeArea / centering does not jump after start.
+  useLayoutEffect(() => {
+    StatusBar.setHidden(true, 'none');
+  }, []);
+
+  // Restore when leaving the screen (after pop animation on iOS).
   useFocusEffect(
     useCallback(() => {
-      // Hide status bar when entering breathing screen
-      StatusBar.setHidden(true, 'fade');
+      StatusBar.setHidden(true, 'none');
       
       // Restore status bar after the pop animation so home safe-area does not jump mid-transition.
       return () => {
